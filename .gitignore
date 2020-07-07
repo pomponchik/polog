@@ -1,0 +1,6 @@
+.idea
+virt
+.DS_Store
+test.py
+__pycache__
+*.db

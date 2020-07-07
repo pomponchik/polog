@@ -1,0 +1,55 @@
+import datetime
+from polog.utils.not_none_to_dict import not_none_to_dict
+from polog.writer import Writer
+from polog.levels import Levels
+from polog.utils.exception_to_dict import exception_to_dict
+
+
+ALLOWED_TYPES = {
+    'function': (str, type(lambda: None)), # Функция, событие в которой логгируется. Ожидается либо сам объект функции, либо строка с ее названием.
+    'module': (str, ), # Модуль, событие в котором логгируется. Ожидается только название.
+    'message': (str, ), # Сообщение, любая строка. В таком виде будет записана в БД.
+    'exception': (str, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, в БД автоматически будут заполнены колонки с названием исключения и его сообщением.
+    'vars': (str, ), # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
+    'success': (bool, ), # Успех / провал операции, которая логгируется.
+}
+
+CONVERT_VALUES = {
+    'function': lambda x: x if isinstance(x, str) else x.__name__,
+    'exception': lambda x: x if isinstance(x, str) else type(x).__name__,
+}
+
+CONVERT_KEYS = {
+    'vars': 'input_variables',
+}
+
+def log(*args, **kwargs):
+    """
+    Функция для ручного создания лога.
+    Первым и единственным позиционным аргументом можно передать уровень логгирования. Если не передать - по умолчанию будет использован уровень 1.
+    Именованные аргументы могут быть только с именами, которые перечислены как ключи в ALLOWED_TYPES и с типами значений, которые соответствуют этим ключам.
+    Именованный аргумент 'vars' соответствует колонке в базе данных 'input_variables', куда пишутся входные аргументы функций. Чтобы сгенерировать правильную строку для заполнения этого поля, желательно использовать функцию polog.utils.json_vars(), куда можно передать любые аргументы и получить в результате json с ними.
+    Не обязательно передавать сюда все возможные именованные аргументы. Передавать нужно только то, что нужно залоггировать, именно поэтому они не заданы жестко в данном случае.
+    """
+    args_dict = {}
+    if len(args) == 0:
+        args_dict['level'] = 1
+    elif len(args) == 1:
+        args_dict['level'] = Levels.get(args[0])
+    else:
+        raise ValueError('A maximum of 1 positional argument is expected. Only the logging level can be passed as a positional argument.')
+
+    for key, value in kwargs.items():
+        if key not in ALLOWED_TYPES:
+            raise ValueError(f'Unknown argument name "{key}". Allowed arguments: {ALLOWED_TYPES}.')
+        is_allowed = sum([isinstance(value, one) for one in ALLOWED_TYPES[key]])
+        if not is_allowed:
+            raise ValueError(f'Type "{type(value).__name__}" is not allowed for variable "{key}". Allowed types: {ALLOWED_TYPES[key]}.')
+        if key in CONVERT_VALUES:
+            value = CONVERT_VALUES[key](value)
+        not_none_to_dict(args_dict, key, value)
+    if 'exception' in kwargs:
+        if not (type(kwargs['exception']) is str):
+            exception_to_dict(args_dict, kwargs['exception'])
+    args_dict['auto'] = False
+    Writer().write(**args_dict)
