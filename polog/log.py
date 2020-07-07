@@ -1,7 +1,7 @@
 import datetime
-from polog.utils.not_none_to_dict import not_none_to_dict
 from polog.writer import Writer
 from polog.levels import Levels
+from polog.utils.not_none_to_dict import not_none_to_dict
 from polog.utils.exception_to_dict import exception_to_dict
 
 
