@@ -1,6 +1,7 @@
 import datetime
 from polog.writer import Writer
 from polog.levels import Levels
+from polog.base_settings import BaseSettings
 from polog.utils.not_none_to_dict import not_none_to_dict
 from polog.utils.exception_to_dict import exception_to_dict
 
@@ -54,6 +55,9 @@ def log(*args, **kwargs):
         if not (type(kwargs['exception']) is str):
             exception_to_dict(args_dict, kwargs['exception'])
         args_dict['success'] = args_dict['success'] if 'success' in kwargs else False
+        if not len(args):
+            # Если передано исключение, используем уровень логирования, соответствующий ошибкам.
+            args_dict['level'] = BaseSettings().errors_level
     if 'function' in kwargs:
         # Проверяем, что передано не название функции, а она сама
         if isinstance(kwargs['function'], ALLOWED_TYPES['function'][1]):
