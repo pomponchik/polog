@@ -51,7 +51,7 @@ def log(*args, **kwargs):
             value = CONVERT_VALUES[key](value)
         not_none_to_dict(args_dict, key, value)
     if 'exception' in kwargs:
-        # Проверяем, что передано само исключение, а не его название
+        # Проверяем, что передано само исключение, а не его название.
         if not (type(kwargs['exception']) is str):
             exception_to_dict(args_dict, kwargs['exception'])
         args_dict['success'] = args_dict['success'] if 'success' in kwargs else False
@@ -59,7 +59,7 @@ def log(*args, **kwargs):
             # Если передано исключение, используем уровень логирования, соответствующий ошибкам.
             args_dict['level'] = BaseSettings().errors_level
     if 'function' in kwargs:
-        # Проверяем, что передано не название функции, а она сама
+        # Проверяем, что передано не название функции, а она сама.
         if isinstance(kwargs['function'], ALLOWED_TYPES['function'][1]):
             args_dict['function'] = kwargs['function'].__name__
             args_dict['module'] = kwargs['function'].__module__
