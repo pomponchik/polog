@@ -39,6 +39,7 @@ def log(*args, **kwargs):
     else:
         raise ValueError('A maximum of 1 positional argument is expected. Only the logging level can be passed as a positional argument.')
 
+    args_dict['time'] = datetime.datetime.now()
     for key, value in kwargs.items():
         if key not in ALLOWED_TYPES:
             raise ValueError(f'Unknown argument name "{key}". Allowed arguments: {ALLOWED_TYPES}.')
@@ -49,7 +50,14 @@ def log(*args, **kwargs):
             value = CONVERT_VALUES[key](value)
         not_none_to_dict(args_dict, key, value)
     if 'exception' in kwargs:
+        # Проверяем, что передано само исключение, а не его название
         if not (type(kwargs['exception']) is str):
             exception_to_dict(args_dict, kwargs['exception'])
+        args_dict['success'] = args_dict['success'] if 'success' in kwargs else False
+    if 'function' in kwargs:
+        # Проверяем, что передано не название функции, а она сама
+        if isinstance(kwargs['function'], ALLOWED_TYPES['function'][1]):
+            args_dict['function'] = kwargs['function'].__name__
+            args_dict['module'] = kwargs['function'].__module__
     args_dict['auto'] = False
     Writer().write(**args_dict)

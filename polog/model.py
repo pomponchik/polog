@@ -22,6 +22,5 @@ class Log(db.Entity):
     level = Required(int)
 
     def __init__(self, **kwargs):
-        now = datetime.datetime.now()
         service = BaseSettings().service_name
-        super(Log, self).__init__(**kwargs, time=now, service=service)
+        super(Log, self).__init__(**kwargs, service=service)

@@ -1,5 +1,6 @@
 import time
 import inspect
+import datetime
 from functools import wraps
 from polog.utils.raise_exception import raise_exception
 from polog.utils.log_exception_info import log_exception_info
@@ -14,6 +15,7 @@ def flog(message=None, level=1, errors_level=None):
             args_dict = get_base_args_dict(func, message)
             try:
                 start = time.time()
+                args_dict['time'] = datetime.datetime.now()
                 result = await func(*args, **kwargs)
             except Exception as e:
                 finish = time.time()
@@ -27,6 +29,7 @@ def flog(message=None, level=1, errors_level=None):
             args_dict = get_base_args_dict(func, message)
             try:
                 start = time.time()
+                args_dict['time'] = datetime.datetime.now()
                 result = func(*args, **kwargs)
             except Exception as e:
                 finish = time.time()

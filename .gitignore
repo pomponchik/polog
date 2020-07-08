@@ -2,5 +2,6 @@
 virt
 .DS_Store
 test.py
+test2.py
 __pycache__
 *.db
