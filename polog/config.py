@@ -43,6 +43,10 @@ class Config(object):
 
     @staticmethod
     def levels(**kwargs):
+        """
+        Установка кастомных уровней логгирования.
+        Имена переменных здесь соответствуют названиям новых уровней логгирования, а их значения - собственно сами уровни.
+        """
         for key, value in kwargs.items():
             if not isinstance(value, int):
                 raise TypeError(f'Variable "{key}" has not type int.')
