@@ -109,7 +109,7 @@ log(message="It's bad.", exception=ValueError("Example of an exception."))
 Таблица, в которую происходит запись, выглядит так:
 
 | id  | level | function | module | message | exception_type | exception_message | traceback | input_variables | local_variables | result | success | time     | time_of_work | service | auto |
-| --- | -------- | ------ | ------- | -------------- | --------- | --------- | --------------- | ------ | ------- | -------- | ------------ | ------- | ---- | ----- |
+| --- | ----- | -------- | ------ | ------- | -------------- | ----------------- | --------- | --------------- | --------------- | ------ | ------- | --------- | ------------ | ------- | ---- |
 | int | int   | str      | str    | str     | str            | str               | str       | str             | str             | str    | bool    | datetime | float        | str     | bool |
 
 
