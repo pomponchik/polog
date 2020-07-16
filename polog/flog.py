@@ -7,11 +7,12 @@ from polog.utils.log_exception_info import log_exception_info
 from polog.utils.log_normal_info import log_normal_info
 from polog.utils.get_base_args_dict import get_base_args_dict
 from polog.registering_functions import RegisteringFunctions
+from polog.errors import IncorrectUseOfTheDecoratorError
 
 
-def flog(message=None, level=1, errors_level=None, is_method=False):
+def flog(*args, message=None, level=1, errors_level=None, is_method=False):
     """
-    Фабрика декораторов логирования для функций.
+    Фабрика декораторов логирования для функций. Можно вызывать как со скобками, так и без.
     """
     def error_logger(func):
         # Если функция уже ранее была задекорирована, мы декорируем ее саму, а не ее в уже задекорированном виде.
@@ -57,4 +58,9 @@ def flog(message=None, level=1, errors_level=None, is_method=False):
         # Проверяем, что функцию не запрещено декорировать. Если запрещено - возвращаем оригинал, иначе - какой-то из wrapper'ов.
         result = RegisteringFunctions().get_function_or_wrapper(before_change_func, wrapper, is_method)
         return result
-    return error_logger
+    # Определяем, как вызван декоратор - как фабрика декораторов (т. е. без позиционных аргументов) или как непосредственный декоратор.
+    if not len(args):
+        return error_logger
+    elif len(args) == 1 and callable(args[0]):
+        return error_logger(args[0])
+    raise IncorrectUseOfTheDecoratorError('You used the logging decorator incorrectly. Read the documentation.')

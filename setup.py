@@ -7,7 +7,7 @@ requirements = ['pony==0.7.13', 'ujson==3.0.0']
 
 setup(
     name="polog",
-    version="0.0.3",
+    version="0.0.4",
     author="Evgeniy Blinov",
     author_email="zheni-b@yandex.ru",
     description="Polog - ультимативный логгер для баз данных.",
@@ -18,6 +18,6 @@ setup(
     install_requires=requirements,
     classifiers=[
         "Programming Language :: Python :: 3.8",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: MIT License",
     ],
 )
