@@ -455,6 +455,6 @@ def bar(a, b, c, other=None):
 ```
 def bar(a, b, c, other=None):
   ...
-  log(function=bar, vars=json_vars(\*\*locals()))
+  log(function=bar, vars=json_vars(**locals()))
   ...
 ```
