@@ -7,8 +7,8 @@ BASE_JSON_TYPES = (int, float, str, bool)
 def get_item(item):
     for one in BASE_JSON_TYPES:
         if isinstance(item, one):
-            return {'variable': item, 'type': one.__name__}
-    return {'variable': str(item), 'type': type(item).__name__}
+            return {'value': item, 'type': one.__name__}
+    return {'value': str(item), 'type': type(item).__name__}
 
 def json_vars(*args, **kwargs):
     """

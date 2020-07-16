@@ -19,7 +19,7 @@ class Config(object):
     @classmethod
     def db(cls, **kwargs):
         """
-        Логгер Polog использует Pony ORM. В данный метод передаются аргументы так же, как в метод db.bind() самой Pony.
+        Логер Polog использует Pony ORM. В данный метод передаются аргументы так же, как в метод db.bind() самой Pony.
         См.: https://docs.ponyorm.org/database.html
 
         Скажем, базу данных sqlite можно инициализировать, вызвав данный метод как-то так:
@@ -44,8 +44,8 @@ class Config(object):
     @staticmethod
     def levels(**kwargs):
         """
-        Установка кастомных уровней логгирования.
-        Имена переменных здесь соответствуют названиям новых уровней логгирования, а их значения - собственно сами уровни.
+        Установка кастомных уровней логирования.
+        Имена переменных здесь соответствуют названиям новых уровней логирования, а их значения - собственно сами уровни.
         """
         for key, value in kwargs.items():
             if not isinstance(value, int):
@@ -55,7 +55,7 @@ class Config(object):
     @staticmethod
     def standart_levels():
         """
-        Установка уровней логгирования в соответствии со стандартной схемой:
+        Установка уровней логирования в соответствии со стандартной схемой:
         https://docs.python.org/3.8/library/logging.html#logging-levels
         """
         levels = {'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}

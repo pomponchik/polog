@@ -6,7 +6,7 @@ from polog.base_settings import BaseSettings
 
 class Writer(object):
     """
-    Класс, в котором создаются потоки с логгерами, передающий в них задания.
+    Класс, в котором создаются потоки с логгерами и передаются в них задания.
     """
     def __init__(self):
         settings = BaseSettings()

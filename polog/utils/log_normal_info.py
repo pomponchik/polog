@@ -6,7 +6,7 @@ from polog.utils.json_vars import json_vars
 
 def log_normal_info(result, finish, start, args_dict, level, *args, **kwargs):
     """
-    Автоматическое логгирование в нормальном случае, когда ошибки не произошло.
+    Автоматическое логирование в нормальном случае, когда ошибки не произошло.
     """
     level = Levels.get(level)
     if level >= BaseSettings().level:
