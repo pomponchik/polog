@@ -7,7 +7,7 @@ requirements = ['pony==0.7.13', 'ujson==3.0.0']
 
 setup(
     name="polog",
-    version="0.0.2",
+    version="0.0.3",
     author="Evgeniy Blinov",
     author_email="zheni-b@yandex.ru",
     description="Polog - ультимативный логгер для баз данных.",

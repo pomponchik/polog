@@ -19,7 +19,7 @@ class Config(object):
     @classmethod
     def db(cls, **kwargs):
         """
-        Логер Polog использует Pony ORM. В данный метод передаются аргументы так же, как в метод db.bind() самой Pony.
+        Логгер Polog использует Pony ORM. В данный метод передаются аргументы так же, как в метод db.bind() самой Pony.
         См.: https://docs.ponyorm.org/database.html
 
         Скажем, базу данных sqlite можно инициализировать, вызвав данный метод как-то так:
