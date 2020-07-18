@@ -5,6 +5,8 @@ from polog.base_settings import BaseSettings
 
 
 class Log(db.Entity):
+    _table_ = 'logs'
+
     id = PrimaryKey(int, auto=True)
     level = Required(int)
     function = Optional(str)

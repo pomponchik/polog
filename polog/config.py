@@ -4,7 +4,7 @@ from polog.base_settings import BaseSettings
 from polog.levels import Levels
 
 
-class Config(object):
+class config(object):
     """
     Установка глобальных параметров логгера. Тут можно настроить, в какую базу данных будут писаться логи, и много других вещей.
     """
@@ -32,7 +32,7 @@ class Config(object):
         setattr(cls, 'db_determined', True)
 
     @staticmethod
-    def settings(**kwargs):
+    def set(**kwargs):
         for key, value in kwargs.items():
             if key not in Config.allowed_settings.keys():
                 raise ValueError(f'"{key}" variable is not allowed for the log settings.')
