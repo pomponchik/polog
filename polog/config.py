@@ -9,11 +9,14 @@ class config(object):
     Установка глобальных параметров логгера. Тут можно настроить, в какую базу данных будут писаться логи, и много других вещей.
     """
     allowed_settings = {
-        'pool_size': int,
-        'service_name': str,
-        'level': int,
-        'errors_level': int,
-        'original_exceptions': bool,
+        'pool_size': (int, ),
+        'service_name': (str, ),
+        'level': (int, str),
+        'errors_level': (int, ),
+        'original_exceptions': (bool, ),
+    }
+    convert_values = {
+        'level': Levels.get,
     }
 
     @classmethod
@@ -33,13 +36,23 @@ class config(object):
 
     @staticmethod
     def set(**kwargs):
+        new_kwargs = {}
         for key, value in kwargs.items():
-            if key not in Config.allowed_settings.keys():
+            if key not in config.allowed_settings.keys():
                 raise ValueError(f'"{key}" variable is not allowed for the log settings.')
-            allowed_type = Config.allowed_settings.get(key)
-            if not isinstance(value, allowed_type):
-                raise TypeError(f'Variable "{key}" has not type {allowed_type.__name__}.')
-        BaseSettings(**kwargs)
+            allowed_types = config.allowed_settings.get(key)
+            is_allowed = False
+            for one in allowed_types:
+                if isinstance(value, one):
+                    is_allowed = True
+            if not is_allowed:
+                allowed_types = ', '.join(allowed_types)
+                raise TypeError(f'Variable "{key}" has not one of types: {allowed_types}.')
+            if key in config.convert_values:
+                handler = config.convert_values[key]
+                value = handler(value)
+            new_kwargs[key] = value
+        BaseSettings(**new_kwargs)
 
     @staticmethod
     def levels(**kwargs):

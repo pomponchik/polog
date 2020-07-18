@@ -7,7 +7,7 @@ class Levels(object):
 
     @classmethod
     def set(cls, name, value):
-        assert isinstance(value, int) and isinstance(key, str)
+        assert isinstance(value, int) and isinstance(name, str)
         cls.levels[name] = value
 
     @classmethod
