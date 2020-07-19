@@ -343,7 +343,7 @@ def some_function(): # При каждом вызове этой функции 
 Также вы можете совместно использовать декораторы ```@сlog``` и ```@flog```:
 
 ```python
-@сlog(level=3)
+@clog(level=3)
 class SomeClass:
   @flog(level=10)
   def some_method(self):

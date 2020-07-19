@@ -56,7 +56,7 @@ def flog(*args, message=None, level=1, errors_level=None, is_method=False):
         else:
             result = wrapper
         # Проверяем, что функцию не запрещено декорировать. Если запрещено - возвращаем оригинал, иначе - какой-то из wrapper'ов.
-        result = RegisteringFunctions().get_function_or_wrapper(func, wrapper, is_method)
+        result = RegisteringFunctions().get_function_or_wrapper(func, before_change_func, wrapper, is_method)
         return result
     # Определяем, как вызван декоратор - как фабрика декораторов (т. е. без позиционных аргументов) или как непосредственный декоратор.
     if not len(args):

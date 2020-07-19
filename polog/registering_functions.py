@@ -42,7 +42,7 @@ class RegisteringFunctions:
         func_id = id(original_function)
         self.forbidden_to_decorate.add(func_id)
 
-    def get_function_or_wrapper(self, func, wrapper, is_method):
+    def get_function_or_wrapper(self, func, before_change_func, wrapper, is_method):
         """
         Здесь принимается решение, декорировать функцию или оставить оригинал.
         Если декорирование функции ранее было запрещено, вернется оригинал.
@@ -50,18 +50,18 @@ class RegisteringFunctions:
         """
         if self.is_forbidden(func):
             return func
-        if self.is_decorated(func):
-            if self.is_method(func):
-                self.remove(func)
+        if self.is_decorated(before_change_func):
+            if self.is_method(before_change_func):
+                self.remove(before_change_func)
                 self.add(wrapper, func, is_method=is_method)
                 return wrapper
             else:
                 if not is_method:
-                    self.remove(func)
+                    self.remove(before_change_func)
                     self.add(wrapper, func, is_method=is_method)
                     return wrapper
                 else:
-                    return func
+                    return before_change_func
         self.remove(func)
         self.add(wrapper, func, is_method=is_method)
         return wrapper
