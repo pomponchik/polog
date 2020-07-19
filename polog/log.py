@@ -24,7 +24,7 @@ CONVERT_VALUES = {
 }
 
 CONVERT_KEYS = {
-    'vars': 'input_variables',
+    'vars': 'local_variables',
 }
 
 def log(*args, **kwargs):
@@ -50,6 +50,8 @@ def log(*args, **kwargs):
             raise ValueError(f'Type "{type(value).__name__}" is not allowed for variable "{key}". Allowed types: {ALLOWED_TYPES[key]}.')
         if key in CONVERT_VALUES:
             value = CONVERT_VALUES[key](value)
+        if key in CONVERT_KEYS:
+            key = CONVERT_KEYS[key]
         not_none_to_dict(args_dict, key, value)
     if not ('level' in kwargs):
         args_dict['level'] = BaseSettings().level
