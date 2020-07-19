@@ -8,18 +8,20 @@ class Writer(object):
     """
     Класс, в котором создаются потоки с логгерами и передаются в них задания.
     """
+    is_completed = {}
+
     def __init__(self):
         settings = BaseSettings()
         if not hasattr(settings, 'pool_size'):
             raise AttributeError('Atribute "pool_size" is not determinated. Use Config.settings(pool_size=<INTEGER>).')
-        pool_size = settings.pool_size
-        assert pool_size > 0
-        assert type(pool_size) is int
+        self.pool_size = settings.pool_size
+        assert self.pool_size > 0
+        assert type(self.pool_size) is int
 
         if not hasattr(self, 'workers'):
             #очередь общая для всех потоков
             self.queue = Queue()
-            self.workers = [Thread(target=Worker(self.queue, index + 1).run) for index in range(pool_size)]
+            self.workers = [Thread(target=Worker(self.queue, index + 1).run) for index in range(self.pool_size)]
             for worker in self.workers:
                 worker.daemon = True
                 worker.start()

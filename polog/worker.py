@@ -13,7 +13,7 @@ class Worker(object):
         self.queue = queue
         self.connector = Connector()
         #метка full нужна, чтобы не завершить поток раньше времени, когда он уже взял таску из очереди, но еще не успел записать ее в БД.
-        self.full = False
+        self.full = True
         self.await_empty_queue()
 
     def run(self):

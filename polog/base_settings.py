@@ -1,5 +1,5 @@
 class BaseSettings(object):
-    pool_size = 1
+    pool_size = 2
     original_exceptions = False
     level = 1
     service_name = 'base'

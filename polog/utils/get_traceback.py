@@ -19,8 +19,11 @@ def get_locals_from_traceback():
     """
     trace = sys.exc_info()[2]
     try:
-        local_variables = {key: get_item(value) for key, value in trace.tb_next.tb_frame.f_locals.items()}
+        try:
+            local_variables = {key: get_item(value) for key, value in trace.tb_next.tb_frame.f_locals.items()}
+        except:
+            local_variables = {key: get_item(value) for key, value in trace.tb_frame.f_locals.items()}
         local_variables_json = json.dumps(local_variables)
         return local_variables_json
-    except:
+    except Exception as e:
         return ''

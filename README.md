@@ -96,8 +96,8 @@ print(OneOperation().operation(2, 0))
 from polog.log import log
 
 
-log(message="All right!")
-log(message="It's bad.", exception=ValueError("Example of an exception."))
+log("All right!")
+log("It's bad.", exception=ValueError("Example of an exception."))
 ```
 
 На этом введение закончено. Если вам интересны тонкости настройки логгера и его более мощные функции, можете почитать более подробную документацию.
@@ -408,16 +408,16 @@ from polog.log import log
 И используйте ее в вашем коде:
 
 ```python
-log(message='Very important message!!!')
+log('Very important message!!!')
 ```
 
-Уровень логирования вы можете передать первым неименованным аргументом:
+Уровень логирования указывается так же, как в декораторах ```@flog``` и ```@сlog```:
 
 ```python
 # Когда псевдонимы для уровней логирования прописаны по стандартной схеме.
-log('ERROR', message='Very important message!!!')
+log('Very important message!!!', level='ERROR')
 # Ну или просто в виде числа.
-log(40, message='Very important message!!!')
+log(message='Very important message!!!', level=40)
 ```
 
 Вы можете передать в ```log()``` функцию, в которой исполняется код:
@@ -438,7 +438,7 @@ except ZeroDivisionError as e:
   log('I should probably stop dividing by zero.', exception=e)
 ```
 
-Колонки **exception_message** и **exception_type** тогда тоже заполнятся автоматически. Флаг ```success``` будет установлен в значение False. Трейсбек автоматически не заполняется и задать его вручную невозможно.
+Колонки **exception_message** и **exception_type** тогда тоже заполнятся автоматически. Флаг ```success``` будет установлен в значение False. Трейсбек и локальные переменные той функции, где произошла ошибка, заполнятся автоматически.
 
 При желании, в качестве аргументов ```function``` и ```exception``` можно использовать и обычные строки, но тогда дополнительные поля не заполнятся сами как надо.
 
@@ -451,7 +451,7 @@ from polog.log import log
 
 def bar(a, b, c, other=None):
   ...
-  log(function=bar, vars=json_vars(a, b, c, other=other))
+  log(':D', function=bar, vars=json_vars(a, b, c, other=other))
   ...
 ```
 
@@ -460,7 +460,7 @@ def bar(a, b, c, other=None):
 ```python
 def bar(a, b, c, other=None):
   ...
-  log(function=bar, vars=json_vars(**locals()))
+  log(':D', function=bar, vars=json_vars(**locals()))
   ...
 ```
 
