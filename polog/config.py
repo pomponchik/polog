@@ -12,11 +12,12 @@ class config(object):
         'pool_size': (int, ),
         'service_name': (str, ),
         'level': (int, str),
-        'errors_level': (int, ),
+        'errors_level': (int, str),
         'original_exceptions': (bool, ),
     }
     convert_values = {
         'level': Levels.get,
+        'errors_level': Levels.get,
     }
 
     @classmethod
