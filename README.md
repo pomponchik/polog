@@ -312,7 +312,7 @@ from polog.clog import clog
 Если не хотите логировать все методы класса, можете перечислить нужные в качестве неименованных аргументов:
 
 ```python
-@сlog('important_method', message='This class is also very important!!!')
+@clog('important_method', message='This class is also very important!!!')
 class VeryImportantClass:
   def important_method(self):
     ...
@@ -417,7 +417,7 @@ log('Very important message!!!')
 # Когда псевдонимы для уровней логирования прописаны по стандартной схеме.
 log('Very important message!!!', level='ERROR')
 # Ну или просто в виде числа.
-log(message='Very important message!!!', level=40)
+log('Very important message!!!', level=40)
 ```
 
 Вы можете передать в ```log()``` функцию, в которой исполняется код:
