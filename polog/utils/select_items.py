@@ -1,10 +1,14 @@
 from pony.orm import select
 from pony.orm import db_session
 from polog.model import Log
+from polog.connector import Connector
 
 
-@db_session
 def select_items(generator):
+    """
+    Замена оригинальной функции select() из Pony ORM, во всем идентичная оригиналу, кроме того, что тут результат всегда отсортирован по полю time.
+    """
+    connect = Connector()
     items = select(generator)
     if items is None:
         return items

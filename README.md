@@ -487,14 +487,28 @@ def bar(a, b, c, other=None):
 from polog.select import logs
 ```
 
-Теперь вы можете делать к нему запросы, используя функцию [```select()```](https://docs.ponyorm.org/queries.html). Для извлечения данных из базы вам необходимо также использовать [```@db_session```](https://docs.ponyorm.org/transactions.html) (работает как декоратор и как менеджер контекста). Пример запроса с помощью Pony:
+Кроме того, если до сих пор с момента запуска ваша программа еще ни разу не делала записей в лог, вам нужно инициализировать Polog:
+
+```python
+from polog.connector import Connector
+
+
+Connector()
+```
+
+В Polog используется каскадная инициализация внутренних механизмов, которая по умолчанию запускается вместе с созданием первой записи. В данном случае мы запускаем тот же процесс вручную.
+
+Теперь вы можете делать запросы, используя функцию [```select()```](https://docs.ponyorm.org/queries.html). Для извлечения данных из базы вам необходимо также использовать [```@db_session```](https://docs.ponyorm.org/transactions.html) (работает как декоратор и как менеджер контекста). Пример запроса с помощью Pony:
 
 ```python
 from datetime import datetime
 from pony.orm import select, db_session
 from polog.select import logs
+from polog.connector import Connector
 
 
+# Инициализация Polog.
+Connector()
 # @db_session еще можно использовать в качестве декоратора для функции, читайте подробнее в документации Pony.
 with db_session:
   # Получаем списко-подобный объект, содержащий все записи с пометкой о неуспешности операций. Вы можете прописать здесь сколь угодно сложный набор условий, опираясь на чисто питоновский синтакисис выражений-генераторов.
@@ -513,7 +527,10 @@ with db_session:
 
 ```python
 from polog.select import logs, select, db_session
+from polog.connector import Connector
 
+
+Connector()
 
 with db_session:
   all = select(x for x in logs)
