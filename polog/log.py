@@ -7,14 +7,24 @@ from polog.utils.exception_to_dict import exception_to_dict
 from polog.utils.get_traceback import get_traceback, get_locals_from_traceback
 
 
+#ALLOWED_TYPES = {
+#    'function': (str, type(lambda: None)), # Функция, событие в которой логируется. Ожидается либо сам объект функции, либо строка с ее названием.
+#    'module': (str, ), # Модуль, событие в котором логируется. Ожидается только название.
+#    'message': (str, ), # Сообщение, любая строка. В таком виде будет записана в БД.
+#    'exception': (str, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, в БД автоматически будут заполнены колонки с названием исключения и его сообщением.
+#    'vars': (str, ), # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
+#    'success': (bool, ), # Успех / провал операции, которая логируется.
+#    'level': (int, str),
+#}
+
 ALLOWED_TYPES = {
-    'function': (str, type(lambda: None)), # Функция, событие в которой логируется. Ожидается либо сам объект функции, либо строка с ее названием.
-    'module': (str, ), # Модуль, событие в котором логируется. Ожидается только название.
-    'message': (str, ), # Сообщение, любая строка. В таком виде будет записана в БД.
-    'exception': (str, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, в БД автоматически будут заполнены колонки с названием исключения и его сообщением.
-    'vars': (str, ), # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
-    'success': (bool, ), # Успех / провал операции, которая логируется.
-    'level': (int, str),
+    'function': lambda x: type(x) is str or callable(x), # Функция, событие в которой логируется. Ожидается либо сам объект функции, либо строка с ее названием.
+    'module': lambda x: type(x) is str, # Модуль, событие в котором логируется. Ожидается только название.
+    'message': lambda x: type(x) is str, # Сообщение, любая строка. В таком виде будет записана в БД.
+    'exception': lambda x: type(x) is str or isinstance(x, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, в БД автоматически будут заполнены колонки с названием исключения и его сообщением.
+    'vars': lambda x: type(x) is str, # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
+    'success': lambda x: type(x) is bool, # Успех / провал операции, которая логируется.
+    'level': lambda x: type(x) is str or type(x) is int,
 }
 
 CONVERT_VALUES = {
@@ -44,10 +54,9 @@ def log(*args, **kwargs):
     args_dict['time'] = datetime.datetime.now()
     for key, value in kwargs.items():
         if key not in ALLOWED_TYPES:
-            raise ValueError(f'Unknown argument name "{key}". Allowed arguments: {ALLOWED_TYPES}.')
-        is_allowed = sum([isinstance(value, one) for one in ALLOWED_TYPES[key]])
-        if not is_allowed:
-            raise ValueError(f'Type "{type(value).__name__}" is not allowed for variable "{key}". Allowed types: {ALLOWED_TYPES[key]}.')
+            raise ValueError(f'Unknown argument name "{key}". Allowed arguments: {", ".join(ALLOWED_TYPES.keys())}.')
+        if not ALLOWED_TYPES[key](value):
+            raise ValueError(f'Type "{type(value).__name__}" is not allowed for variable "{key}".')
         if key in CONVERT_VALUES:
             value = CONVERT_VALUES[key](value)
         if key in CONVERT_KEYS:
@@ -68,7 +77,7 @@ def log(*args, **kwargs):
         args_dict.pop('exception')
     if 'function' in kwargs:
         # Проверяем, что передано не название функции, а она сама.
-        if isinstance(kwargs['function'], ALLOWED_TYPES['function'][1]):
+        if callable(kwargs['function']):
             args_dict['function'] = kwargs['function'].__name__
             args_dict['module'] = kwargs['function'].__module__
     args_dict['auto'] = False
