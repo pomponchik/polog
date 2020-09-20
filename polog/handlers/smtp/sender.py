@@ -8,10 +8,11 @@ class SMTP_sender(object):
     Объект класса является вызываемым благодаря наличию метода __call__().
     При вызове объекта данного класса происходит отправка электронного письма через SMTP-протокол. В конструкторе возможно конфигурирование условий, при которых отправка писем при вызове не производится.
     """
-    def __init__(self, email_from, password, smtp_server, email_to, text_assembler=None, subject_assembler=None, decider=None, only_errors=None, alt=None):
+    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, decider=None, only_errors=None, alt=None):
         self.email_from = email_from
         self.password = password
         self.email_to = email_to
+        self.port = port
         self.smtp_server = smtp_server
         self.text_assembler = text_assembler
         self.subject_assembler = subject_assembler
@@ -24,14 +25,23 @@ class SMTP_sender(object):
             return self.run_alt(**kwargs)
         try:
             message = self.get_mime(**kwargs)
-            server = smtplib.SMTP_SSL(self.smtp_server, 465)
-            server.login(self.email_from, self.password)
-            server.sendmail(self.email_from, [self.email_to], message.as_string())
-            server.quit()
+            self.send(message)
         except Exception:
             self.run_alt(**kwargs)
 
+    def __repr__(self):
+        return f'SMTP_sender(email_from="{self.email_from}", password="{self.password}", smtp_server="{self.smtp_server}", email_to="{self.email_to}", port={self.port}, text_assembler={self.text_assembler}, subject_assembler={self.subject_assembler}, alt={self.alt})'
+
+    def send(self, message):
+        server = smtplib.SMTP_SSL(self.smtp_server, self.port)
+        server.login(self.email_from, self.password)
+        server.sendmail(self.email_from, [self.email_to], message.as_string())
+        server.quit()
+
     def get_mime(self, **kwargs):
+        """
+        Наполнение письма контентом.
+        """
         text = self.get_text(**kwargs)
         message = MIMEText(text)
         message['Subject'] = self.get_subject(**kwargs)
