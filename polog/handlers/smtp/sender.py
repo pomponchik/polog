@@ -1,4 +1,5 @@
 import smtplib
+import atexit
 from email.mime.text import MIMEText
 
 
@@ -39,9 +40,10 @@ class SMTP_sender(object):
         self.only_errors = only_errors
         self.alt = alt
         self.is_html = is_html
-        if self.keep_session:
+        if keep_session:
             # Подмена метода .send()
             self.send = self.keep_session_send
+        self.atexit_quit()
 
     def __call__(self, **kwargs):
         """
@@ -146,9 +148,9 @@ class SMTP_sender(object):
         elements = [f'{key} = {value}' for key, value in kwargs.items()]
         text = '\n'.join(elements)
         if text:
-            text = f'Message from the polog:\n\n{text}'
+            text = f'Message from the Polog:\n\n{text}'
             return text
-        return 'Empty message from the polog.'
+        return 'Empty message from the Polog.'
 
     def get_subject(self, **kwargs):
         """
@@ -166,8 +168,8 @@ class SMTP_sender(object):
         """
         success = kwargs.get('success')
         if success:
-            return 'Success message from the polog'
-        return 'Error message from the polog'
+            return 'Success message from the Polog'
+        return 'Error message from the Polog'
 
     def to_send_or_not_to_send(self, **kwargs):
         """
@@ -196,3 +198,11 @@ class SMTP_sender(object):
         """
         if callable(self.alt):
             return self.alt(**kwargs)
+
+    def atexit_quit(self):
+        """
+        Разлогиниваемся на сервере перед завершением программы.
+        """
+        @atexit.register
+        def quit():
+            self.quit_from_server()
