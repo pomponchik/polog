@@ -6,9 +6,28 @@ class SMTP_sender(object):
     """
     Класс-обработчик для логов.
     Объект класса является вызываемым благодаря наличию метода __call__().
-    При вызове объекта данного класса происходит отправка электронного письма через SMTP-протокол. В конструкторе возможно конфигурирование условий, при которых отправка писем при вызове не производится.
+    При вызове объекта данного класса происходит отправка электронного письма через SMTP-протокол. В конструкторе возможно конфигурирование условий, при которых отправка писем не производится.
     """
-    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, decider=None, only_errors=None, alt=None):
+    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, only_errors=None, decider=None, alt=None, is_html=False, keep_session=False):
+        """
+        Здесь происходит конфигурирование отправщика писем.
+
+        Обязательные аргументы:
+        email_from (str) - адрес электронной почты, с которого должна происходить отправка писем.
+        password (str) - пароль для почтового ящика, соответствующего адресу "email_from".
+        smtp_server (str) - адрес сервера, через который происходит отправка почты.
+        email_to (str) - адрес электронной почты, на который происходит отправка писем.
+
+        Необязательные аргументы:
+        port (int) - номер порта в почтовом сервере, через который происходит отправка почты. По умолчанию 465 (обычно используется для шифрованного соединения).
+        text_assembler (function) - альтернативная функция для генерации текста сообщений. Должна принимать в себя те же аргументы, что метод .__call__() текущего класса и возвращать строковый объект.
+        subject_assembler (function) - по аналогии с аргументом "text_assembler", альтернативная функция для генерации темы письма. Должна принимать аргументы как .__call__() и возвращать строку.
+        only_errors (bool) - фильтр на отправку писем. В режиме False (то есть по умолчанию) через него проходят все события. В режиме True - только ошибки, т. е., если это не ошибка, письмо гарантированно отправлено не будет.
+        decider (function) - дополнительный пользовательский фильтр на отправку сообщений. По умолчанию он отсутствует, т. е. отправляются сообщения обо всех событиях, прошедших через фильтр "only_errors" (см. строчкой выше). Пользователь может передать сюда свою функцию, которая должна принимать набор аргументов, аналогичный методу .__call__() текущего класса, и возвращать bool. Возвращенное значение True из данной функции будет означать, что сообщение нужно отправлять, а False - что нет.
+        alt (function) - функция, которая будет выполнена в случае, если отправка сообщения не удалась или запрещена фильтрами. Должна принимать тот же набор аргументов, что и метод .__call__() текущего класса. Возвращаемые значения не используются.
+        is_html (bool) - флаг, является ли отправляемое содержимое HTML-документом. По умолчанию False.
+        keep_session (bool) - настроййка, влияющая на производительность. В режиме False (по умолчанию), при каждой отправке письма происходит новое открытие соединения с сервером и логин на сервере, а после отправки соединение разрывается. В режиме True соединение создается 1 раз и используется для всех последующих писем. В случае ошибок при отправке писем, соединение пересоздается.
+        """
         self.email_from = email_from
         self.password = password
         self.email_to = email_to
@@ -19,8 +38,19 @@ class SMTP_sender(object):
         self.decider = decider
         self.only_errors = only_errors
         self.alt = alt
+        self.is_html = is_html
+        if self.keep_session:
+            # Подмена метода .send()
+            self.send = self.keep_session_send
 
     def __call__(self, **kwargs):
+        """
+        Благодаря этой функции объект класса SMTP_sender является вызываемым.
+        При вызове происходит отправка электронного письма на сервер через SMTP-протокол.
+        В случае неудачи при отправке (например, если учетные данные для сервера были указаны неправильно), выполняется функция alt, если она была указана при инициализации объекта.
+
+        Здесь принимаются те же аргументы, что при записи лога в БД.
+        """
         if not self.to_send_or_not_to_send(**kwargs):
             return self.run_alt(**kwargs)
         try:
@@ -33,17 +63,67 @@ class SMTP_sender(object):
         return f'SMTP_sender(email_from="{self.email_from}", password="{self.password}", smtp_server="{self.smtp_server}", email_to="{self.email_to}", port={self.port}, text_assembler={self.text_assembler}, subject_assembler={self.subject_assembler}, alt={self.alt})'
 
     def send(self, message):
-        server = smtplib.SMTP_SSL(self.smtp_server, self.port)
-        server.login(self.email_from, self.password)
-        server.sendmail(self.email_from, [self.email_to], message.as_string())
-        server.quit()
+        """
+        Обертка для отправки сообщения для случаев, когда настройка "keep_session" в режиме False, т. е. по умолчанию.
+        При каждой отправке сообщения объект соединения с сервером создается заново.
+        """
+        self.create_smtp_server()
+        self.send_mail(message)
+        self.quit_from_server()
+
+    def keep_session_send(self, message):
+        """
+        Обертка для отправки сообщения на случай, если настройка "keep_session" установлена в режим True.
+        В этом случае соединение с сервером не создается заново для каждого сообщения, а используется постоянно, для многих сообщений.
+        В случае ошибок при отправке сообщения, объект соединения пересоздается и попытка отправки повторяется. Исключение выйдет за пределы метода только если сообщение не удалось отправить во второй раз.
+        """
+        if not hasattr(self, '_server'):
+            self.create_smtp_server()
+        try:
+            self.send_mail(message)
+        except Exception:
+            self.recreate_smtp_server()
+            self.send_mail(message)
+
+    def send_mail(self, message):
+        """
+        Отправляем сообщение.
+        """
+        self._server.sendmail(self.email_from, [self.email_to], message.as_string())
+
+    def create_smtp_server(self):
+        """
+        Создание объекта SMTP-сервера и логин.
+        """
+        self._server = smtplib.SMTP_SSL(self.smtp_server, self.port)
+        self._server.login(self.email_from, self.password)
+
+    def quit_from_server(self):
+        """
+        Разлогиниваемся на сервере.
+        """
+        if hasattr(self, '_server'):
+            try:
+                self._server.quit()
+            except:
+                pass
+
+    def recreate_smtp_server(self):
+        """
+        Завершаем соединение с сервером и создаем новое.
+        """
+        self.quit_from_server()
+        self.create_smtp_server()
 
     def get_mime(self, **kwargs):
         """
         Наполнение письма контентом.
         """
         text = self.get_text(**kwargs)
-        message = MIMEText(text)
+        if self.is_html:
+            message = MIMEText(text, "html")
+        else:
+            message = MIMEText(text)
         message['Subject'] = self.get_subject(**kwargs)
         message['From'] = self.email_from
         message['To'] = self.email_to
