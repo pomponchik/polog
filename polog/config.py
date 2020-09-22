@@ -75,3 +75,14 @@ class config(object):
         levels = {'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}
         for key, value in levels.items():
             Levels.set(key, value)
+
+    @staticmethod
+    def add_handler(*args):
+        """
+        Добавляем дополнительные обработчики для логов.
+        """
+        settings = BaseSettings()
+        for handler in args:
+            if not callable(handler):
+                raise ValueError(f'Object od type "{handler.__class__.__name__}" can not be a handler.')
+            settings.handlers.append(handler)

@@ -3,6 +3,7 @@ import atexit
 from pony.orm import db_session, commit
 from polog.connector import Connector
 from polog.model import Log
+from polog.base_settings import BaseSettings
 
 
 class Worker(object):
@@ -28,6 +29,7 @@ class Worker(object):
                 item = self.queue.get()
                 self.full = True
                 self.write_log(**item)
+                self.do_anything(**item)
                 self.full = False
             except Exception as e:
                 # Если не удалось записать лог в бд, запись уничтожается.
@@ -37,6 +39,16 @@ class Worker(object):
     def write_log(self, **kwargs):
         log = Log(**kwargs)
         commit()
+
+    def do_anything(self, **kwargs):
+        """
+        Выполняем кастомные обработчики для записи логов.
+        """
+        for handler in BaseSettings().handlers:
+            try:
+                handler(**kwargs)
+            except:
+                pass
 
     def await_empty_queue(self):
         """
