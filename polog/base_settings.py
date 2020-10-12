@@ -4,6 +4,7 @@ class BaseSettings(object):
     level = 1
     service_name = 'base'
     errors_level = 2
+    delay_before_exit = 1.0
     handlers = []
 
     def __init__(self, **kwargs):

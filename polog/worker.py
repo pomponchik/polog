@@ -1,8 +1,5 @@
 import time
 import atexit
-from pony.orm import db_session, commit
-from polog.connector import Connector
-from polog.model import Log
 from polog.base_settings import BaseSettings
 
 
@@ -13,8 +10,6 @@ class Worker(object):
     def __init__(self, queue, index):
         self.index = index
         self.queue = queue
-        # Инициализация соединения.
-        self.connector = Connector()
         # Метка full нужна, чтобы не завершить поток раньше времени, когда он уже взял таску из очереди, но еще не успел записать ее в БД.
         # По умолчанию метка в фиктивном положительном положении, чтобы исключить ситуацию с преждевременным прекращением потока при очень быстром завершении программы. Если метка по умолчанию будет отрицательной, функция ожидания завершения не будет дожидаться окончания записи и прервет поток на самом интересном месте.
         self.full = True
@@ -28,17 +23,11 @@ class Worker(object):
             try:
                 item = self.queue.get()
                 self.full = True
-                self.write_log(**item)
                 self.do_anything(**item)
                 self.full = False
             except Exception as e:
                 # Если не удалось записать лог в бд, запись уничтожается.
                 self.full = False
-
-    @db_session
-    def write_log(self, **kwargs):
-        log = Log(**kwargs)
-        commit()
 
     def do_anything(self, **kwargs):
         """
@@ -47,8 +36,8 @@ class Worker(object):
         for handler in BaseSettings().handlers:
             try:
                 handler(**kwargs)
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
     def await_empty_queue(self):
         """
@@ -61,7 +50,7 @@ class Worker(object):
             while True:
                 maybe_finish = time.time()
                 time_delta = maybe_finish - start_awaiting_time
-                if time_delta > 1.0:
+                if time_delta > BaseSettings().delay_before_exit:
                     break
                 if (not self.full) and self.queue.empty():
                     break

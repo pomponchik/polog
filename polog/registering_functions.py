@@ -30,7 +30,7 @@ class RegisteringFunctions:
             self.all_decorated_functions.pop(func_id, None)
             original_id = id(original_function)
             if original_id in self.decorated_methods:
-                self.decorated_methods.pop(original_id)
+                self.decorated_methods.discard(original_id)
 
     def forbid(self, func):
         """

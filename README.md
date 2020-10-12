@@ -534,7 +534,7 @@ from polog.handlers.smtp.sender import SMTP_sender
 
 
 # Адреса и пароль абсолютно случайны.
-config.add_handler(SMTP_sender('from_me42@yandex.com', 'JHjhhb87TY(*Ny08z)', 'smtp.yandex.ru', 'to_me@yandex.ru'))
+config.add_handlers(SMTP_sender('from_me42@yandex.com', 'JHjhhb87TY(*Ny08z)', 'smtp.yandex.ru', 'to_me@yandex.ru'))
 ```
 
 ```SMTP_sender``` - это вызываемый класс. Обязательных аргументов для его инициализации 4: адрес, с которого мы посылаем письма, пароль от ящика, адрес сервера, к которому мы подключаемся, и адрес, куда мы посылаем письма.
