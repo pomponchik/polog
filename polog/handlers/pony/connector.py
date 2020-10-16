@@ -29,5 +29,5 @@ class Connector:
         return self.db
 
     def bind(self):
-        self.db.generate_mapping(create_tables=True)
         self.db.bind(self.args)
+        self.db.generate_mapping(create_tables=True)

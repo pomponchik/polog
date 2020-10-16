@@ -5,6 +5,11 @@ from polog.handlers.pony.connector import Connector
 
 
 class pony_writer:
+    """
+    Класс-обработчик для логов.
+    Объект класса является вызываемым благодаря наличию метода .__call__().
+    При вызову объекта данного класса происходит запись в базу данных.
+    """
     def __init__(self, table=None, **kwargs):
         self.table = table if not (table is None) else 'logs'
         self.connector = Connector(**kwargs)
@@ -18,7 +23,7 @@ class pony_writer:
         commit()
 
     def get_model(self):
-        class Log(self.db):
+        class Log(self.db.Entity):
             _table_ = self.table
             id = PrimaryKey(int, auto=True)
             level = Required(int)
