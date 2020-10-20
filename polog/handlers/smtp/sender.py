@@ -40,7 +40,7 @@ class SMTP_sender(object):
         self.alt = alt
         self.is_html = is_html
 
-    def __call__(self, **kwargs):
+    def __call__(self, args, **kwargs):
         """
         Благодаря этой функции объект класса SMTP_sender является вызываемым.
         При вызове происходит отправка электронного письма на сервер через SMTP-протокол.
