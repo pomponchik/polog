@@ -21,9 +21,9 @@ class Worker(object):
         """
         while True:
             try:
-                item = self.queue.get()
+                items = self.queue.get()
                 self.full = True
-                self.do_anything(**item)
+                self.do_anything(items[0], **(items[1]))
                 self.full = False
             except Exception as e:
                 # Если не удалось записать лог в бд, запись уничтожается.

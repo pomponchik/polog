@@ -18,7 +18,7 @@ class pony_writer:
         self.connector.bind()
 
     @db_session
-    def __call__(self, **kwargs):
+    def __call__(self, *args, **kwargs):
         log = self.model(**kwargs)
         commit()
 

@@ -31,11 +31,11 @@ class Writer(object):
             cls.instance = super(Writer, cls).__new__(cls)
         return cls.instance
 
-    def write(self, **kwargs):
+    def write(self, original_args, **kwargs):
         """
         Кладем словарь с аргументами в очередь на запись.
         """
-        self.queue.put_nowait(kwargs)
+        self.queue.put_nowait((original_args, kwargs))
 
     def queue_size(self):
         """

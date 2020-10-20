@@ -12,7 +12,7 @@ class config(object):
         'level': (int, str),
         'errors_level': (int, str),
         'original_exceptions': (bool, ),
-        'delay_before_exit': (float, int, )
+        'delay_before_exit': (float, int, ),
     }
     convert_values = {
         'level': Levels.get,
