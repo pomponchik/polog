@@ -5,6 +5,6 @@ test.py
 test2.py
 __pycache__
 *.db
-polog.egg-info
+*.egg-info
 dist
 build

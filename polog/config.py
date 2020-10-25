@@ -4,7 +4,7 @@ from polog.levels import Levels
 
 class config(object):
     """
-    Установка глобальных параметров логгера. Тут можно настроить, в какую базу данных будут писаться логи, и много других вещей.
+    Установка глобальных параметров логгера.
     """
     allowed_settings = {
         'pool_size': (int, ),
@@ -63,7 +63,7 @@ class config(object):
     @staticmethod
     def add_handlers(*args):
         """
-        Добавляем дополнительные обработчики для логов.
+        Добавляем обработчики для логов. Сюда можно передать несколько обработчиков через запятую.
         """
         settings = BaseSettings()
         for handler in args:

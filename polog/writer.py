@@ -33,7 +33,7 @@ class Writer(object):
 
     def write(self, original_args, **kwargs):
         """
-        Кладем словарь с аргументами в очередь на запись.
+        Кладем аргументы оригинальной функции и извлеченные логгером данные в очередь на запись.
         """
         self.queue.put_nowait((original_args, kwargs))
 
