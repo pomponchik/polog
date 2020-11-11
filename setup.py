@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
-requirements = ['pony==0.7.13', 'ujson==3.0.0']
+requirements = ['ujson==3.0.0']
 
 setup(
     name="polog",
