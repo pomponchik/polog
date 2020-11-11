@@ -25,9 +25,11 @@ class Worker(object):
                 self.full = True
                 # items - это всегда кортеж из 2-х элементов.
                 self.do_anything(items[0], **(items[1]))
+                self.queue.task_done()
                 self.full = False
             except Exception as e:
                 # Если не удалось записать лог, запись уничтожается.
+                self.queue.task_done()
                 self.full = False
 
     def do_anything(self, args, **kwargs):
