@@ -17,4 +17,4 @@ def log_normal_info(result, finish, start, args_dict, level, *args, **kwargs):
         input_variables = json_vars(*args, **kwargs)
         if not (input_variables is None):
             args_dict['input_variables'] = input_variables
-        Writer().write(**args_dict)
+        Writer().write((args, kwargs), **args_dict)

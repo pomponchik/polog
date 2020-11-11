@@ -1,9 +1,3 @@
-class DatabaseIsAlreadyDeterminedError(ValueError):
-    """
-    Попытка дважды установить базу данных для записи логов.
-    """
-    pass
-
 class LoggedError(ValueError):
     """
     Специальное исключение, оно не логируется декораторами.

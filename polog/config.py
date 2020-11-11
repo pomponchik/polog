@@ -1,12 +1,10 @@
-from polog.errors import DatabaseIsAlreadyDeterminedError
-from polog.connector import Connector
 from polog.base_settings import BaseSettings
 from polog.levels import Levels
 
 
 class config(object):
     """
-    Установка глобальных параметров логгера. Тут можно настроить, в какую базу данных будут писаться логи, и много других вещей.
+    Установка глобальных параметров логгера.
     """
     allowed_settings = {
         'pool_size': (int, ),
@@ -14,26 +12,12 @@ class config(object):
         'level': (int, str),
         'errors_level': (int, str),
         'original_exceptions': (bool, ),
+        'delay_before_exit': (float, int, ),
     }
     convert_values = {
         'level': Levels.get,
         'errors_level': Levels.get,
     }
-
-    @classmethod
-    def db(cls, **kwargs):
-        """
-        Логгер Polog использует Pony ORM. В данный метод передаются аргументы так же, как в метод db.bind() самой Pony.
-        См.: https://docs.ponyorm.org/database.html
-
-        Скажем, базу данных sqlite можно инициализировать, вызвав данный метод как-то так:
-        Config.db(provider='sqlite', filename=os.path.join(os.getcwd(), 'logs.db'), create_db=True)
-        (именно так это и будет сделано по умолчанию, если этот метод  не будет вызван.)
-        """
-        if hasattr(cls, 'db_determined'):
-            raise DatabaseIsAlreadyDeterminedError('You have already defined a database for logging. Forgot?')
-        connect = Connector(**kwargs)
-        setattr(cls, 'db_determined', True)
 
     @staticmethod
     def set(**kwargs):
@@ -75,3 +59,14 @@ class config(object):
         levels = {'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}
         for key, value in levels.items():
             Levels.set(key, value)
+
+    @staticmethod
+    def add_handlers(*args):
+        """
+        Добавляем обработчики для логов. Сюда можно передать несколько обработчиков через запятую.
+        """
+        settings = BaseSettings()
+        for handler in args:
+            if not callable(handler):
+                raise ValueError(f'Object od type "{handler.__class__.__name__}" can not be a handler.')
+            settings.handlers.append(handler)

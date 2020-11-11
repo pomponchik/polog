@@ -1,47 +1,52 @@
 import time
 import atexit
-from pony.orm import db_session, commit
-from polog.connector import Connector
-from polog.model import Log
+from polog.base_settings import BaseSettings
 
 
 class Worker(object):
     """
-    Экземпляр класса соответствует одному потоку. Здесь происходит непосредственно запись в БД.
+    Экземпляр класса соответствует одному потоку. Здесь происходит непосредственно выполнение функций-обработчиков.
     """
     def __init__(self, queue, index):
         self.index = index
         self.queue = queue
-        # Инициализация соединения.
-        self.connector = Connector()
-        # Метка full нужна, чтобы не завершить поток раньше времени, когда он уже взял таску из очереди, но еще не успел записать ее в БД.
+        # Метка full нужна, чтобы не завершить поток раньше времени, когда он уже взял таску из очереди, но еще не успел ее обработать.
         # По умолчанию метка в фиктивном положительном положении, чтобы исключить ситуацию с преждевременным прекращением потока при очень быстром завершении программы. Если метка по умолчанию будет отрицательной, функция ожидания завершения не будет дожидаться окончания записи и прервет поток на самом интересном месте.
         self.full = True
         self.await_empty_queue()
 
     def run(self):
         """
-        Принимаем из очереди словари с данными для записи в БД и собственно записываем их.
+        Принимаем из очереди данные и что-то с ними делаем.
         """
         while True:
             try:
-                item = self.queue.get()
+                items = self.queue.get()
                 self.full = True
-                self.write_log(**item)
+                # items - это всегда кортеж из 2-х элементов.
+                self.do_anything(items[0], **(items[1]))
+                self.queue.task_done()
                 self.full = False
             except Exception as e:
-                # Если не удалось записать лог в бд, запись уничтожается.
+                self.queue.task_done()
+                # Если не удалось записать лог, запись уничтожается.
                 self.full = False
 
-    @db_session
-    def write_log(self, **kwargs):
-        log = Log(**kwargs)
-        commit()
+    def do_anything(self, args, **kwargs):
+        """
+        Выполняем кастомные обработчики для записи логов. Если один из них поднимет исключение, гасим его и продолжаем выполнять оставшиеся обработчики.
+        """
+        settings = BaseSettings()
+        for handler in settings.handlers:
+            try:
+                handler(args, **kwargs, service_name=settings.service_name)
+            except Exception:
+                pass
 
     def await_empty_queue(self):
         """
-        Прежде, чем завершить программу, дожидаемся, пока все потоки запишут в базу последние сообщения.
-        Лимит на ожидание - 1 секунда. Он необходим для разрешения ситуации, когда поток еще ни разу не писал в лог сообщений, и соответственно статус заполненности у него фиктивный, в результате чего из него невозможно выйти.
+        Прежде, чем завершить программу, дожидаемся, пока все потоки обработают последние сообщения.
+        Лимит на ожидание берется из настроек. Он необходим для разрешения ситуации, когда поток еще ни разу не писал в лог сообщений, и соответственно статус заполненности у него фиктивный, в результате чего из него невозможно выйти.
         """
         @atexit.register
         def full_checker():
@@ -49,7 +54,7 @@ class Worker(object):
             while True:
                 maybe_finish = time.time()
                 time_delta = maybe_finish - start_awaiting_time
-                if time_delta > 1.0:
+                if time_delta > BaseSettings().delay_before_exit:
                     break
                 if (not self.full) and self.queue.empty():
                     break
