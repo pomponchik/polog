@@ -6,7 +6,7 @@
 - **Поддержка асинхронности**. Декораторы для автоматического логирования работают как на обычных функциях, так и на корутинах.
 - **Высокая производительность**. Записи делаются из отдельных потоков и ввод-вывод не блокирует основной поток исполнения вашей программы.
 - **Автоматическое логирование**. Просто повесьте декоратор на вашу функцию или класс, и каждый вызов будет логироваться автоматически (или только ошибки - это легко настроить).
-- **Удобное профилирование**. Время работы функций записывается автоматически. Вы можете накопить статистику производительности вашего кода и легко ее анализировать.
+- **Удобное профилирование**. Время работы функций записывается. Вы можете накопить статистику производительности вашего кода и легко ее анализировать.
 - Учтено, что может быть **несколько сервисов**, которые пишут в одно место. Их можно будет различить.
 - Вы можете писать собственные **обработчики** или пользоваться уже существующими. К примеру, вы можете настроить [отправку](#включаем-оповещения-по-электронной-почте) уведомлений об ошибках по электронной почте или их [запись](#пишем-логи-в-реляционную-базу-данных) в реляционную БД.
 
@@ -39,7 +39,7 @@ $ pip install polog
 Прежде, чем вызывать логгер, необходимо зарегистрировать [обработчик](#пишем-свои-обработчики) для записей. Для примера это будет простейшая функция, выводящая сообщение в консоль без какого-либо форматирования:
 
 ```python
-from polog.config import config
+from polog import config
 
 
 def print_log(function_args, **kwargs):
@@ -51,7 +51,7 @@ config.add_handlers(print_log)
 Теперь вы можете импортировать декоратор [```@flog```](#декоратор-flog) и применить его к вашей функции:
 
 ```python
-from polog.flog import flog
+from polog import flog
 
 
 @flog
@@ -66,7 +66,7 @@ print(sum(2, 2))
 Теперь попробуем залогировать ошибку:
 
 ```python
-from polog.flog import flog
+from polog import flog
 
 
 @flog
@@ -81,7 +81,7 @@ print(division(2, 0))
 Еще небольшой пример кода:
 
 ```python
-from polog.flog import flog
+from polog import flog
 
 
 @flog
@@ -102,7 +102,7 @@ print(operation(2, 0))
 Что, если мы хотим залогировать все методы целого класса? Обязательно ли проходиться по всем его методам и на каждый вешать декоратор [```@flog```](#декоратор-flog)? Нет! Для классов существует декоратор [```@clog```](#clog---декоратор-класса):
 
 ```python
-from polog.clog import clog
+from polog import clog
 
 
 @clog
@@ -121,7 +121,7 @@ print(OneOperation().operation(2, 0))
 Если вам все же не хватило автоматического логирования, вы можете писать логи вручную, вызывая функцию [```log()```](#ручное-логирование-через-log) из своего кода:
 
 ```python
-from polog.log import log
+from polog import log
 
 
 log("All right!")
@@ -178,7 +178,7 @@ logging.critical("I'm quitting.")
 В декораторах вы можете указать желаемый уровень логирования:
 
 ```python
-from polog.flog import flog
+from polog import flog
 
 
 @flog(level=5)
@@ -194,8 +194,7 @@ print(sum(2, 2))
 Также вы можете присвоить уровням логирования имена и в дальнейшем использовать их вместо чисел:
 
 ```python
-from polog.config import config
-from polog.flog import flog
+from polog import flog, config
 
 
 # Присваиваем уровню 5 имя 'ERROR', а уровню 1 - 'ALL'.
@@ -215,8 +214,7 @@ print(sum(2, 2))
 Если вы привыкли пользоваться стандартным модулем [logging](https://docs.python.org/3.8/library/logging.html), вы можете присвоить уровням логирования [стандартные имена](https://docs.python.org/3.8/library/logging.html#logging-levels) оттуда:
 
 ```python
-from polog.config import config
-from polog.flog import flog
+from polog import flog, config
 
 
 # Имена уровням логирования проставляются автоматически, в соответствии со стандартной схемой.
@@ -233,8 +231,7 @@ print(sum(2, 2))
 Также вы можете установить текущий уровень логирования:
 
 ```python
-from polog.config import config
-from polog.flog import flog
+from polog import flog, config
 
 
 # Имена уровням логирования проставляются автоматически, в соответствии со стандартной схемой.
@@ -264,7 +261,7 @@ print(sum(2, 2))
 Также вы можете установить уровень логирования для ошибок глобально через настройки:
 
 ```python
-from polog.config import config
+from polog import config
 
 
 config.set(error_level='CRITICAL')
@@ -318,13 +315,13 @@ config.set(pool_size=5)
 
 ```@flog``` можно использовать как со скобками, так и без. Вызов без скобок эквивалентен вызову со скобками, но без аргументов.
 
-Напомним, он импортируется так:
+Начнем с импорта:
 
 ```python
-from polog.flog import flog
+from polog import flog
 ```
 
-Используйте параметр ```message``` для добавления произвольного текста к каждому логу.
+Параметр ```message``` можно использовать для добавления произвольного текста к каждому логу.
 
 ```python
 @flog(message='This function is very important!!!')
@@ -337,10 +334,10 @@ def very_important_function():
 
 ### ```@clog``` - декоратор класса
 
-По традиции, вспомним, откуда он импортируется:
+Импортируется так:
 
 ```python
-from polog.clog import clog
+from polog import clog
 ```
 
 Может принимать все те же аргументы, что и [```@flog()```](#декоратор-flog), либо использоваться без аргументов - как со скобками, так и без. Автоматически навешивает декоратор ```@flog``` на все методы задекорированного класса.
@@ -403,7 +400,7 @@ class SomeClass:
 Импортируется ```@logging_is_forbidden``` так:
 
 ```python
-from polog.forbid import logging_is_forbidden
+from polog import logging_is_forbidden
 ```
 
 ```@logging_is_forbidden``` сработает при любом расположении среди декораторов логирования:
@@ -456,7 +453,7 @@ def some_function():
 Импортируйте функцию ```log()```:
 
 ```python
-from polog.log import log
+from polog import log
 ```
 
 И используйте ее в вашем коде:
@@ -500,7 +497,7 @@ except ZeroDivisionError as e:
 
 ```python
 from polog.utils.json_vars import json_vars
-from polog.log import log
+from polog import log
 
 
 def bar(a, b, c, other=None):
@@ -546,8 +543,7 @@ def bar(a, b, c, other=None):
 Рассмотрим пример простейшего обработчика:
 
 ```python
-from polog.config import config
-from polog.log import log
+from polog import config, log
 
 
 def print_function_name(function_args, **kwargs):
@@ -570,7 +566,7 @@ log('hello!')
 Подключается так:
 
 ```python
-from polog.config import config
+from polog import config
 from polog.handlers.smtp.sender import SMTP_sender
 
 
