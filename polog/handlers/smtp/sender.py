@@ -57,7 +57,7 @@ class SMTP_sender(object):
             self.run_alt(**kwargs)
 
     def __repr__(self):
-        return f'SMTP_sender(email_from="{self.email_from}", password="{self.password}", smtp_server="{self.smtp_server}", email_to="{self.email_to}", port={self.port}, text_assembler={self.text_assembler}, subject_assembler={self.subject_assembler}, alt={self.alt})'
+        return f'SMTP_sender(email_from="{self.email_from}", password=<HIDDEN>, smtp_server="{self.smtp_server}", email_to="{self.email_to}", port={self.port}, text_assembler={self.text_assembler}, subject_assembler={self.subject_assembler}, alt={self.alt})'
 
     def send(self, message):
         """
