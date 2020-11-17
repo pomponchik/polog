@@ -96,7 +96,7 @@ class SMTP_sender(object):
         self.quit_from_server()
         self.create_smtp_server()
 
-    def get_mime(self, **kwargs):
+    def get_mime(self, args, **kwargs):
         """
         Наполнение письма контентом.
         """
@@ -105,12 +105,12 @@ class SMTP_sender(object):
             message = MIMEText(text, "html")
         else:
             message = MIMEText(text)
-        message['Subject'] = self.get_subject(**kwargs)
+        message['Subject'] = self.get_subject(args, **kwargs)
         message['From'] = self.email_from
         message['To'] = self.email_to
         return message
 
-    def get_text(self, **kwargs):
+    def get_text(self, args, **kwargs):
         """
         Данный метод возвращает текст письма.
         Клиент может передать в конструктор класса собственную функцию, которая принимает в себя те же аргументы, что метод __call__() текущего класса, и возвращает строку. В этом случае результат выполнения данной функции будет использован в теле письма. Иначе текст письма будет сгенерирован по умолчанию.
@@ -119,7 +119,7 @@ class SMTP_sender(object):
             return self.text_assembler(**kwargs)
         return self.get_standart_text(**kwargs)
 
-    def get_standart_text(self, **kwargs):
+    def get_standart_text(self, args, **kwargs):
         """
         Метод, возвращающий текст письма по умолчанию.
         По умолчанию текст письма - это просто перечисление всех переданных в метод __call__() аргументов.
@@ -131,7 +131,7 @@ class SMTP_sender(object):
             return text
         return 'Empty message from the Polog.'
 
-    def get_subject(self, **kwargs):
+    def get_subject(self, args, **kwargs):
         """
         Данный метод возвращает тему письма.
         По умолчанию берется стандартная тема, однако клиент может кастомизировать создание темы, передав в конструктор класса аргумент "subject_assembler". Это должна быть функция, принимающая те же аргументы, что и метод __call__() текущего класса, и возвращающая строку, которая собственно и будет использована в качестве темы письма.
@@ -140,7 +140,7 @@ class SMTP_sender(object):
             return self.subject_assembler(**kwargs)
         return self.get_standart_subject(**kwargs)
 
-    def get_standart_subject(self, **kwargs):
+    def get_standart_subject(self, args, **kwargs):
         """
         Данный метод вызывается, когда клиент не установил альтернативных обработчиков для генерации темы письма.
         Тема письма генерируется на основании аргумента "success", переданного в метод __call__().
@@ -150,7 +150,7 @@ class SMTP_sender(object):
             return 'Success message from the Polog'
         return 'Error message from the Polog'
 
-    def to_send_or_not_to_send(self, **kwargs):
+    def to_send_or_not_to_send(self, args, **kwargs):
         """
         Здесь принимается решение, отправлять письмо или нет.
         По умолчанию письмо будет отправлено в любом случае.
@@ -168,7 +168,7 @@ class SMTP_sender(object):
                 return result
         return True
 
-    def run_alt(self, **kwargs):
+    def run_alt(self, args, **kwargs):
         """
         Если по какой-то причине отправить письмо не удалось, запускается данный метод.
         По умолчанию он не делает ничего, однако, если в конструктор класса была передана функция в качестве параметра alt, она будет вызвана со всеми аргументами, которые изначально были переданы в __call__().
