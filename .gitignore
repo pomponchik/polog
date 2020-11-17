@@ -1,7 +1,7 @@
 .idea
 virt
 .DS_Store
-test*.py
+tests*.py
 __pycache__
 *.db
 *.egg-info
