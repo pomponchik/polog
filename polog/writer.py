@@ -4,7 +4,7 @@ from polog.worker import Worker
 from polog.base_settings import BaseSettings
 
 
-class Writer(object):
+class Writer:
     """
     Класс, в котором создаются потоки с логгерами и передаются в них задания.
     """

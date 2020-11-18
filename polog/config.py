@@ -2,7 +2,7 @@ from polog.base_settings import BaseSettings
 from polog.levels import Levels
 
 
-class config(object):
+class config:
     """
     Установка глобальных параметров логгера.
     """

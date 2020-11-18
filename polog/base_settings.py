@@ -1,4 +1,4 @@
-class BaseSettings(object):
+class BaseSettings:
     pool_size = 2
     original_exceptions = False
     level = 1

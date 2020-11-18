@@ -3,7 +3,7 @@ import atexit
 from email.mime.text import MIMEText
 
 
-class SMTP_sender(object):
+class SMTP_sender:
     """
     Класс-обработчик для логов.
     Объект класса является вызываемым благодаря наличию метода .__call__().

@@ -3,7 +3,7 @@ import atexit
 from polog.base_settings import BaseSettings
 
 
-class Worker(object):
+class Worker:
     """
     Экземпляр класса соответствует одному потоку. Здесь происходит непосредственно выполнение функций-обработчиков.
     """

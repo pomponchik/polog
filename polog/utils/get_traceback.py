@@ -1,7 +1,6 @@
 import sys
 import traceback
 import ujson as json
-from polog.message import message
 from polog.utils.json_vars import get_item
 
 
