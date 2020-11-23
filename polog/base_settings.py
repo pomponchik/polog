@@ -1,3 +1,6 @@
+from threading import Lock
+
+
 class BaseSettings:
     pool_size = 2
     original_exceptions = False
@@ -12,6 +15,7 @@ class BaseSettings:
             setattr(self.__class__, key, value)
 
     def __new__(cls, **kwargs):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(BaseSettings, cls).__new__(cls)
-        return cls.instance
+        with Lock():
+            if not hasattr(cls, 'instance'):
+                cls.instance = super(BaseSettings, cls).__new__(cls)
+            return cls.instance
