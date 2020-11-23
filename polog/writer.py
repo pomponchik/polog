@@ -1,10 +1,10 @@
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 from polog.worker import Worker
 from polog.base_settings import BaseSettings
 
 
-class Writer(object):
+class Writer:
     """
     Класс, в котором создаются потоки с логгерами и передаются в них задания.
     """
@@ -27,9 +27,10 @@ class Writer(object):
                 worker.start()
 
     def __new__(cls, **kwargs):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(Writer, cls).__new__(cls)
-        return cls.instance
+        with Lock():
+            if not hasattr(cls, 'instance'):
+                cls.instance = super(Writer, cls).__new__(cls)
+            return cls.instance
 
     def write(self, original_args, **kwargs):
         """

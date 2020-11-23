@@ -8,6 +8,7 @@ from polog.utils.log_normal_info import log_normal_info
 from polog.utils.get_base_args_dict import get_base_args_dict
 from polog.registering_functions import RegisteringFunctions
 from polog.errors import IncorrectUseOfTheDecoratorError
+from polog.message import message as _message
 
 
 def flog(*args, message=None, level=1, errors_level=None, is_method=False):
@@ -22,6 +23,7 @@ def flog(*args, message=None, level=1, errors_level=None, is_method=False):
             """
             Обертка для корутин, вызов обернутой функции происходит через await.
             """
+            _message.clean_context()
             args_dict = get_base_args_dict(func, message)
             try:
                 start = time.time()
@@ -39,6 +41,7 @@ def flog(*args, message=None, level=1, errors_level=None, is_method=False):
             """
             Обертка для обычных функций.
             """
+            _message.clean_context()
             args_dict = get_base_args_dict(func, message)
             try:
                 start = time.time()
