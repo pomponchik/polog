@@ -7,7 +7,22 @@ from polog.utils.get_traceback import get_traceback, get_locals_from_traceback
 context = ContextVar('context')
 
 class Message:
+    """
+    При помощи данного класса можно редактировать сообщение и некоторые другие характеристики лога, записываемого через flog(), изнутри задекорированной функции.
+    """
     def __call__(self, *text, level=None, success=None, e=None, exception=None, exception_type=None, exception_message=None, local_variables=None):
+        """
+        При каждом вызове ообъекта класса Message происходит сохранение переданного сюда набора аргументов в словарь, а также сохранение этого словаря в контекстную переменную.
+
+        Первым и единственным опциональным неименованным аргументом идет сообщение (message) лога.
+        Остальные аргументы - именнованные:
+
+        level (str, int) - уровень лога.
+        success (bool) - метка успешности операции.
+        e, exception (Exception) - экземпляр исключения. Можно передать, используя любой из этих ярлыков. Если передать по экземпляру исключения в каждый ярлык, приоритет будет у 'e'.
+        exception_type, exception_message (str) - строки с названием класса исключения и его сообщением. Если заполнены аргументы e или exception, содержимое данных аргументов игнорируется.
+        local_variables (str) - ожидается строка с перечислением переменных функции в формате json, полученная с помощью json_vars().
+        """
         vars = {}
         if text:
             self.set_var('message', str(text[0]), vars)
@@ -57,6 +72,7 @@ class Message:
 
     def set_var(self, name, var, vars, not_none=True):
         """
+        Сохраняем переданный пользователем объект в контекстную переменную. При условии, объект ожидаемого типа. При необходимости, конвертируем в нужный тип.
         """
         if not not_none or var is not None:
             if not ALLOWED_TYPES[name](var):

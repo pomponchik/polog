@@ -496,8 +496,7 @@ except ZeroDivisionError as e:
 Также вы можете передавать в ```log()``` произвольные переменные, которые считаете нужным залогировать. Для этого нужно использовать функцию ```json_vars()```, которая принимает любые аргументы и переводит их в стандартный json-формат:
 
 ```python
-from polog.utils.json_vars import json_vars
-from polog import log
+from polog import log, json_vars
 
 
 def bar(a, b, c, other=None):
