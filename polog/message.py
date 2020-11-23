@@ -61,7 +61,7 @@ class Message:
         elif exception is not None and isinstance(exception, Exception):
             new_e = exception
         if new_e is not None:
-            exception_to_dict(vars, e)
+            exception_to_dict(vars, new_e)
             vars['traceback'] = get_traceback()
             vars['local_variables'] = get_locals_from_traceback()
         else:
