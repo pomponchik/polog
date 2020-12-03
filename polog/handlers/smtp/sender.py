@@ -46,13 +46,13 @@ class SMTP_sender:
         При вызове происходит отправка электронного письма на сервер через SMTP-протокол.
         В случае неудачи при отправке (например, если учетные данные для сервера были указаны неправильно), выполняется функция alt, если она была указана при инициализации объекта
         """
-        if not self.to_send_or_not_to_send(**kwargs):
-            return self.run_alt(**kwargs)
+        if not self.to_send_or_not_to_send(args, **kwargs):
+            return self.run_alt(args, **kwargs)
         try:
-            message = self.get_mime(**kwargs)
+            message = self.get_mime(args, **kwargs)
             self.send(message)
-        except Exception:
-            self.run_alt(**kwargs)
+        except Exception as e:
+            self.run_alt(args, **kwargs)
 
     def __repr__(self):
         return f'SMTP_sender(email_from="{self.email_from}", password=<HIDDEN>, smtp_server="{self.smtp_server}", email_to="{self.email_to}", port={self.port}, text_assembler={self.text_assembler}, subject_assembler={self.subject_assembler}, alt={self.alt})'
@@ -100,7 +100,7 @@ class SMTP_sender:
         """
         Наполнение письма контентом.
         """
-        text = self.get_text(**kwargs)
+        text = self.get_text(args, **kwargs)
         if self.is_html:
             message = MIMEText(text, "html")
         else:
@@ -116,8 +116,8 @@ class SMTP_sender:
         Клиент может передать в конструктор класса собственную функцию, которая принимает в себя те же аргументы, что метод __call__() текущего класса, и возвращает строку. В этом случае результат выполнения данной функции будет использован в теле письма. Иначе текст письма будет сгенерирован по умолчанию.
         """
         if callable(self.text_assembler):
-            return self.text_assembler(**kwargs)
-        return self.get_standart_text(**kwargs)
+            return self.text_assembler(args, **kwargs)
+        return self.get_standart_text(args, **kwargs)
 
     def get_standart_text(self, args, **kwargs):
         """
@@ -137,8 +137,8 @@ class SMTP_sender:
         По умолчанию берется стандартная тема, однако клиент может кастомизировать создание темы, передав в конструктор класса аргумент "subject_assembler". Это должна быть функция, принимающая те же аргументы, что и метод __call__() текущего класса, и возвращающая строку, которая собственно и будет использована в качестве темы письма.
         """
         if callable(self.subject_assembler):
-            return self.subject_assembler(**kwargs)
-        return self.get_standart_subject(**kwargs)
+            return self.subject_assembler(args, **kwargs)
+        return self.get_standart_subject(args, **kwargs)
 
     def get_standart_subject(self, args, **kwargs):
         """
@@ -176,4 +176,4 @@ class SMTP_sender:
         К примеру, в качестве параметра alt можно передать другой объект класса SMTP_sender, который будет отправлять письмо с другого почтового сервера или адреса, когда не доступен основной.
         """
         if callable(self.alt):
-            return self.alt(**kwargs)
+            return self.alt(args, **kwargs)

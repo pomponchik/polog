@@ -40,7 +40,7 @@ class Worker:
         for handler in settings.handlers:
             try:
                 handler(args, **kwargs, service_name=settings.service_name)
-            except Exception:
+            except Exception as e:
                 pass
 
     def await_empty_queue(self):

@@ -642,6 +642,7 @@ local_variables = {"x":{"value":1,"type":"int"},"y":{"value":0,"type":"int"}}
 time_of_work = 2.86102294921875e-06
 level = 2
 input_variables = {"args":[{"value":1,"type":"int"},{"value":0,"type":"int"}]}
+service_name = base
 ```
 
 При необходимости, вы можете настроить отправку писем более тонко. Для этого в конструктор класса нужно передать дополнительные именованные параметры. Вот их список:
