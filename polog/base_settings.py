@@ -9,6 +9,7 @@ class BaseSettings:
     errors_level = 2
     delay_before_exit = 1.0
     handlers = []
+    extra_fields = {}
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():

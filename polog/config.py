@@ -70,3 +70,9 @@ class config:
             if not callable(handler):
                 raise ValueError(f'Object od type "{handler.__class__.__name__}" can not be a handler.')
             settings.handlers.append(handler)
+
+    @staticmethod
+    def add_fields(**fields):
+        settings = BaseSettings()
+        for key, value in fields.items():
+            settings.extra_fields[key] = value
