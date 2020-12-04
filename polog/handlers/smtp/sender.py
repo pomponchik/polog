@@ -1,6 +1,5 @@
-import smtplib
-import atexit
 from email.mime.text import MIMEText
+from polog.handlers.smtp.smtp_dependency_wrapper import SMTPDependencyWrapper
 
 
 class SMTP_sender:
@@ -9,7 +8,7 @@ class SMTP_sender:
     Объект класса является вызываемым благодаря наличию метода .__call__().
     При вызове объекта данного класса происходит отправка электронного письма через SMTP-протокол. В конструкторе возможно конфигурирование условий, при которых отправка писем не производится.
     """
-    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, only_errors=None, filter=None, alt=None, is_html=False):
+    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, only_errors=None, filter=None, alt=None, is_html=False, smtp_wrapper=SMTPDependencyWrapper):
         """
         Здесь происходит конфигурирование отправщика писем.
 
@@ -39,6 +38,7 @@ class SMTP_sender:
         self.only_errors = only_errors
         self.alt = alt
         self.is_html = is_html
+        self.smtp_wrapper = smtp_wrapper(self.smtp_server, self.port, self.email_from, self.password, self.email_to)
 
     def __call__(self, args, **kwargs):
         """
@@ -62,39 +62,7 @@ class SMTP_sender:
         Обертка для отправки сообщения.
         При каждой отправке сообщения объект соединения с сервером создается заново.
         """
-        self.create_smtp_server()
-        self.send_mail(message)
-        self.quit_from_server()
-
-    def send_mail(self, message):
-        """
-        Отправляем сообщение.
-        """
-        self._server.sendmail(self.email_from, [self.email_to], message.as_string())
-
-    def create_smtp_server(self):
-        """
-        Создание объекта SMTP-сервера и логин.
-        """
-        self._server = smtplib.SMTP_SSL(self.smtp_server, self.port)
-        self._server.login(self.email_from, self.password)
-
-    def quit_from_server(self):
-        """
-        Разлогиниваемся на сервере.
-        """
-        if hasattr(self, '_server'):
-            try:
-                self._server.quit()
-            except:
-                pass
-
-    def recreate_smtp_server(self):
-        """
-        Завершаем соединение с сервером и создаем новое.
-        """
-        self.quit_from_server()
-        self.create_smtp_server()
+        self.smtp_wrapper.send(message)
 
     def get_mime(self, args, **kwargs):
         """

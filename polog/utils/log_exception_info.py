@@ -27,5 +27,5 @@ def log_exception_info(exc, finish, start, args_dict, errors_level, *args, **kwa
             message.copy_context(args_dict)
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
-            extract_extra_fields(args_dict, (args, kwargs), **args_dict)
+            extract_extra_fields((args, kwargs), args_dict)
             Writer().write((args, kwargs), **args_dict)
