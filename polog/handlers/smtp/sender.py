@@ -1,6 +1,5 @@
-import smtplib
-import atexit
 from email.mime.text import MIMEText
+from polog.handlers.smtp.smtp_dependency_wrapper import SMTPDependencyWrapper
 
 
 class SMTP_sender:
@@ -9,7 +8,7 @@ class SMTP_sender:
     Объект класса является вызываемым благодаря наличию метода .__call__().
     При вызове объекта данного класса происходит отправка электронного письма через SMTP-протокол. В конструкторе возможно конфигурирование условий, при которых отправка писем не производится.
     """
-    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, only_errors=None, filter=None, alt=None, is_html=False):
+    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, only_errors=None, filter=None, alt=None, is_html=False, smtp_wrapper=SMTPDependencyWrapper):
         """
         Здесь происходит конфигурирование отправщика писем.
 
@@ -39,6 +38,7 @@ class SMTP_sender:
         self.only_errors = only_errors
         self.alt = alt
         self.is_html = is_html
+        self.smtp_wrapper = smtp_wrapper(self.smtp_server, self.port, self.email_from, self.password, self.email_to)
 
     def __call__(self, args, **kwargs):
         """
@@ -46,13 +46,13 @@ class SMTP_sender:
         При вызове происходит отправка электронного письма на сервер через SMTP-протокол.
         В случае неудачи при отправке (например, если учетные данные для сервера были указаны неправильно), выполняется функция alt, если она была указана при инициализации объекта
         """
-        if not self.to_send_or_not_to_send(**kwargs):
-            return self.run_alt(**kwargs)
+        if not self.to_send_or_not_to_send(args, **kwargs):
+            return self.run_alt(args, **kwargs)
         try:
-            message = self.get_mime(**kwargs)
+            message = self.get_mime(args, **kwargs)
             self.send(message)
-        except Exception:
-            self.run_alt(**kwargs)
+        except Exception as e:
+            self.run_alt(args, **kwargs)
 
     def __repr__(self):
         return f'SMTP_sender(email_from="{self.email_from}", password=<HIDDEN>, smtp_server="{self.smtp_server}", email_to="{self.email_to}", port={self.port}, text_assembler={self.text_assembler}, subject_assembler={self.subject_assembler}, alt={self.alt})'
@@ -62,45 +62,13 @@ class SMTP_sender:
         Обертка для отправки сообщения.
         При каждой отправке сообщения объект соединения с сервером создается заново.
         """
-        self.create_smtp_server()
-        self.send_mail(message)
-        self.quit_from_server()
-
-    def send_mail(self, message):
-        """
-        Отправляем сообщение.
-        """
-        self._server.sendmail(self.email_from, [self.email_to], message.as_string())
-
-    def create_smtp_server(self):
-        """
-        Создание объекта SMTP-сервера и логин.
-        """
-        self._server = smtplib.SMTP_SSL(self.smtp_server, self.port)
-        self._server.login(self.email_from, self.password)
-
-    def quit_from_server(self):
-        """
-        Разлогиниваемся на сервере.
-        """
-        if hasattr(self, '_server'):
-            try:
-                self._server.quit()
-            except:
-                pass
-
-    def recreate_smtp_server(self):
-        """
-        Завершаем соединение с сервером и создаем новое.
-        """
-        self.quit_from_server()
-        self.create_smtp_server()
+        self.smtp_wrapper.send(message)
 
     def get_mime(self, args, **kwargs):
         """
         Наполнение письма контентом.
         """
-        text = self.get_text(**kwargs)
+        text = self.get_text(args, **kwargs)
         if self.is_html:
             message = MIMEText(text, "html")
         else:
@@ -116,8 +84,8 @@ class SMTP_sender:
         Клиент может передать в конструктор класса собственную функцию, которая принимает в себя те же аргументы, что метод __call__() текущего класса, и возвращает строку. В этом случае результат выполнения данной функции будет использован в теле письма. Иначе текст письма будет сгенерирован по умолчанию.
         """
         if callable(self.text_assembler):
-            return self.text_assembler(**kwargs)
-        return self.get_standart_text(**kwargs)
+            return self.text_assembler(args, **kwargs)
+        return self.get_standart_text(args, **kwargs)
 
     def get_standart_text(self, args, **kwargs):
         """
@@ -137,8 +105,8 @@ class SMTP_sender:
         По умолчанию берется стандартная тема, однако клиент может кастомизировать создание темы, передав в конструктор класса аргумент "subject_assembler". Это должна быть функция, принимающая те же аргументы, что и метод __call__() текущего класса, и возвращающая строку, которая собственно и будет использована в качестве темы письма.
         """
         if callable(self.subject_assembler):
-            return self.subject_assembler(**kwargs)
-        return self.get_standart_subject(**kwargs)
+            return self.subject_assembler(args, **kwargs)
+        return self.get_standart_subject(args, **kwargs)
 
     def get_standart_subject(self, args, **kwargs):
         """
@@ -176,4 +144,4 @@ class SMTP_sender:
         К примеру, в качестве параметра alt можно передать другой объект класса SMTP_sender, который будет отправлять письмо с другого почтового сервера или адреса, когда не доступен основной.
         """
         if callable(self.alt):
-            return self.alt(**kwargs)
+            return self.alt(args, **kwargs)

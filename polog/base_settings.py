@@ -9,6 +9,7 @@ class BaseSettings:
     errors_level = 2
     delay_before_exit = 1.0
     handlers = []
+    extra_fields = {}
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -17,5 +18,5 @@ class BaseSettings:
     def __new__(cls, **kwargs):
         with Lock():
             if not hasattr(cls, 'instance'):
-                cls.instance = super(BaseSettings, cls).__new__(cls)
+                cls.instance = super().__new__(cls)
             return cls.instance
