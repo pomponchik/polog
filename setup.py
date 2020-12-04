@@ -7,10 +7,10 @@ requirements = ['ujson==3.0.0']
 
 setup(
     name="polog",
-    version="0.0.8",
+    version="0.0.9",
     author="Evgeniy Blinov",
     author_email="zheni-b@yandex.ru",
-    description="Polog - ультимативный логгер.",
+    description="Удобный асинхронный логгер",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/pomponchik/polog",
