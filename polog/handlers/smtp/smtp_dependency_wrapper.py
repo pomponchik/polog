@@ -2,6 +2,11 @@ import smtplib
 
 
 class SMTPDependencyWrapper:
+    """
+    Политика отправки сообщений в Polog отделена от реализации.
+    Данный класс представляет реализацию, т. е. низкоуровневые методы для работы с SMTP-протоколом.
+    Это необходимо, чтобы класс с политикой был тестируемым.
+    """
     def __init__(self, server, port, email_from, password, email_to):
         self.server = server
         self.port = port
