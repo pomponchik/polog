@@ -27,16 +27,20 @@ class Request:
     META = {'REMOTE_ADDR': '123.456.789.010'}
 
 def test_django_example():
+    """
+    Проверяем, что пример кода из README.md работает.
+    В данном случае мы проверяем, что извлекается ip-адрес из обработчика запросов Django.
+    """
     request = Request()
     django_handler_example(request)
     time.sleep(0.0001)
     assert lst[0]['ip'] == '123.456.789.010'
     lst.pop()
 
-def test_django_example_2():
+def test_django_example_error():
     request = Request()
     try:
-        django_handler_example(request)
+        django_handler_error(request)
     except:
         pass
     time.sleep(0.0001)
