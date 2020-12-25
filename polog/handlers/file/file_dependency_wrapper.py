@@ -37,3 +37,9 @@ class FileDependencyWrapper:
             result = stat.st_size
             return result
         return 0
+
+    def copy_file(self, path_to_copy):
+        pass
+
+    def file_exist(self, filename):
+        pass
