@@ -47,7 +47,7 @@ class TelegramSender:
         """
         инициализирует бота, и отправляет сообщение
         """
-        bot = telebot.telebot(self.token)
+        bot = telebot.TeleBot(self.token)
         bot.send_message(self.chat_id, message)
 
     def get_text(self, args, **kwargs):
