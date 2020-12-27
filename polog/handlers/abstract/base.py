@@ -30,7 +30,6 @@ class BaseHandler:
             content = self.get_content(args, **kwargs)
             self.do(content)
         except Exception as e:
-            print(e)
             self.run_alt(args, **kwargs)
 
     def to_do_or_not_to_do(self, args, **kwargs):

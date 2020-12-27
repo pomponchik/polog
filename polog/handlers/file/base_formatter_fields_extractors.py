@@ -39,7 +39,6 @@ class BaseFormatterFieldsExtractors:
         function = kwargs.get('function', None)
         module = kwargs.get('module', None)
         service = kwargs.get('service_name', None)
-        #print({**kwargs})
         if (function is not None) and (module is not None):
             function = cls.search_function_name(function, module)
             result = f'where: {service}.{module}.{function}()'
@@ -96,7 +95,6 @@ class BaseFormatterFieldsExtractors:
         json_dict = json.loads(json_text)
         args = json_dict.get('args', None)
         kwargs = json_dict.get('kwargs', None)
-        print(kwargs)
         if args is None and kwargs is None:
             return None
         result = []
@@ -105,7 +103,6 @@ class BaseFormatterFieldsExtractors:
             result.append(args)
         if kwargs is not None:
             kwargs = ', '.join([f'{x} = {cls.json_variable_to_human_readable_text(y)}' for x, y in kwargs.items()])
-            print(kwargs)
             result.append(kwargs)
         result = ', '.join(result)
         return result
