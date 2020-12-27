@@ -25,3 +25,8 @@ def json_vars(*args, **kwargs):
     if len(kwargs):
         result['kwargs'] = kwargs
     return json.dumps(result)
+
+def json_one_variable(variable):
+    variable = get_item(variable)
+    result = json.dumps(variable)
+    return result

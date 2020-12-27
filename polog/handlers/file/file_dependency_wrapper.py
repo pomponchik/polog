@@ -1,4 +1,5 @@
 import os
+import shutil
 
 
 class FileDependencyWrapper:
@@ -31,6 +32,9 @@ class FileDependencyWrapper:
     def write(self, log_string):
         self.file.write(log_string)
 
+    def flush(self):
+        self.file.flush()
+
     def get_size(self):
         if self.filename is not None:
             stat = os.stat(self.filename)
@@ -38,8 +42,10 @@ class FileDependencyWrapper:
             return result
         return 0
 
-    def copy_file(self, path_to_copy):
-        pass
+    def move_file(self, path_to_copy):
+        if self.filename is None:
+            raise ValueError('Copying is not possible, the name of the source file is unknown.')
+        shutil.move(self.filename, path_to_copy)
 
     def file_exist(self, filename):
-        pass
+        return os.path.exists(filename) and os.path.isfile(filename)

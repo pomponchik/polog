@@ -1,8 +1,9 @@
 from email.mime.text import MIMEText
+from polog.handlers.abstract.base import BaseHandler
 from polog.handlers.smtp.smtp_dependency_wrapper import SMTPDependencyWrapper
 
 
-class SMTP_sender:
+class SMTP_sender(BaseHandler):
     """
     Класс-обработчик для логов.
     Объект класса является вызываемым благодаря наличию метода .__call__().
@@ -40,31 +41,17 @@ class SMTP_sender:
         self.is_html = is_html
         self.smtp_wrapper = smtp_wrapper(self.smtp_server, self.port, self.email_from, self.password, self.email_to)
 
-    def __call__(self, args, **kwargs):
-        """
-        Благодаря этой функции объект класса SMTP_sender является вызываемым.
-        При вызове происходит отправка электронного письма на сервер через SMTP-протокол.
-        В случае неудачи при отправке (например, если учетные данные для сервера были указаны неправильно), выполняется функция alt, если она была указана при инициализации объекта
-        """
-        if not self.to_send_or_not_to_send(args, **kwargs):
-            return self.run_alt(args, **kwargs)
-        try:
-            message = self.get_mime(args, **kwargs)
-            self.send(message)
-        except Exception as e:
-            self.run_alt(args, **kwargs)
-
     def __repr__(self):
         return f'SMTP_sender(email_from="{self.email_from}", password=<HIDDEN>, smtp_server="{self.smtp_server}", email_to="{self.email_to}", port={self.port}, text_assembler={self.text_assembler}, subject_assembler={self.subject_assembler}, alt={self.alt})'
 
-    def send(self, message):
+    def do(self, message):
         """
         Обертка для отправки сообщения.
         При каждой отправке сообщения объект соединения с сервером создается заново.
         """
         self.smtp_wrapper.send(message)
 
-    def get_mime(self, args, **kwargs):
+    def get_content(self, args, **kwargs):
         """
         Наполнение письма контентом.
         """
@@ -117,31 +104,3 @@ class SMTP_sender:
         if success:
             return 'Success message from the Polog'
         return 'Error message from the Polog'
-
-    def to_send_or_not_to_send(self, args, **kwargs):
-        """
-        Здесь принимается решение, отправлять письмо или нет.
-        По умолчанию письмо будет отправлено в любом случае.
-        Если в конструкторе настройка "only_errors" установлена в положение True, письмо не будет отправлено в случае успешного выполнения логируемой операции.
-        Когда настройка "only_errors" не препятствует отправке письма, проверяется еще объект filter, переданный в конструктор. По умолчанию этот объект является None и не влияет на отправку письма. Однако, если это функция, то она будет вызвана с теми же аргументами, с которыми изначально был вызван текущий объект класса SMTP_sender. Если она вернет True, письмо будет отправлено, иначе - нет.
-        """
-        if type(self.only_errors) is bool:
-            if self.only_errors == True:
-                success = kwargs.get('success')
-                if success:
-                    return False
-        if callable(self.filter):
-            result = self.filter(**kwargs)
-            if type(result) is bool:
-                return result
-        return True
-
-    def run_alt(self, args, **kwargs):
-        """
-        Если по какой-то причине отправить письмо не удалось, запускается данный метод.
-        По умолчанию он не делает ничего, однако, если в конструктор класса была передана функция в качестве параметра alt, она будет вызвана со всеми аргументами, которые изначально были переданы в __call__().
-
-        К примеру, в качестве параметра alt можно передать другой объект класса SMTP_sender, который будет отправлять письмо с другого почтового сервера или адреса, когда не доступен основной.
-        """
-        if callable(self.alt):
-            return self.alt(args, **kwargs)
