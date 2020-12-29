@@ -37,7 +37,7 @@ class BaseFormatter:
     def __call__(self, args, **kwargs):
         """
         При первом вызове объекта данный метод будет переопределен методом __second_call__().
-        Здесь происходит вызов вторичной инициализации объекта, после чего происходит запись лога и метод становится ненужным.
+        Здесь происходит вызов вторичной инициализации объекта, после чего происходит запись лога и метод становится не нужным.
         """
         self.__init_on_run__()
         result = self.__second_call__(args, **kwargs)
@@ -98,12 +98,20 @@ class BaseFormatter:
         return result
 
     def get_dict(self, args, **kwargs):
+        """
+        Из исходных данных формируем словарь, заполненный только нужными полями, в уже отформатированном виде.
+        Потом останется этот словарь только "склеить" в одну строку.
+        """
         result = {}
         self.add_base_fields(result, args, **kwargs)
         self.add_extra_fields(result, args, **kwargs)
         return result
 
     def add_base_fields(self, base, args, **kwargs):
+        """
+        Базовые поля - это те, для которых прописаны специальные обработчики в self.FIELD_HANDLERS.
+        Здесь мы вызываем все эти обработчики.
+        """
         for field_name, extractor in self.FIELD_HANDLERS.items():
             try:
                 value = extractor(**kwargs)
@@ -116,6 +124,9 @@ class BaseFormatter:
                 base[field_name] = f'{field_name}: "{value}"'
 
     def add_extra_fields(self, base, args, **kwargs):
+        """
+        Добавляем в словарь с данными поля, отсутствующие в self.FIELD_HANDLERS.
+        """
         for field_name, value in kwargs.items():
             if field_name not in base:
                 if field_name not in self.FORBIDDEN_EXTRA_FIELDS:
@@ -123,10 +134,16 @@ class BaseFormatter:
                         base[field_name] = f'{field_name}: "{value}"'
 
     def format(self, data):
+        """
+        Берем словарь с уже отформатированными данными и делаем из него строку.
+        """
         values = data.values()
         return ' | '.join(values) + self.separator
 
     def width_and_align(self, data):
+        """
+        Для некоторых полей заданы нормы форматирования (self.ALIGN_NORMS). Здесь происходит применение этих норм.
+        """
         for field_name in self.ALIGN_NORMS:
             item = data.get(field_name, None)
             if item is not None:
