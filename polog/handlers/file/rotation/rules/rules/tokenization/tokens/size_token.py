@@ -1,7 +1,9 @@
-from polog.handlers.file.rotation.rules.rules.tokenization.tokens.abstract_token import AbstractToken
+from polog.handlers.file.rotation.rules.rules.tokenization.tokens.abstractions.abstract_token import AbstractToken
 
 
 class SizeToken(AbstractToken):
+    regexp_letter = 's'
+
     short_sizes = {
         'b': 1,
         'kb': 1024,
@@ -18,11 +20,10 @@ class SizeToken(AbstractToken):
         'terabyte': 1024 * 1024 * 1024 * 1024,
         'petabyte': 1024 * 1024 * 1024 * 1024 * 1024,
     }
-    def its_me(self):
+
+    @classmethod
+    def its_me(cls, chunk):
         raise NotImplementedError()
 
     def parse(self):
-        raise NotImplementedError()
-
-    def equal_content(self):
         raise NotImplementedError()
