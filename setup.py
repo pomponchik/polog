@@ -3,17 +3,17 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
-requirements = ['ujson==3.0.0']
+requirements = ["ipython>=6", "polog>=0.0.9", "pyTelegramBotAPI>=3.7.4"]
 
 setup(
-    name="polog",
+    name="telegram_polog_handler",
     version="0.0.9",
-    author="Evgeniy Blinov",
-    author_email="zheni-b@yandex.ru",
-    description="Удобный асинхронный логгер",
+    author="hgreenfe",
+    author_email="hgreenfe@student.21-school.ru",
+    description="telegram handler for polog",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/pomponchik/polog",
+    url="https://github.com/Bce-OK/telegram_polog_handler",
     packages=find_packages(),
     install_requires=requirements,
     classifiers=[
