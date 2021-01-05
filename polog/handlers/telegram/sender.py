@@ -1,5 +1,3 @@
-from email.mime.text import MIMEText
-from polog.handlers.smtp.smtp_dependency_wrapper import SMTPDependencyWrapper
 import telebot
 
 class TelegramSender:
