@@ -1,8 +1,11 @@
 import telebot
 
-class TelegramSender:
+class TelegramSender(BaseHandler):
     """
-
+    Класс-обработчик для логов.
+    Объект класса является вызываемым благодаря наличию метода __call__() в базовом классе
+    При вызове объекта данного класса происходит отправка сообщения в телеграм.
+    В конструкторе возможно конфигурирование условий, при которых отправка сообщения не производится.
     """
     def __init__(self, token, chat_id, alt=None, text_assembler=None, only_errors=None, filter=None):
         """
@@ -25,30 +28,19 @@ class TelegramSender:
         self.filter = filter
         self.only_errors = only_errors
 
-
-    def __call__(self, args, **kwargs):
-        """
-        Вызов объекта, в связи с чем происходит проверка на необходимость отправки и отправка сообщения в телеграм
-        """
-        if not self.to_send_or_not_to_send(args, **kwargs):
-            return self.run_alt(args, **kwargs)
-        try:
-            message = self.get_text(args, **kwargs)
-            self.send(message)
-        except Exception as e:
-            self.run_alt(args, **kwargs)
-
     def __repr__(self):
         return f'telegram_sender(chat_id={self.chat_id}, alt={self.alt}, text_assembler={self.text_assembler}, only_errors={self.only_errors}, filter={self.filter})'
 
-    def send(self, message):
+    def do(self, content):
         """
-        инициализирует бота, и отправляет сообщение
+        инициализирует бота, и отправляет сообщение в телеграм.
+        content - уже полностью подготовленная и обработанная строка
         """
         bot = telebot.TeleBot(self.token)
-        bot.send_message(self.chat_id, message)
+        bot.send_message(self.chat_id, content)
 
-    def get_text(self, args, **kwargs):
+
+    def get_content(self, args, **kwargs):
         """
         получает сообщение
         """
@@ -67,29 +59,3 @@ class TelegramSender:
             text = f'Message from the Polog:\n\n{text}'
             return text
         return 'Empty message from the Polog.'
-
-    def to_send_or_not_to_send(self, args, **kwargs):
-        """
-        Здесь принимается решение, отправлять сообщение или нет.
-        По умолчанию сообщение будет отправлено в любом случае.
-        Если в конструкторе настройка "only_errors" установлена в положение True, сообщение не будет отправлено в случае успешного выполнения логируемой операции.
-        Когда настройка "only_errors" не препятствует отправке сообщения, проверяется еще объект filter, переданный в конструктор. По умолчанию этот объект является None и не влияет на отправку сообщения. Однако, если это функция, то она будет вызвана с теми же аргументами, с которыми изначально был вызван текущий объект класса SMTP_sender. Если она вернет True, сообщение будет отправлено, иначе - нет.
-        """
-        if type(self.only_errors) is bool:
-            if self.only_errors == True:
-                success = kwargs.get('success')
-                if success:
-                    return False
-        if callable(self.filter):
-            result = self.filter(**kwargs)
-            if type(result) is bool:
-                return result
-        return True
-
-    def run_alt(self, args, **kwargs):
-        """
-        Если по какой-то причине отправить сообщение не удалось, запускается данный метод.
-        По умолчанию он не делает ничего, однако, если в конструктор класса была передана функция в качестве параметра alt, она будет вызвана со всеми аргументами, которые изначально были переданы в __call__().
-        """
-        if callable(self.alt):
-            return self.alt(args, **kwargs)

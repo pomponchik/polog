@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
-requirements = ["ipython>=6", "polog>=0.0.9", "pyTelegramBotAPI>=3.7.4"]
+requirements = ["polog>=0.0.9", "pyTelegramBotAPI>=3.7.4"]
 
 setup(
     name="telegram_polog_handler",
