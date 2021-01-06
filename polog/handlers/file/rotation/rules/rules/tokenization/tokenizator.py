@@ -1,9 +1,6 @@
-from polog.handlers.file.rotation.rules.rules.tokenization.tokens.size_token import SizeToken
-from polog.handlers.file.rotation.rules.rules.tokenization.tokens.number_token import NumberToken
-
-
+from polog.handlers.file.rotation.rules.rules.tokenization.tokens import SizeToken, NumberToken, DotToken
 class Tokenizator:
-    def __init__(self, source, tokens_classes=[SizeToken, NumberToken]):
+    def __init__(self, source, tokens_classes=[SizeToken, NumberToken, DotToken]):
         self.source = source
         self.tokens_classes = tokens_classes
         self.tokens = self.generate_tokens()
