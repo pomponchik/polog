@@ -1,5 +1,7 @@
 .idea
 virt
+venv
+env
 .DS_Store
 tests*.py
 __pycache__
