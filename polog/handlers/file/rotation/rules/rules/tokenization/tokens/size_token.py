@@ -23,10 +23,7 @@ class SizeToken(AbstractToken):
 
     @classmethod
     def its_me(cls, chunk):
-        result = chunk in cls.short_sizes
-        result += chunk in cls.full_sizes
-        result += chunk + 's' in cls.full_sizes
-        return result
+        return chunk in cls.get_all_keys()
 
     def parse(self):
         if chunk in cls.short_sizes:
@@ -34,3 +31,8 @@ class SizeToken(AbstractToken):
         elif chunk in cls.full_sizes:
             return cls.full_sizes[self.source]
         return cls.full_sizes[f'{self.source}s']
+
+    @classmethod
+    def get_all_keys(cls):
+        result = [x for x in cls.short_sizes.keys(), x for x in cls.short_sizes.full_sizes(), f'{x}s' for x in cls.short_sizes.full_sizes()]
+        return result

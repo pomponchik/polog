@@ -2,9 +2,6 @@ from polog.handlers.file.rotation.rules.rules.file_size_rule import AbstractRule
 
 
 class DateTimeRule(AbstractRule):
-    def extract_data_from_string(self, source):
-        raise NotImplementedError
-
     @classmethod
     def prove_source(cls, source):
         raise NotImplementedError
