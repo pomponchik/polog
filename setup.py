@@ -7,7 +7,7 @@ requirements = ["polog>=0.0.9", "pyTelegramBotAPI>=3.7.4"]
 
 setup(
     name="telegram_polog_handler",
-    version="0.0.9",
+    version="0.1.0",
     author="hgreenfe",
     author_email="hgreenfe@student.21-school.ru",
     description="telegram handler for polog",
