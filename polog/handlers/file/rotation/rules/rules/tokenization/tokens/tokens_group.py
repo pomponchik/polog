@@ -14,12 +14,41 @@ class TokensGroup:
             return True
         regexp = self.parse_regexp(regexp)
         try:
-            return self.regexp_recursion(regexp, self.tokens, 0, 0)
+            return self.regexp_recursion(regexp, self.tokens, 0, 0, 0, 0)
         except RecursionError:
             return False
 
-    def regexp_recursion(self, regexp, tokens, tokens_index, regexp_index):
-        
+    def __getitem__(self, key):
+        _class = self.__class__
+        if isinstance(key, int):
+            return _class([self.tokens[key]])
+        elif isinstance(key, str):
+            if key == '.':
+                for token in self.tokens:
+                    if token.regexp_letter != '.':
+                        return _class([token])
+                return _class([])
+            elif key == '*':
+                return _class([x for x in self.tokens])
+            else:
+                return _class([x for x in self.tokens if x.regexp_letter == key])
+        raise KeyError('The key can be a string or a number.')
+
+    def __len__(self):
+        return len(self.tokens)
+
+    def regexp_recursion(self, regexp, tokens, tokens_index, regexp_index, base_tokens_index, base_regexp_index):
+        if len(regexp) - 1 == regexp_index:
+            unit = regexp[regexp_index]
+            token = tokens[tokens_index]
+            if unit.letter == token.index:
+                if unit.value is not None:
+                    return token.equal(unit.value)
+                return True
+            return False
+        else:
+            pass
+
 
     def parse_regexp(self, regexp):
         result = []

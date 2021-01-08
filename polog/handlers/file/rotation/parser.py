@@ -10,5 +10,3 @@ class Parser:
     def split_source(self, source):
         result = [x.strip() for x in source.split(',')]
         return result
-
-    def

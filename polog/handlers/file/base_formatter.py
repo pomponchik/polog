@@ -121,7 +121,7 @@ class BaseFormatter:
                 except:
                     value = None
             if value is not None:
-                base[field_name] = f'{field_name}: "{value}"'
+                base[field_name] = value
 
     def add_extra_fields(self, base, args, **kwargs):
         """

@@ -30,6 +30,8 @@ class MetaToken(type):
         При несоблюдении любого из этих правил, поднимется исключение.
         """
         x = super().__new__(cls, name, bases, dct)
+        if x.__name__ == 'AbstractToken':
+            return x
         if not hasattr(x, 'regexp_letter') or type(x.regexp_letter) is not str or len(x.regexp_letter) != 1 or x.regexp_letter in cls.forbidden_regexp_letters:
             raise AttributeError(f'The attribute "regexp_letter" of the class {x.__name__} must be a string of the lenth == 1, not "*" and not ".". When inheriting from an abstract class, you should correctly override this parameter. These conditions are automatically checked in the metaclass.')
         if x.regexp_letter in cls.all_regexp_letters:

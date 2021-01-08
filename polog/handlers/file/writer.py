@@ -5,7 +5,7 @@ from polog.handlers.file.rotation.rotator import Rotator
 
 
 class file_writer(BaseHandler):
-    def __init__(self, file, formatter=None, rotation=None, forced_flush=True, separator='\n', rotation=None, only_errors=False, filter=None, alt=None, file_wrapper=FileDependencyWrapper, base_formatter=BaseFormatter, rotator=Rotator):
+    def __init__(self, file, formatter=None, rotation=None, forced_flush=True, separator='\n', only_errors=False, filter=None, alt=None, file_wrapper=FileDependencyWrapper, base_formatter=BaseFormatter, rotator=Rotator):
         self.file = file_wrapper(file)
         self.forced_flush = forced_flush
         self.filter = filter
@@ -28,7 +28,8 @@ class file_writer(BaseHandler):
             self.file.flush()
 
     def maybe_rotation(self):
-        self.rotator.maybe_rotation()
+        pass
+        #self.rotator.maybe_rotation()
 
     def get_formatter(self, maybe_formatter):
         if callable(maybe_formatter):

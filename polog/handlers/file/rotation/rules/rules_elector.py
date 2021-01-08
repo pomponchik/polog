@@ -1,4 +1,4 @@
-from polog.handlers.file.rotation.rules.file_size_rule import FileSizeRule
+from polog.handlers.file.rotation.rules.rules.file_size_rule import FileSizeRule
 
 
 class RulesElector:
