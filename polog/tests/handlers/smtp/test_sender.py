@@ -17,7 +17,16 @@ config.add_handlers(SMTP_sender('fff', 'fff', 'fff', 'fff', smtp_wrapper=Depende
 
 
 def test_send_normal():
+    """
+    Проверяем, что что-то проходит через обработчик в DependencyWrapper.
+    """
     log('hello')
+    time.sleep(0.0001)
+    assert lst[0]
+    lst.pop()
+
+def test_send_error():
+    log('hello', exception=ValueError())
     time.sleep(0.0001)
     assert lst[0]
     lst.pop()

@@ -2,7 +2,7 @@ import time
 import inspect
 import datetime
 from functools import wraps
-from polog.utils.raise_exception import raise_exception
+from polog.utils.reraise_exception import reraise_exception
 from polog.utils.log_exception_info import log_exception_info
 from polog.utils.log_normal_info import log_normal_info
 from polog.utils.get_base_args_dict import get_base_args_dict
@@ -32,7 +32,7 @@ def flog(*args, message=None, level=1, errors_level=None, is_method=False):
             except Exception as e:
                 finish = time.time()
                 log_exception_info(e, finish, start, args_dict, errors_level, *args, **kwargs)
-                raise_exception(e)
+                reraise_exception(e)
             finish = time.time()
             log_normal_info(result, finish, start, args_dict, level, *args, **kwargs)
             return result
@@ -50,7 +50,7 @@ def flog(*args, message=None, level=1, errors_level=None, is_method=False):
             except Exception as e:
                 finish = time.time()
                 log_exception_info(e, finish, start, args_dict, errors_level, *args, **kwargs)
-                raise_exception(e)
+                reraise_exception(e)
             finish = time.time()
             log_normal_info(result, finish, start, args_dict, level, *args, **kwargs)
             return result
