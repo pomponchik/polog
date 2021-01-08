@@ -7,3 +7,4 @@ from polog.message import message
 from polog.utils.json_vars import json_vars
 from polog.field import field
 from polog.errors import LoggedError
+from polog.handlers.file.writer import file_writer
