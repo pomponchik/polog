@@ -44,7 +44,7 @@ $ pip install polog
 from polog import config, file_writer
 
 
-config.add_handlers(file_writer)
+config.add_handlers(file_writer('file.log'))
 ```
 
 Теперь вы можете импортировать декоратор [```@flog```](#декоратор-flog) и применить его к вашей функции:
