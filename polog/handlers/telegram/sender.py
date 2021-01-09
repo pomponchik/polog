@@ -1,4 +1,5 @@
 import telebot
+from polog.handlers.abstract.base import BaseHandler
 
 class TelegramSender(BaseHandler):
     """
