@@ -10,7 +10,7 @@ class TokensGroup:
     def __getitem__(self, key):
         _class = self.__class__
         if isinstance(key, int):
-            return _class([self.tokens[key]])
+            return self.tokens[key]
         elif isinstance(key, str):
             if key == '.':
                 for token in self.tokens:

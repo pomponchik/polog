@@ -26,11 +26,11 @@ class SizeToken(AbstractToken):
         return chunk in cls.get_all_keys()
 
     def parse(self):
-        if chunk in cls.short_sizes:
-            return cls.short_sizes[self.source]
-        elif chunk in cls.full_sizes:
-            return cls.full_sizes[self.source]
-        return cls.full_sizes[f'{self.source}s']
+        if self.source in self.short_sizes:
+            return self.short_sizes[self.source]
+        elif self.source in self.full_sizes:
+            return self.full_sizes[self.source]
+        return self.full_sizes[f'{self.source}s']
 
     @classmethod
     def get_all_keys(cls):

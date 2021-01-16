@@ -12,12 +12,16 @@ class Tokenizator:
         pre_tokens = self.split_text(self.source)
         tokens = []
         for source_token in pre_tokens:
+            full = False
             for cls in self.tokens_classes:
                 try:
                     token = cls(source_token)
                     tokens.append(token)
-                except:
+                    full = True
+                except Exception as e:
                     pass
+                if full:
+                    break
         return TokensGroup(tokens)
 
     def split_text(self, source):
