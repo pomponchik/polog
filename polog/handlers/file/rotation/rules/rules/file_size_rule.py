@@ -3,6 +3,7 @@ from polog.handlers.file.rotation.rules.rules.tokenization.tokens.size_token imp
 #from polog.handlers.file.file_dependency_wrapper import
 
 
+
 class FileSizeRule(AbstractRule):
     @classmethod
     def prove_source(cls, source):
@@ -18,6 +19,8 @@ class FileSizeRule(AbstractRule):
             pass
 
     def extract_data_from_string(self):
-        number = tokens[0].content
-        dimension = tokens[1].content
+        number = self.tokens[0].content
+        dimension = self.tokens[1].content
         self.size_limit = number * dimension
+        print(self.size_limit)
+        print(number, dimension)

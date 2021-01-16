@@ -7,17 +7,6 @@ class TokensGroup:
     def __init__(self, tokens_list):
         self.tokens = tokens_list
 
-    def check_regexp(self, regexp):
-        if not isinstance(regexp, str):
-            raise ValueError('The regexp variable must be str instance.')
-        if regexp == '':
-            return True
-        regexp = self.parse_regexp(regexp)
-        try:
-            return self.regexp_recursion(regexp, self.tokens, 0, 0, 0, 0)
-        except RecursionError:
-            return False
-
     def __getitem__(self, key):
         _class = self.__class__
         if isinstance(key, int):
@@ -37,18 +26,34 @@ class TokensGroup:
     def __len__(self):
         return len(self.tokens)
 
-    def regexp_recursion(self, regexp, tokens, tokens_index, regexp_index, base_tokens_index, base_regexp_index):
-        if len(regexp) - 1 == regexp_index:
+    def check_regexp(self, regexp):
+        if not isinstance(regexp, str):
+            raise ValueError('The regexp variable must be str instance.')
+        if regexp == '':
+            return True
+        regexp = self.parse_regexp(regexp)
+        try:
+            return self.regexp_loop(regexp, self.tokens, 0, 0)
+        except RecursionError:
+            return False
+
+    def regexp_loop(self, regexp, tokens, tokens_index, regexp_index):
+        if regexp_index >= len(regexp):
+            return
+        while tokens_index < len(tokens):
             unit = regexp[regexp_index]
             token = tokens[tokens_index]
-            if unit.letter == token.index:
-                if unit.value is not None:
-                    return token.equal(unit.value)
-                return True
-            return False
-        else:
-            pass
-
+            if unit.letter == token.regexp_letter:
+                tokens_index += 1
+                regexp_index += 1
+            else:
+                if unit.letter == '*':
+                    tokens_index += 1
+                    return self.regexp_loop(regexp, tokens, tokens_index, regexp_index)
+                else:
+                    return False
+            tokens_index += 1
+        return True
 
     def parse_regexp(self, regexp):
         result = []

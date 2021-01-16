@@ -1,4 +1,7 @@
 from polog.handlers.file.rotation.rules.rules.tokenization.tokens import SizeToken, NumberToken, DotToken
+from polog.handlers.file.rotation.rules.rules.tokenization.tokens.tokens_group import TokensGroup
+
+
 class Tokenizator:
     def __init__(self, source, tokens_classes=[SizeToken, NumberToken, DotToken]):
         self.source = source
@@ -9,17 +12,13 @@ class Tokenizator:
         pre_tokens = self.split_text(self.source)
         tokens = []
         for source_token in pre_tokens:
-            is_defined = False
             for cls in self.tokens_classes:
                 try:
                     token = cls(source_token)
-                    is_defined = True
+                    tokens.append(token)
                 except:
                     pass
-            if not is_defined:
-                raise ValueError(f'The "{source_token}" token is not recognized.')
-            tokens.append(token)
-        return tokens
+        return TokensGroup(tokens)
 
     def split_text(self, source):
         return source.split()

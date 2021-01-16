@@ -29,7 +29,7 @@ class file_writer(BaseHandler):
 
     def maybe_rotation(self):
         pass
-        #self.rotator.maybe_rotation()
+        self.rotator.maybe_rotation()
 
     def get_formatter(self, maybe_formatter):
         if callable(maybe_formatter):

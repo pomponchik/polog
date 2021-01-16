@@ -2,10 +2,19 @@ from polog.handlers.file.rotation.rules.rules_elector import RulesElector
 
 
 class Parser:
-    def extract_rules(self, rules, elector=RulesElector):
+    def __init__(self, elector=RulesElector):
         self.elector = elector()
-        splitted_rules = self.split_source(rules)
 
+    def extract_rules(self, rules):
+        result = []
+        splitted_rules = self.split_source(rules)
+        for source in splitted_rules:
+            try:
+                rule = self.elector.choose(source)
+                result.append(rule)
+            except:
+                pass
+        return result
 
     def split_source(self, source):
         result = [x.strip() for x in source.split(',')]

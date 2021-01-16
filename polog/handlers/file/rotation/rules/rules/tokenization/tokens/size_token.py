@@ -35,6 +35,6 @@ class SizeToken(AbstractToken):
     @classmethod
     def get_all_keys(cls):
         result = [x for x in cls.short_sizes.keys()]
-        result.extend([x for x in cls.short_sizes.full_sizes()])
-        result.extend([f'{x}s' for x in cls.short_sizes.full_sizes()])
+        result.extend([x for x in cls.full_sizes.keys()])
+        result.extend([f'{x}s' for x in cls.full_sizes.keys()])
         return result
