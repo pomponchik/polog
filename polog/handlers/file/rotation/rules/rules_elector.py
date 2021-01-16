@@ -10,9 +10,9 @@ class RulesElector:
             print(rule)
             print(source)
             try:
-                if rule.prove_source(source):
+                if rule(source).prove_source():
                     print('yes!')
                     return rule(source)
             except Exception as e:
-                print(e)
+                raise e
         raise ValueError(f'The rule "{source}" is formatted incorrectly. Read the documentstion.')

@@ -5,13 +5,11 @@ from polog.handlers.file.rotation.rules.rules.tokenization.tokens.size_token imp
 
 
 class FileSizeRule(AbstractRule):
-    @classmethod
-    def prove_source(cls, source):
-        keys = SizeToken.get_all_keys()
-        for key in keys:
-            if key in keys:
-                return True
-        return False
+    def prove_source(self):
+        print(self)
+        result = self.tokens.check_regexp('sm')
+        print('result = ', result)
+        return result
 
     def check(self):
         file_wrapper = self.handler.file

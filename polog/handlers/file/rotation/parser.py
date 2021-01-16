@@ -12,8 +12,8 @@ class Parser:
             try:
                 rule = self.elector.choose(source)
                 result.append(rule)
-            except:
-                pass
+            except Exception as e:
+                raise e
         return result
 
     def split_source(self, source):

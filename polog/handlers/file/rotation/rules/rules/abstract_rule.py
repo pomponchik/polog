@@ -14,7 +14,7 @@ class AbstractRule:
         return result
 
     def get_tokens(self, source):
-        tokens = Tokenizator(source).tokens
+        tokens = Tokenizator(source).generate_tokens()
         return tokens
 
     def extract_data_from_string(self, source):

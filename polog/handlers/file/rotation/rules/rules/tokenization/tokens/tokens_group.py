@@ -96,7 +96,7 @@ class TokensGroup:
             else:
                 base_letter = letter
                 if next_letter != '[':
-                    result = regexp_unit(letter=letter, value=None)
+                    result = self.regexp_unit(letter=letter, value=None)
                 else:
                     result = None
             return result, bracket_flag, into_brackets, base_letter
