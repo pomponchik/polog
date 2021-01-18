@@ -2,8 +2,9 @@ from polog.handlers.file.rotation.rules.rules.tokenization.tokenizator import To
 
 
 class AbstractRule:
-    def __init__(self, source):
+    def __init__(self, source, handler):
         self.source = source
+        self.handler = handler
         self.tokens = self.get_tokens(source)
         self.extract_data_from_string()
 

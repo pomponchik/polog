@@ -1,5 +1,6 @@
 import os
 import shutil
+import pathlib
 
 
 class FileDependencyWrapper:
@@ -51,6 +52,16 @@ class FileDependencyWrapper:
         """
         self.file.write(log_string)
 
+    def close(self):
+        self.file.close()
+
+    def open(self, filename):
+        self.file = open(filename, 'a', encoding='utf-8')
+
+    def reopen(self):
+        self.close()
+        self.open(self.filename)
+
     def flush(self):
         """
         Сброс буфера в файл.
@@ -73,7 +84,15 @@ class FileDependencyWrapper:
         """
         if self.filename is None:
             raise ValueError('Copying is not possible, the name of the source file is unknown.')
-        shutil.move(self.filename, path_to_copy)
+        try:
+            shutil.move(self.filename, path_to_copy)
+        except FileNotFoundError:
+            self.make_dirs_for_path(path_to_copy)
+            shutil.move(self.filename, path_to_copy)
+
+    def make_dirs_for_path(self, path):
+        path = pathlib.Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
 
     def file_exist(self, filename):
         """

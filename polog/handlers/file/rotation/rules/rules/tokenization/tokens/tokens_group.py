@@ -19,9 +19,9 @@ class TokensGroup:
                 return _class([])
             elif key == '*':
                 return _class([x for x in self.tokens])
-            else:
+            elif len(key) == 1:
                 return _class([x for x in self.tokens if x.regexp_letter == key])
-        raise KeyError('The key can be a string or a number.')
+        raise KeyError('The key can be a string of lenth equal 1 or a number.')
 
     def __len__(self):
         return len(self.tokens)

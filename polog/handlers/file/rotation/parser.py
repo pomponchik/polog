@@ -2,8 +2,8 @@ from polog.handlers.file.rotation.rules.rules_elector import RulesElector
 
 
 class Parser:
-    def __init__(self, elector=RulesElector):
-        self.elector = elector()
+    def __init__(self, handler, elector=RulesElector):
+        self.elector = elector(handler)
 
     def extract_rules(self, rules):
         result = []
