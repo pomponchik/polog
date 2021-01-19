@@ -3,6 +3,9 @@ from polog.handlers.file.rotation.rules.rules.tokenization.tokens.size_token imp
 
 
 class FileSizeRule(AbstractRule):
+    """
+    Правило для ротации логов в зависимости от размера файла, куда они пишутся.
+    """
     def prove_source(self):
         result = self.tokens.check_regexp('ns')
         return result
