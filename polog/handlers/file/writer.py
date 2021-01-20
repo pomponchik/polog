@@ -52,23 +52,18 @@ class file_writer(BaseHandler):
         Проверяем, нужна ли ротация логов при данном вызове.
         Если да - ротируем.
         """
-        if self.rotator.maybe_rotation():
-            self.rotate()
-
-    def rotate(self):
-        self.file.move_file('logs/lolg.pi')
-        self.file.reopen()
+        try:
+            self.rotator.maybe_do()
+        except Exception as e:
+            print(e)
 
     def get_formatter(self, maybe_formatter):
         if callable(maybe_formatter):
             return maybe_formatter
         return self.base_formatter_wrapper
 
-    def get_rotator(self, rotator, rotation):
-        if isinstance(rotation, Rotator):
-            return rotation
-        return rotator(rotation, self)
+    def get_rotator(self, rotator, rotation_rules):
+        return rotator(rotation_rules, self.file)
 
     def base_formatter_wrapper(self, args, **kwargs):
-        result = self.base_formatter(args, **kwargs)
-        return result
+        return self.base_formatter(args, **kwargs)

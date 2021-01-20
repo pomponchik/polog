@@ -11,7 +11,7 @@ class FileSizeRule(AbstractRule):
         return result
 
     def check(self):
-        file_wrapper = self.handler.file
+        file_wrapper = self.file
         return file_wrapper.get_size() >= self.size_limit
 
     def extract_data_from_string(self):

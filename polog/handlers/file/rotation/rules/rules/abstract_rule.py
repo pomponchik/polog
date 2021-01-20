@@ -14,9 +14,9 @@ class AbstractRule:
 
     Для упрощения парсинга правил ротации из текста в Polog реализованы собственные движки для токенизации текста и обработки высокоуровневых регулярных выражений.
     """
-    def __init__(self, source, handler):
+    def __init__(self, source, file):
         self.source = source
-        self.handler = handler
+        self.file = file
         self.tokens = self.get_tokens(source)
         self.extract_data_from_string()
 
