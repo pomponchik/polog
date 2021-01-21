@@ -53,12 +53,23 @@ class FileDependencyWrapper:
         self.file.write(log_string)
 
     def close(self):
+        """
+        Закрываем файл.
+        """
         self.file.close()
 
     def open(self, filename):
+        """
+        Открываем файл.
+        Работает только в том случае, если исходно пользователь передал имя файла, а не файловый объект.
+        """
         self.file = open(filename, 'a', encoding='utf-8')
 
     def reopen(self):
+        """
+        Закрываем файл и открываем снова.
+        Работает только в том случае, если исходно пользователь передал имя файла, а не файловый объект.
+        """
         self.close()
         self.open(self.filename)
 
@@ -91,6 +102,10 @@ class FileDependencyWrapper:
             shutil.move(self.filename, path_to_copy)
 
     def make_dirs_for_path(self, path):
+        """
+        Для указанного пути данный метод создает все промежуточные директории, которые еще не были созданы.
+        Используется, к примеру, при ротации логов, когда директория для перекладывания туда файлов еще не создана.
+        """
         path = pathlib.Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
 

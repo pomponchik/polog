@@ -58,12 +58,24 @@ class file_writer(BaseHandler):
             print(e)
 
     def get_formatter(self, maybe_formatter):
+        """
+        Возвращаем форматтер - некую функцию или класс.
+        Его задача - преобразовывать "сырые" данные лога в строку для записи в файл.
+        Пользователь может передать сюда свой форматтер. Если он этого не сделал, берем стандартный метод форматирования.
+        """
         if callable(maybe_formatter):
             return maybe_formatter
         return self.base_formatter_wrapper
 
     def get_rotator(self, rotator, rotation_rules):
+        """
+        Возвращаем ротатор - объект класса, ответственного за ротацию.
+        У ротатора обязан присутствовать метод .maybe_do().
+        """
         return rotator(rotation_rules, self.file)
 
     def base_formatter_wrapper(self, args, **kwargs):
+        """
+        Метод, где вызывается базовый форматтер.
+        """
         return self.base_formatter(args, **kwargs)
