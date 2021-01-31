@@ -36,5 +36,5 @@ class memory_saver(ReadOnlySingleton, BaseHandler):
         Очистка старых записей.
         Семафор используется, чтобы случайно не очистить список старых логов в тот момент, когда в него идет запись из другого потока.
         """
-        with all_semaphore:
+        with self.all_semaphore:
             self.all = []
