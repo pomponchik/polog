@@ -18,5 +18,6 @@ def test_add_full_args():
     assert handler.last.kwargs == {'lol': 'kek'}
 
 def test_clean():
+    handler((None, None), **{'message': 'hello'})
     handler.clean()
     assert len(handler.all) == 0
