@@ -1,7 +1,8 @@
 from threading import Lock
+from polog.utils.read_only_singleton import ReadOnlySingleton
 
 
-class BaseSettings:
+class BaseSettings(ReadOnlySingleton):
     pool_size = 2
     original_exceptions = False
     level = 1
@@ -12,11 +13,6 @@ class BaseSettings:
     extra_fields = {}
 
     def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self.__class__, key, value)
-
-    def __new__(cls, **kwargs):
         with Lock():
-            if not hasattr(cls, 'instance'):
-                cls.instance = super().__new__(cls)
-            return cls.instance
+            for key, value in kwargs.items():
+                setattr(self.__class__, key, value)

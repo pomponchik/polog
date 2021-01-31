@@ -1,6 +1,7 @@
 import time
 import pytest
 from polog import config, flog, field
+from polog.handlers.memory.saver import memory_saver
 
 
 def ip_extractor(args, **kwargs):
@@ -9,9 +10,8 @@ def ip_extractor(args, **kwargs):
     return ip
 
 config.add_fields(ip=field(ip_extractor))
-lst = []
-add_item = lambda *args, **kwargs: lst.append({x: y for x, y in kwargs.items()})
-config.add_handlers(add_item)
+handler = memory_saver()
+config.add_handlers(handler)
 
 @flog
 def django_handler_example(request):
@@ -34,8 +34,7 @@ def test_django_example():
     request = Request()
     django_handler_example(request)
     time.sleep(0.0001)
-    assert lst[0]['ip'] == '123.456.789.010'
-    lst.pop()
+    assert handler.last.fields['ip'] == '123.456.789.010'
 
 def test_django_example_error():
     request = Request()
@@ -44,5 +43,4 @@ def test_django_example_error():
     except:
         pass
     time.sleep(0.0001)
-    assert lst[0]['ip'] == '123.456.789.010'
-    lst.pop()
+    assert handler.last.fields['ip'] == '123.456.789.010'

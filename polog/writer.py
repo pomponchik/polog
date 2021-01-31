@@ -2,9 +2,10 @@ from queue import Queue
 from threading import Thread, Lock
 from polog.worker import Worker
 from polog.base_settings import BaseSettings
+from polog.utils.read_only_singleton import ReadOnlySingleton
 
 
-class Writer:
+class Writer(ReadOnlySingleton):
     """
     Класс, в котором создаются потоки с логгерами и передаются в них задания.
     """
@@ -18,19 +19,14 @@ class Writer:
         assert self.pool_size > 0
         assert type(self.pool_size) is int
 
-        if not hasattr(self, 'workers'):
-            #очередь общая для всех потоков
-            self.queue = Queue()
-            self.workers = [Thread(target=Worker(self.queue, index + 1).run) for index in range(self.pool_size)]
-            for worker in self.workers:
-                worker.daemon = True
-                worker.start()
-
-    def __new__(cls, **kwargs):
         with Lock():
-            if not hasattr(cls, 'instance'):
-                cls.instance = super().__new__(cls)
-            return cls.instance
+            if not hasattr(self, 'workers'):
+                #очередь общая для всех потоков
+                self.queue = Queue()
+                self.workers = [Thread(target=Worker(self.queue, index + 1).run) for index in range(self.pool_size)]
+                for worker in self.workers:
+                    worker.daemon = True
+                    worker.start()
 
     def write(self, original_args, **kwargs):
         """

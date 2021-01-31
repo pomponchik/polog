@@ -17,7 +17,6 @@ class BaseHandler:
         self.filter = filter
         self.only_errors = only_errors
         self.alt = alt
-        raise NotImplementedError
 
     def __call__(self, args, **kwargs):
         """

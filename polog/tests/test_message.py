@@ -1,11 +1,11 @@
 import time
 import pytest
 from polog import flog, message, config
+from polog.handlers.memory.saver import memory_saver
 
 
-lst = []
-add_item = lambda *args, **kwargs: lst.append(([x for x in args], {x: y for x, y in kwargs.items()}))
-config.add_handlers(add_item)
+handler = memory_saver()
+config.add_handlers(handler)
 
 @flog(message='base text')
 def normal_function():
@@ -35,19 +35,19 @@ def test_basic():
     normal_function()
     # Дожидаемся, чтобы лог успел записаться.
     time.sleep(0.0001)
-    assert lst[-1][1]['message'] == 'new text'
+    assert handler.last.fields['message'] == 'new text'
 
 def test_basic_exception():
     """Проверяем работу с исключениями."""
     error_function()
     time.sleep(0.0001)
-    assert lst[-1][1]['exception_type'] == 'ValueError'
-    assert lst[-1][1]['exception_message'] == 'exception text'
+    assert handler.last.fields['exception_type'] == 'ValueError'
+    assert handler.last.fields['exception_message'] == 'exception text'
     error_function_2()
     time.sleep(0.0001)
-    assert lst[-1][1]['exception_type'] == 'ValueError'
-    assert lst[-1][1]['exception_message'] == 'exception text 2'
+    assert handler.last.fields['exception_type'] == 'ValueError'
+    assert handler.last.fields['exception_message'] == 'exception text 2'
     error_function_3()
     time.sleep(0.0001)
-    assert lst[-1][1]['exception_type'] == 'ValueError'
-    assert lst[-1][1]['exception_message'] == 'new message'
+    assert handler.last.fields['exception_type'] == 'ValueError'
+    assert handler.last.fields['exception_message'] == 'new message'
