@@ -10,11 +10,11 @@ from polog.utils.get_traceback import get_traceback, get_locals_from_traceback
 ALLOWED_TYPES = {
     'function': lambda x: type(x) is str or callable(x), # Функция, событие в которой логируется. Ожидается либо сам объект функции, либо строка с ее названием.
     'module': lambda x: type(x) is str, # Модуль, событие в котором логируется. Ожидается только название.
-    'message': lambda x: type(x) is str, # Сообщение, любая строка. В таком виде будет записана в БД.
-    'exception': lambda x: type(x) is str or isinstance(x, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, в БД автоматически будут заполнены колонки с названием исключения и его сообщением.
+    'message': lambda x: type(x) is str, # Сообщение лога, любая строка.
+    'exception': lambda x: type(x) is str or isinstance(x, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, поля с названием исключения и его сообщением будут заполнены автоматически.
     'vars': lambda x: type(x) is str, # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
     'success': lambda x: type(x) is bool, # Успех / провал операции, которая логируется.
-    'level': lambda x: type(x) is str or type(x) is int,
+    'level': lambda x: type(x) is str or type(x) is int, # Уровень важности лога.
 }
 
 CONVERT_VALUES = {
