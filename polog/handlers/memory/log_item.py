@@ -10,3 +10,9 @@ class LogItem:
         self.args = args[0]
         self.kwargs = args[1]
         self.fields = {**kwargs}
+
+    def __getitem__(self, key):
+        """
+        Возвращаем содержимое полей по ключу.
+        """
+        return self.fields[key]
