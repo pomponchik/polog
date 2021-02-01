@@ -1,7 +1,7 @@
 from queue import Queue
 from threading import Thread, Lock
-from polog.worker import Worker
-from polog.base_settings import BaseSettings
+from polog.core.worker import Worker
+from polog.core.base_settings import BaseSettings
 from polog.utils.read_only_singleton import ReadOnlySingleton
 
 

@@ -1,5 +1,5 @@
-from polog.base_settings import BaseSettings
-from polog.levels import Levels
+from polog.core.base_settings import BaseSettings
+from polog.core.levels import Levels
 
 
 class config:

@@ -1,4 +1,4 @@
-from polog.levels import Levels
+from polog.core.levels import Levels
 from polog.handlers.file.base_formatter_fields_extractors import BaseFormatterFieldsExtractors
 
 

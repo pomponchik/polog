@@ -1,4 +1,4 @@
-from polog.base_settings import BaseSettings
+from polog.core.base_settings import BaseSettings
 
 
 def extract_extra_fields(args, args_dict):

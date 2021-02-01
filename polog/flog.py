@@ -6,7 +6,7 @@ from polog.utils.reraise_exception import reraise_exception
 from polog.utils.log_exception_info import log_exception_info
 from polog.utils.log_normal_info import log_normal_info
 from polog.utils.get_base_args_dict import get_base_args_dict
-from polog.registering_functions import RegisteringFunctions
+from polog.core.registering_functions import RegisteringFunctions
 from polog.errors import IncorrectUseOfTheDecoratorError
 from polog.message import message as _message
 

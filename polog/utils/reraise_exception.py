@@ -1,4 +1,4 @@
-from polog.base_settings import BaseSettings
+from polog.core.base_settings import BaseSettings
 from polog.errors import LoggedError
 
 

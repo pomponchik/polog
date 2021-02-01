@@ -1,4 +1,4 @@
-from polog.registering_functions import RegisteringFunctions
+from polog.core.registering_functions import RegisteringFunctions
 
 
 def logging_is_forbidden(func):

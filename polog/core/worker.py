@@ -1,6 +1,6 @@
 import time
 import atexit
-from polog.base_settings import BaseSettings
+from polog.core.base_settings import BaseSettings
 
 
 class Worker:

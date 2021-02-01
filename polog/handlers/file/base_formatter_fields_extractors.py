@@ -1,7 +1,7 @@
 import inspect
 import importlib
 import ujson as json
-from polog.levels import Levels
+from polog.core.levels import Levels
 
 
 class BaseFormatterFieldsExtractors:

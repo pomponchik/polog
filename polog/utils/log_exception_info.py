@@ -1,6 +1,6 @@
-from polog.writer import Writer
+from polog.core.writer import Writer
+from polog.core.base_settings import BaseSettings
 from polog.errors import LoggedError
-from polog.base_settings import BaseSettings
 from polog.utils.get_traceback import get_traceback, get_locals_from_traceback
 from polog.utils.get_errors_level import get_errors_level
 from polog.utils.json_vars import json_vars
