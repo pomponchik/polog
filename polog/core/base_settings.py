@@ -3,6 +3,11 @@ from polog.utils.read_only_singleton import ReadOnlySingleton
 
 
 class BaseSettings(ReadOnlySingleton):
+    """
+    Здесь хранятся все базовые настройки Polog.
+    Данный класс не предназначен для доступа "снаружи". Его должны использовать только другие части Polog.
+    """
+
     pool_size = 2
     original_exceptions = False
     level = 1
