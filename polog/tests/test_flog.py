@@ -11,6 +11,11 @@ config.add_handlers(handler)
 def function():
     return True
 
+@flog(message='base text')
+@flog(message='base text')
+def function_2():
+    return True
+
 def test_empty():
     """
     Проверяем, что лог через flog записывается.
@@ -30,3 +35,12 @@ def test_message():
     log = handler.last
     message = log.fields['message']
     assert message == 'base text'
+
+def test_double():
+    """
+    Проверка, что при двойном декорировании запись генерится только одна.
+    """
+    handler.clean()
+    function_2()
+    time.sleep(0.0001)
+    assert len(handler.all) == 1
