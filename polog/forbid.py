@@ -11,5 +11,5 @@ def logging_is_forbidden(func):
         return func
     original_function = RegisteringFunctions().get_original(func)
     RegisteringFunctions().remove(func)
-    RegisteringFunctions().forbid(func)
+    RegisteringFunctions().forbid(original_function)
     return original_function

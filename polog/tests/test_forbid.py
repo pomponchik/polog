@@ -44,5 +44,4 @@ def test_multiple():
     handler.clean()
     function_3()
     time.sleep(0.0001)
-    print(handler.last.fields)
     assert len(handler.all) == 0
