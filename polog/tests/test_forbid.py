@@ -25,7 +25,7 @@ def function_2():
 @flog(message='base text', level=100)
 @flog(message='base text', level=100)
 def function_3():
-    pass
+    return True
 
 
 def test_before():
@@ -54,3 +54,9 @@ def test_multiple():
     function_3()
     time.sleep(0.0001)
     assert len(handler.all) == 0
+
+def test_working():
+    """
+    Проверяем, что декоратор не ломает поведение функции.
+    """
+    assert function_3() == True
