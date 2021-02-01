@@ -29,18 +29,27 @@ def function_3():
 
 
 def test_before():
+    """
+    Проверяем ситуацию, когда @logging_is_forbidden стоит до логирующего декоратора.
+    """
     handler.clean()
     function()
     time.sleep(0.0001)
     assert len(handler.all) == 0
 
 def test_after():
+    """
+    Когда @logging_is_forbidden после логирующего декоратора.
+    """
     handler.clean()
     function_2()
     time.sleep(0.0001)
     assert len(handler.all) == 0
 
 def test_multiple():
+    """
+    Когда логирующие декораторы по нескольку штук с обеих сторон от @logging_is_forbidden.
+    """
     handler.clean()
     function_3()
     time.sleep(0.0001)
