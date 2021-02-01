@@ -71,4 +71,5 @@ def log(*args, **kwargs):
             args_dict['function'] = kwargs['function'].__name__
             args_dict['module'] = kwargs['function'].__module__
     args_dict['auto'] = False
+    # TODO: переписать это говно нормально.
     Writer().write((None, None), **args_dict)
