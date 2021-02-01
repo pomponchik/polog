@@ -11,7 +11,7 @@ config.add_handlers(handler)
 def function():
     return True
 
-@flog(message='base text')
+@flog(message='base text 2')
 @flog(message='base text')
 def function_2():
     return True
@@ -44,3 +44,4 @@ def test_double():
     function_2()
     time.sleep(0.0001)
     assert len(handler.all) == 1
+    assert handler.last.fields['message'] == 'base text 2'
