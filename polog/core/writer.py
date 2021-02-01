@@ -21,7 +21,7 @@ class Writer(ReadOnlySingleton):
 
         with Lock():
             if not hasattr(self, 'workers'):
-                #очередь общая для всех потоков
+                # Очередь общая для всех потоков.
                 self.queue = Queue()
                 self.workers = [Thread(target=Worker(self.queue, index + 1).run) for index in range(self.pool_size)]
                 for worker in self.workers:
