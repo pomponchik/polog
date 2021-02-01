@@ -38,3 +38,4 @@ class memory_saver(ReadOnlySingleton, BaseHandler):
         """
         with self.all_semaphore:
             self.all = []
+            self.last = None

@@ -34,6 +34,7 @@ def test_clean():
     handler((None, None), **{'message': 'hello'})
     handler.clean()
     assert len(handler.all) == 0
+    assert handler.last is None
 
 def test_add_to_all():
     """
