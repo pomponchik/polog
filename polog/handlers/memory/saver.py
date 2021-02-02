@@ -1,7 +1,7 @@
 from threading import Lock, BoundedSemaphore
 from polog.handlers.abstract.base import BaseHandler
 from polog.handlers.memory.log_item import LogItem
-from polog.utils.read_only_singleton import ReadOnlySingleton
+from polog.core.utils.read_only_singleton import ReadOnlySingleton
 
 
 class memory_saver(ReadOnlySingleton, BaseHandler):

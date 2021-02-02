@@ -1,6 +1,6 @@
 import inspect
 from polog.flog import flog
-from polog.utils.get_methods import get_methods
+from polog.core.utils.get_methods import get_methods
 
 
 def clog(*methods, message=None, level=1, errors_level=None):

@@ -1,11 +1,11 @@
 from polog.core.writer import Writer
 from polog.core.base_settings import BaseSettings
 from polog.errors import LoggedError
-from polog.utils.get_traceback import get_traceback, get_locals_from_traceback
-from polog.utils.get_errors_level import get_errors_level
+from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
+from polog.core.utils.get_errors_level import get_errors_level
 from polog.utils.json_vars import json_vars
-from polog.utils.exception_to_dict import exception_to_dict
-from polog.utils.extract_extra_fields import extract_extra_fields
+from polog.core.utils.exception_to_dict import exception_to_dict
+from polog.core.utils.extract_extra_fields import extract_extra_fields
 from polog.message import message
 
 

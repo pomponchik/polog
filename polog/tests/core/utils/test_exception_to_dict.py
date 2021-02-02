@@ -1,5 +1,5 @@
 import pytest
-from polog.utils.exception_to_dict import exception_to_dict
+from polog.core.utils.exception_to_dict import exception_to_dict
 
 
 def test_exception_to_dict():

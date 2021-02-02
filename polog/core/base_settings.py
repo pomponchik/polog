@@ -1,5 +1,5 @@
 from threading import Lock
-from polog.utils.read_only_singleton import ReadOnlySingleton
+from polog.core.utils.read_only_singleton import ReadOnlySingleton
 
 
 class BaseSettings(ReadOnlySingleton):

@@ -2,7 +2,7 @@ from polog.core.writer import Writer
 from polog.core.base_settings import BaseSettings
 from polog.core.levels import Levels
 from polog.utils.json_vars import json_vars, json_one_variable
-from polog.utils.extract_extra_fields import extract_extra_fields
+from polog.core.utils.extract_extra_fields import extract_extra_fields
 from polog.message import message
 
 

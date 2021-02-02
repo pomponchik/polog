@@ -1,4 +1,4 @@
-from polog.utils.get_arg import get_arg
+from polog.core.utils.get_arg import get_arg
 
 
 def get_base_args_dict(func, message):

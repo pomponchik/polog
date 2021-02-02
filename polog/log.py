@@ -2,9 +2,9 @@ import datetime
 from polog.core.writer import Writer
 from polog.core.levels import Levels
 from polog.core.base_settings import BaseSettings
-from polog.utils.not_none_to_dict import not_none_to_dict
-from polog.utils.exception_to_dict import exception_to_dict
-from polog.utils.get_traceback import get_traceback, get_locals_from_traceback
+from polog.core.utils.not_none_to_dict import not_none_to_dict
+from polog.core.utils.exception_to_dict import exception_to_dict
+from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
 
 
 ALLOWED_TYPES = {
