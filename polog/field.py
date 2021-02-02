@@ -22,6 +22,14 @@ class field:
         self.extractor = self.get_extractor(extractor)
         self.converter = self.get_converter(converter)
 
+    def get_data(self, args, **kwargs):
+        """
+        Берем сырые данные, извлекаем из них некое значение с помощью экстрактора и скармливаем его конвертеру, результат возвращаем.
+        """
+        item = self.extract(args, **kwargs)
+        converted_item = self.convert(item)
+        return converted_item
+
     def extract(self, args, **kwargs):
         """
         Принимаем на вход стандартные аргументы обработчика и возвращаем некий объект.
