@@ -49,7 +49,7 @@ def test_function():
     handler.clean()
     log('lol', function=function)
     time.sleep(0.0001)
-    assert handler.last.fields['function'] == function.__name__
+    assert handler.last['function'] == function.__name__
     assert handler.last.fields['module'] == function.__module__
 
 def test_raise():
