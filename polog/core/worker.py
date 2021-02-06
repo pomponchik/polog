@@ -7,12 +7,13 @@ class Worker:
     """
     Экземпляр класса соответствует одному потоку. Здесь происходит непосредственно выполнение функций-обработчиков.
     """
-    def __init__(self, queue, index):
+    def __init__(self, queue, index, settings=BaseSettings()):
         self.index = index
         self.queue = queue
         # Метка full нужна, чтобы не завершить поток раньше времени, когда он уже взял таску из очереди, но еще не успел ее обработать.
         # По умолчанию метка в фиктивном положительном положении, чтобы исключить ситуацию с преждевременным прекращением потока при очень быстром завершении программы. Если метка по умолчанию будет отрицательной, функция ожидания завершения не будет дожидаться окончания записи и прервет поток на самом интересном месте.
         self.full = True
+        self.settings = settings
         self.await_empty_queue()
 
     def run(self):
@@ -36,10 +37,10 @@ class Worker:
         """
         Выполняем кастомные обработчики для записи логов. Если один из них поднимет исключение, гасим его и продолжаем выполнять оставшиеся обработчики.
         """
-        settings = BaseSettings()
-        for handler in settings.handlers:
+
+        for handler in self.settings.handlers:
             try:
-                handler(args, **kwargs, service_name=settings.service_name)
+                handler(args, **kwargs, service_name=self.settings.service_name)
             except Exception as e:
                 pass
 
@@ -54,7 +55,7 @@ class Worker:
             while True:
                 maybe_finish = time.time()
                 time_delta = maybe_finish - start_awaiting_time
-                if time_delta > BaseSettings().delay_before_exit:
+                if time_delta > self.settings.delay_before_exit:
                     break
                 if (not self.full) and self.queue.empty():
                     break

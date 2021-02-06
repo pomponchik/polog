@@ -30,7 +30,6 @@ def error_function_2():
 def error_function_3():
     message(exception_type='ValueError', exception_message='new message')
 
-
 def test_basic():
     """Проверяем, что дефолтное сообщение подменяется новым."""
     normal_function()
