@@ -227,9 +227,7 @@ class BaseFormatterFieldsExtractors:
             args = json.loads(variables)
         except:
             return f'local variables: {variables}'
-        print(args)
         result = ', '.join([f'{x} = {cls.json_variable_to_human_readable_text(y)}' for x, y in args.items()])
-        print(result)
         result = f'local variables: {result}'
         return result
 
