@@ -2,6 +2,7 @@ import inspect
 import importlib
 import ujson as json
 from polog.core.levels import Levels
+from polog.core.base_settings import BaseSettings
 
 
 class BaseFormatterFieldsExtractors:
@@ -20,7 +21,10 @@ class BaseFormatterFieldsExtractors:
         """
         Выводим дату и время в квадратных скобках.
         """
-        return f'[{kwargs.get("time")}]'
+        time = kwargs.get("time")
+        if time is None:
+            return None
+        return f'[{time}]'
 
     @staticmethod
     def level(**kwargs):
@@ -49,7 +53,7 @@ class BaseFormatterFieldsExtractors:
         Выводим метку успешности операции.
 
         Существуют 3 опции успешности: 'SUCCESS', 'ERROR' и 'UNKNOWN'.
-        Последний вариант присваивается в том случае, если информации об успешности операци нет.
+        Последний вариант присваивается в том случае, если информации об успешности операции нет.
         Как правило, такое случается при ручном логировании.
         """
         success = kwargs.get('success')
@@ -85,10 +89,13 @@ class BaseFormatterFieldsExtractors:
         """
         function = kwargs.get('function')
         module = kwargs.get('module')
-        service = kwargs.get('service_name')
+        service = BaseSettings.service_name
         if (function is not None) and (module is not None):
             function = cls.search_function_name(function, module)
             result = f'where: {service}.{module}.{function}()'
+            return result
+        elif function is not None:
+            result = f'where: {service}.{function}()'
             return result
         return f'where: {service}.?'
 
@@ -104,7 +111,10 @@ class BaseFormatterFieldsExtractors:
         key = (function_name, module_name)
         if key in cls.FULL_FUNCTIONS_NAMES:
             return cls.FULL_FUNCTIONS_NAMES[key]
-        module = importlib.import_module(module_name)
+        try:
+            module = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            return function_name
         if hasattr(module, function_name):
             maybe_function = getattr(module, function_name)
             if callable(maybe_function):
@@ -213,8 +223,13 @@ class BaseFormatterFieldsExtractors:
         variables = kwargs.get('local_variables')
         if variables is None:
             return None
-        args = json.loads(variables)
+        try:
+            args = json.loads(variables)
+        except:
+            return f'local variables: {variables}'
+        print(args)
         result = ', '.join([f'{x} = {cls.json_variable_to_human_readable_text(y)}' for x, y in args.items()])
+        print(result)
         result = f'local variables: {result}'
         return result
 

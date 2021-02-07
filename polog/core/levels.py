@@ -37,6 +37,8 @@ class Levels:
         В случае, если один уровень фигурировал под двумя разными названиями, вернется последнее название.
         Если название уровня не зарегистрировано, вернется преобразованное в строку числовое значение уровня.
         """
+        if level_number is None:
+            return None
         result = cls.levels_reverse.get(level_number, None)
         if result is None:
             result = str(level_number)
