@@ -27,9 +27,9 @@ class memory_saver(ReadOnlySingleton, BaseHandler):
         """
         with Lock():
             log = LogItem(args, **kwargs)
-            self.last = log
             with self.all_semaphore:
                 self.all.append(log)
+                self.last = log
 
     def clean(self):
         """
