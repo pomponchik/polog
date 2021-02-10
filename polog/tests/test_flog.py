@@ -1,4 +1,5 @@
 import time
+import asyncio
 import pytest
 from polog import flog, config
 from polog.handlers.memory.saver import memory_saver
@@ -16,20 +17,39 @@ def function():
 def function_2():
     return True
 
+@flog(message='base text')
+async def function_3():
+    return True
+
 def test_empty():
     """
     Проверяем, что лог через flog записывается.
     """
+    handler.clean()
     function()
     time.sleep(0.0001)
     log = handler.last
+    assert log is not None
     assert log.fields['module'] == test_empty.__module__
     assert log.fields['function'] == function.__name__
+
+def test_empty_async():
+    """
+    Проверяем, что лог через flog записывается (для корутин).
+    """
+    handler.clean()
+    asyncio.run(function_3())
+    time.sleep(0.0001)
+    log = handler.last
+    assert log is not None
+    assert log.fields['module'] == test_empty.__module__
+    assert log.fields['function'] == function_3.__name__
 
 def test_message():
     """
     Проверяем, что сообщение по умолчанию записывается.
     """
+    handler.clean()
     function()
     time.sleep(0.0001)
     log = handler.last
