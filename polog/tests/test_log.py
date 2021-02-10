@@ -28,8 +28,8 @@ def test_exception():
         log('lol', exception=e)
     time.sleep(0.0001)
     assert handler.last is not None
-    assert handler.last.fields['exception_type'] == 'ValueError'
-    assert handler.last.fields['exception_message'] == 'kek'
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
 
 def test_level():
     """
@@ -38,7 +38,7 @@ def test_level():
     handler.clean()
     log('lol', level=100)
     time.sleep(0.0001)
-    assert handler.last.fields['level'] == 100
+    assert handler.last['level'] == 100
 
 def test_function():
     """
@@ -50,7 +50,7 @@ def test_function():
     log('lol', function=function)
     time.sleep(0.0001)
     assert handler.last['function'] == function.__name__
-    assert handler.last.fields['module'] == function.__module__
+    assert handler.last['module'] == function.__module__
 
 def test_raise():
     """

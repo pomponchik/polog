@@ -35,19 +35,19 @@ def test_basic():
     normal_function()
     # Дожидаемся, чтобы лог успел записаться.
     time.sleep(0.0001)
-    assert handler.last.fields['message'] == 'new text'
+    assert handler.last['message'] == 'new text'
 
 def test_basic_exception():
     """Проверяем работу с исключениями."""
     error_function()
     time.sleep(0.0001)
-    assert handler.last.fields['exception_type'] == 'ValueError'
-    assert handler.last.fields['exception_message'] == 'exception text'
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'exception text'
     error_function_2()
     time.sleep(0.0001)
-    assert handler.last.fields['exception_type'] == 'ValueError'
-    assert handler.last.fields['exception_message'] == 'exception text 2'
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'exception text 2'
     error_function_3()
     time.sleep(0.0001)
-    assert handler.last.fields['exception_type'] == 'ValueError'
-    assert handler.last.fields['exception_message'] == 'new message'
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'new message'

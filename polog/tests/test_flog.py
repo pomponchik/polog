@@ -30,8 +30,8 @@ def test_empty():
     time.sleep(0.0001)
     log = handler.last
     assert log is not None
-    assert log.fields['module'] == test_empty.__module__
-    assert log.fields['function'] == function.__name__
+    assert log['module'] == test_empty.__module__
+    assert log['function'] == function.__name__
 
 def test_empty_async():
     """
@@ -42,8 +42,8 @@ def test_empty_async():
     time.sleep(0.0001)
     log = handler.last
     assert log is not None
-    assert log.fields['module'] == test_empty.__module__
-    assert log.fields['function'] == function_3.__name__
+    assert log['module'] == test_empty.__module__
+    assert log['function'] == function_3.__name__
 
 def test_message():
     """
@@ -52,8 +52,7 @@ def test_message():
     handler.clean()
     function()
     time.sleep(0.0001)
-    log = handler.last
-    message = log.fields['message']
+    message = handler.last['message']
     assert message == 'base text'
 
 def test_double():
@@ -64,7 +63,7 @@ def test_double():
     function_2()
     time.sleep(0.0001)
     assert len(handler.all) == 1
-    assert handler.last.fields['message'] == 'base text 2'
+    assert handler.last['message'] == 'base text 2'
 
 def test_working():
     """

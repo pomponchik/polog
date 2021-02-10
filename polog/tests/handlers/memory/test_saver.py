@@ -43,3 +43,13 @@ def test_add_to_all():
     handler.clean()
     handler((None, None), **{'message': 'hello'})
     assert len(handler.all) > 0
+
+def test_getargs():
+    """
+    Проверка, что можно получить доступ к полям лога без обращения напрямую к словарю.
+    """
+    handler.clean()
+    handler((None, None), **{'message': 'hello'})
+    assert handler.last is not None
+    assert handler.last.fields['message'] is not None
+    assert handler.last.fields['message'] == handler.last['message']

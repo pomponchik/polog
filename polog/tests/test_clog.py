@@ -35,7 +35,7 @@ def test_important_method():
     ExampleOne().important_method()
     time.sleep(0.0001)
     assert handler.last is not None
-    assert handler.last.fields['message'] == 'base_message'
+    assert handler.last['message'] == 'base_message'
 
 def test_not_important_method():
     """
@@ -60,7 +60,7 @@ def test_none_names():
     ExampleTwo().one_method()
     time.sleep(0.0001)
     assert handler.last is not None
-    assert handler.last.fields['message'] == 'base_message_2'
+    assert handler.last['message'] == 'base_message_2'
 
 def test_flog():
     """
@@ -70,4 +70,4 @@ def test_flog():
     ExampleTwo().two_method()
     time.sleep(0.0001)
     assert len(handler.all) == 1
-    assert handler.last.fields['level'] == 100
+    assert handler.last['level'] == 100

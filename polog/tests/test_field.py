@@ -34,7 +34,7 @@ def test_django_example():
     request = Request()
     django_handler_example(request)
     time.sleep(0.0001)
-    assert handler.last.fields['ip'] == '123.456.789.010'
+    assert handler.last['ip'] == '123.456.789.010'
 
 def test_django_example_error():
     request = Request()
@@ -43,4 +43,4 @@ def test_django_example_error():
     except:
         pass
     time.sleep(0.0001)
-    assert handler.last.fields['ip'] == '123.456.789.010'
+    assert handler.last['ip'] == '123.456.789.010'
