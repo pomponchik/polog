@@ -1,6 +1,7 @@
 import time
+import json
 import pytest
-from polog import log, config
+from polog import log, config, json_vars
 from polog.handlers.memory.saver import memory_saver
 
 
@@ -62,3 +63,38 @@ def test_raise():
         assert False
     except ValueError:
         pass
+
+non_local = []
+
+def test_vars_to_local_variables():
+    """
+    Проверяем, что переданные вручную локальные переменные попадают в лог.
+    """
+    handler.clean()
+    a = 1
+    b = 2
+    c = "3"
+    log('lol', vars=json_vars(**locals()))
+    time.sleep(0.0001)
+    non_local.append(handler.last['local_variables'])
+    non_local.append(json_vars(**locals()))
+    assert non_local[0] == non_local[1]
+
+def test_vars_from_exception():
+    """
+    Проверяем, что при исключении автоматически извлекаются те же данные о локальных переменных, что можно извлечь вручную.
+    """
+    handler.clean()
+    a = 1
+    b = 2
+    c = "3"
+    try:
+        d = 3 / 0
+    except ZeroDivisionError as e:
+        k = e
+        log('kek', exception=e)
+    e = k
+    time.sleep(0.0001)
+    log('kek', vars=json_vars(**locals()))
+    time.sleep(0.0001)
+    assert json.loads(handler.all[0]['local_variables']) == json.loads(handler.all[1]['local_variables'])['kwargs']

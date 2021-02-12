@@ -16,3 +16,13 @@ class LogItem:
         Возвращаем содержимое полей по ключу.
         """
         return self.fields[key]
+
+    def __str__(self):
+        content = []
+        for x, y in self.fields.items():
+            if type(y) is str:
+                y = f'"{y}"'
+            item = f'{x} = {y}'
+            content.append(item)
+        content = ', '.join(content)
+        return f'<log item with content: {content}>'
