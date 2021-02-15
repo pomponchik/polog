@@ -18,6 +18,9 @@ class LogItem:
         return self.fields[key]
 
     def __str__(self):
+        """
+        Выводятся все активные поля лога.
+        """
         content = []
         for x, y in self.fields.items():
             if type(y) is str:
