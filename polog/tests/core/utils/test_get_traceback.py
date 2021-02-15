@@ -2,12 +2,9 @@ import time
 import json
 import pytest
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
-from polog.handlers.memory.saver import memory_saver
 from polog import json_vars, config
 
 
-handler = memory_saver()
-config.add_handlers(handler)
 non_local = []
 
 def test_locals_full():
