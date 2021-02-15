@@ -14,7 +14,6 @@ class ReadOnlySingleton:
         with Lock():
             def __new__(cls, **kwargs):
                 return cls.instance
-            if not hasattr(cls, 'instance'):
-                cls.instance = super().__new__(cls)
+            cls.instance = super().__new__(cls)
             cls.__new__ = __new__
             return cls.instance
