@@ -97,4 +97,4 @@ def test_vars_from_exception():
     time.sleep(0.0001)
     log('kek', vars=json_vars(**locals()))
     time.sleep(0.0001)
-    assert json.loads(handler.all[0]['local_variables']) == json.loads(handler.all[1]['local_variables'])['kwargs']
+    assert json.loads(handler.all[0]['local_variables']) == json.loads(handler.all[1]['local_variables'])

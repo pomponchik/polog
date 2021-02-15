@@ -2,6 +2,7 @@ import sys
 import traceback
 import ujson as json
 from polog.utils.json_vars import get_item
+from polog.utils.json_vars import json_vars
 
 
 def get_traceback():
@@ -20,10 +21,10 @@ def get_locals_from_traceback():
     trace = sys.exc_info()[2]
     try:
         try:
-            local_variables = {key: get_item(value) for key, value in trace.tb_next.tb_frame.f_locals.items()}
+            local_variables = trace.tb_next.tb_frame.f_locals
         except:
-            local_variables = {key: get_item(value) for key, value in trace.tb_frame.f_locals.items()}
-        local_variables_json = json.dumps(local_variables)
+            local_variables = trace.tb_frame.f_locals
+        local_variables_json = json_vars(**local_variables)
         return local_variables_json
     except Exception as e:
         return ''
