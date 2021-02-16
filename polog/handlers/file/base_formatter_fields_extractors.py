@@ -186,6 +186,8 @@ class BaseFormatterFieldsExtractors:
         """
         if json_text is None:
             return None
+        if not json_text:
+            return None
         json_dict = json.loads(json_text)
         args = json_dict.get('args')
         kwargs = json_dict.get('kwargs')
@@ -224,12 +226,13 @@ class BaseFormatterFieldsExtractors:
         if variables is None:
             return None
         try:
-            args = json.loads(variables)
+            result = cls.json_variables_to_text(variables)
+            if result is None:
+                return result
+            result = f'local variables: {result}'
+            return result
         except:
             return f'local variables: {variables}'
-        result = ', '.join([f'{x} = {cls.json_variable_to_human_readable_text(y)}' for x, y in args.items()])
-        result = f'local variables: {result}'
-        return result
 
     @staticmethod
     def time_of_work(**kwargs):

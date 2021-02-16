@@ -50,15 +50,16 @@ def test_full_input_variables():
 
 def test_empty_input_variables():
     assert Extractors.input_variables(**{}) is None
+    assert Extractors.input_variables(**{'input_variables': ''}) is None
 
-"""def test_full_local_variables():
+def test_full_local_variables():
     normal_vars = json_vars(lol='kek', kek='lol')
     not_normal_vars = json_vars(1, 2, 3, lol='kek', kek='lol')
     error_vars = 'lol'
-    normal_vars = json_vars(locals())
-    import json
-    print(Extractors.local_variables(**{'local_variables': normal_vars}))
-    assert Extractors.local_variables(**{'local_variables': normal_vars}) == 'local_variables: lol = "kek" (str), kek = "lol" (str)'
-"""
+    assert Extractors.local_variables(**{'local_variables': normal_vars}) == 'local variables: lol = "kek" (str), kek = "lol" (str)'
+    assert Extractors.local_variables(**{'local_variables': not_normal_vars}) == 'local variables: 1 (int), 2 (int), 3 (int), lol = "kek" (str), kek = "lol" (str)'
+    assert Extractors.local_variables(**{'local_variables': error_vars}) == 'local variables: lol'
+
 def test_empty_local_variables():
     assert Extractors.local_variables(**{}) is None
+    assert Extractors.local_variables(**{'local_variables': ''}) is None
