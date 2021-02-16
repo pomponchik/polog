@@ -265,6 +265,8 @@ class BaseFormatterFieldsExtractors:
         """
         traceback = kwargs.get('traceback')
         if traceback is not None:
+            if not traceback:
+                return 'no traceback'
             traceback = json.loads(traceback)
             if not traceback:
                 return 'no traceback'

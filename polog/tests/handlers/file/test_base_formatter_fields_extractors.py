@@ -1,6 +1,8 @@
+import json
 import datetime
 import pytest
 from polog.handlers.file.base_formatter_fields_extractors import BaseFormatterFieldsExtractors as Extractors
+from polog.core.utils.get_traceback import get_traceback
 from polog import config, json_vars
 from polog.core.base_settings import BaseSettings
 
@@ -128,3 +130,36 @@ def test_time_of_work_empty():
     Проверка, что при отсутствии поля time_of_work возвращается None.
     """
     assert Extractors.time_of_work(**{}) is None
+
+def test_exception_full():
+    """
+    Поля exception_type и exception_message объединяются. Проверяем форматирование.
+    """
+    assert Extractors.exception(**{'exception_type': 'ValueError', 'exception_message': 'lol'}) == 'exception: ValueError("lol")'
+
+def test_exception_empty():
+    """
+    Проверка, что корректно возвращается None при незаполненных полях об исключении.
+    """
+    assert Extractors.exception(**{}) is None
+
+def test_traceback_empty():
+    """
+    Проверка, что при отсутствии поля traceback возвращается None.
+    """
+    assert Extractors.traceback(**{}) is None
+
+def test_traceback_full():
+    """
+    Проверка базовых условий форматирования трейсбэка.
+    """
+    assert Extractors.traceback(**{'traceback': ''}) == 'no traceback'
+    try:
+        raise ValueError('lol')
+    except:
+        trace = get_traceback()
+        handled_trace = Extractors.traceback(**{'traceback': trace})
+        assert handled_trace.startswith('traceback: ')
+        assert len(handled_trace) > len('traceback: ')
+        assert "raise ValueError('lol')" in handled_trace
+        assert "in test_traceback_full" in handled_trace
