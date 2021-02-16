@@ -63,3 +63,13 @@ def test_full_local_variables():
 def test_empty_local_variables():
     assert Extractors.local_variables(**{}) is None
     assert Extractors.local_variables(**{'local_variables': ''}) is None
+
+def test_time_of_work_full():
+    assert Extractors.time_of_work(**{'time_of_work': 1.0}) == 'time of work: 1 sec.'
+    assert Extractors.time_of_work(**{'time_of_work': 1.534}) == 'time of work: 1.534 sec.'
+    assert Extractors.time_of_work(**{'time_of_work': 1.5}) == 'time of work: 1.5 sec.'
+    # Проверяем ограничение в 8 знаков после запятой.
+    assert Extractors.time_of_work(**{'time_of_work': 1.5345653557557657657}) == 'time of work: 1.53456536 sec.'
+
+def test_time_of_work_empty():
+    assert Extractors.time_of_work(**{}) is None

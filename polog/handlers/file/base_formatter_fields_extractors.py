@@ -238,8 +238,14 @@ class BaseFormatterFieldsExtractors:
     def time_of_work(**kwargs):
         """
         Время работы функции в формате строки, где оно указывается вещественным числом секунд с точностью до 8 знаков после запятой.
+        Все ненужные ноли справа удаляются.
         """
-        result = f"time of work: {kwargs.get('time_of_work'):.8f} sec." if 'time_of_work' in kwargs else None
+        var = kwargs.get('time_of_work')
+        if var is None:
+            return None
+        number = f'{var:.8f}'
+        number = number.rstrip('0.')
+        result = f"time of work: {number} sec."
         return result
 
     @staticmethod
