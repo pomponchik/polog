@@ -17,6 +17,10 @@ def function_2():
 async def function_3():
     return True
 
+@flog
+def function_4():
+    return True
+
 def test_empty(handler):
     """
     Проверяем, что лог через flog записывается.
@@ -66,3 +70,9 @@ def test_working():
     Проверяем, что декоратор не ломает поведение функции.
     """
     assert function() == True
+
+def test_working_without_brackets():
+    """
+    Проверяем, декоратор можно вызывать без скобок и функция остается рабочей.
+    """
+    assert function_4() == True
