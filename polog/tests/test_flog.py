@@ -1,12 +1,8 @@
 import time
 import asyncio
 import pytest
-from polog import flog, config
-from polog.handlers.memory.saver import memory_saver
+from polog import flog
 
-
-handler = memory_saver()
-config.add_handlers(handler)
 
 @flog(message='base text')
 def function():
@@ -21,7 +17,7 @@ def function_2():
 async def function_3():
     return True
 
-def test_empty():
+def test_empty(handler):
     """
     Проверяем, что лог через flog записывается.
     """
@@ -33,7 +29,7 @@ def test_empty():
     assert log['module'] == test_empty.__module__
     assert log['function'] == function.__name__
 
-def test_empty_async():
+def test_empty_async(handler):
     """
     Проверяем, что лог через flog записывается (для корутин).
     """
@@ -45,7 +41,7 @@ def test_empty_async():
     assert log['module'] == test_empty.__module__
     assert log['function'] == function_3.__name__
 
-def test_message():
+def test_message(handler):
     """
     Проверяем, что сообщение по умолчанию записывается.
     """
@@ -55,7 +51,7 @@ def test_message():
     message = handler.last['message']
     assert message == 'base text'
 
-def test_double():
+def test_double(handler):
     """
     Проверка, что при двойном декорировании запись генерится только одна.
     """

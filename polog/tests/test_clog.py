@@ -1,11 +1,6 @@
 import time
 import pytest
-from polog import clog, flog, config
-from polog.handlers.memory.saver import memory_saver
-
-
-handler = memory_saver()
-config.add_handlers(handler)
+from polog import clog, flog
 
 
 @clog('important_method', message='base_message')
@@ -27,7 +22,7 @@ class ExampleTwo:
     def two_method(self):
         pass
 
-def test_important_method():
+def test_important_method(handler):
     """
     Проверка, что указанные в декораторе класса по именам методы логируются.
     """
@@ -37,7 +32,7 @@ def test_important_method():
     assert handler.last is not None
     assert handler.last['message'] == 'base_message'
 
-def test_not_important_method():
+def test_not_important_method(handler):
     """
     Проверка, что, если в декораторе класса были указаны нужные имена методов, то прочие методы логироваться не будут.
     """
@@ -52,7 +47,7 @@ def test_field():
     """
     assert ExampleOne.field == 'test'
 
-def test_none_names():
+def test_none_names(handler):
     """
     Проверка, что, если в декораторе класса не указаны имена методов, то логируются все.
     """
@@ -62,7 +57,7 @@ def test_none_names():
     assert handler.last is not None
     assert handler.last['message'] == 'base_message_2'
 
-def test_flog():
+def test_flog(handler):
     """
     Проверка, что при перекрестном логировании с flog все идет по плану.
     """

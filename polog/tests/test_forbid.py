@@ -1,11 +1,7 @@
 import time
 import pytest
-from polog import flog, logging_is_forbidden, config
-from polog.handlers.memory.saver import memory_saver
+from polog import flog, logging_is_forbidden
 
-
-handler = memory_saver()
-config.add_handlers(handler)
 
 @logging_is_forbidden
 @flog(message='base text', level=100)
@@ -28,7 +24,7 @@ def function_3():
     return True
 
 
-def test_before():
+def test_before(handler):
     """
     Проверяем ситуацию, когда @logging_is_forbidden стоит до логирующего декоратора.
     """
@@ -37,7 +33,7 @@ def test_before():
     time.sleep(0.0001)
     assert len(handler.all) == 0
 
-def test_after():
+def test_after(handler):
     """
     Когда @logging_is_forbidden после логирующего декоратора.
     """
@@ -46,7 +42,7 @@ def test_after():
     time.sleep(0.0001)
     assert len(handler.all) == 0
 
-def test_multiple():
+def test_multiple(handler):
     """
     Когда логирующие декораторы по нескольку штук с обеих сторон от @logging_is_forbidden.
     """

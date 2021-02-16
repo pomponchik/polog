@@ -1,15 +1,10 @@
 import time
 import json
 import pytest
-from polog import log, config, json_vars
-from polog.handlers.memory.saver import memory_saver
+from polog import log, json_vars
 
 
-handler = memory_saver()
-config.add_handlers(handler)
-
-
-def test_base():
+def test_base(handler):
     """
     Проверка, что в базовом случае лог записывается.
     """
@@ -18,7 +13,7 @@ def test_base():
     time.sleep(0.0001)
     assert handler.last is not None
 
-def test_exception():
+def test_exception(handler):
     """
     Проверка, что из исключения извлекается вся нужная инфа.
     """
@@ -32,7 +27,7 @@ def test_exception():
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
 
-def test_level():
+def test_level(handler):
     """
     Проверка, что указанный уровень лога срабатывает.
     """
@@ -41,7 +36,7 @@ def test_level():
     time.sleep(0.0001)
     assert handler.last['level'] == 100
 
-def test_function():
+def test_function(handler):
     """
     Проверка, что из поданной функции автоматически извлекается имя функции и имя модуля.
     """
@@ -53,7 +48,7 @@ def test_function():
     assert handler.last['function'] == function.__name__
     assert handler.last['module'] == function.__module__
 
-def test_raise():
+def test_raise(handler):
     """
     Проверка, что при неправильно поданном типе именованной переменной возникает исключение.
     """
@@ -66,7 +61,7 @@ def test_raise():
 
 non_local = []
 
-def test_vars_to_local_variables():
+def test_vars_to_local_variables(handler):
     """
     Проверяем, что переданные вручную локальные переменные попадают в лог.
     """
@@ -80,7 +75,7 @@ def test_vars_to_local_variables():
     non_local.append(json_vars(**locals()))
     assert non_local[0] == non_local[1]
 
-def test_vars_from_exception():
+def test_vars_from_exception(handler):
     """
     Проверяем, что при исключении автоматически извлекаются те же данные о локальных переменных, что можно извлечь вручную.
     """

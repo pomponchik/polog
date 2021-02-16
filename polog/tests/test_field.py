@@ -1,7 +1,6 @@
 import time
 import pytest
 from polog import config, flog, field
-from polog.handlers.memory.saver import memory_saver
 
 
 def ip_extractor(args, **kwargs):
@@ -10,8 +9,6 @@ def ip_extractor(args, **kwargs):
     return ip
 
 config.add_fields(ip=field(ip_extractor))
-handler = memory_saver()
-config.add_handlers(handler)
 
 @flog
 def django_handler_example(request):
@@ -26,7 +23,7 @@ def django_handler_error(request):
 class Request:
     META = {'REMOTE_ADDR': '123.456.789.010'}
 
-def test_django_example():
+def test_django_example(handler):
     """
     Проверяем, что пример кода из README.md работает.
     В данном случае мы проверяем, что извлекается ip-адрес из обработчика запросов Django.
@@ -36,7 +33,7 @@ def test_django_example():
     time.sleep(0.0001)
     assert handler.last['ip'] == '123.456.789.010'
 
-def test_django_example_error():
+def test_django_example_error(handler):
     request = Request()
     try:
         django_handler_error(request)
