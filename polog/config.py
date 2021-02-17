@@ -81,7 +81,7 @@ class config:
         Если ранее тот же обработчик уже был добавлен, он не дублируется.
         """
         settings = BaseSettings()
-        old_handlers_ids = [id(x) for x in settings.handlers]
+        old_handlers_ids = {id(x) for x in settings.handlers}
         for handler in args:
             if not callable(handler):
                 raise ValueError(f'Object od type "{handler.__class__.__name__}" can not be a handler.')
