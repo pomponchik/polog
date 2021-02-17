@@ -84,7 +84,7 @@ def test_only_errors_true_true(handler):
 
 def test_alt(handler):
     """
-    Проверяем, что настройка only_errors в положении True блокирует запись логов об успешных операциях.
+    Проверяем, что функция alt запускается, когда в обработчике что-то пошло не так.
     """
     handler.clean()
     def alt(args, **kwargs):
