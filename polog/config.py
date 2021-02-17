@@ -65,6 +65,8 @@ class config:
         for key, value in kwargs.items():
             if not isinstance(value, int):
                 raise TypeError(f'Variable "{key}" has not type int.')
+            if value < 0:
+                raise ValueError('The logging level cannot be less than zero.')
             Levels.set(key, value)
 
     @staticmethod
