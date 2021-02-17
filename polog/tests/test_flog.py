@@ -30,7 +30,7 @@ def test_empty(handler):
     time.sleep(0.0001)
     log = handler.last
     assert log is not None
-    assert log['module'] == test_empty.__module__
+    assert log['module'] == function.__module__
     assert log['function'] == function.__name__
 
 def test_empty_async(handler):
@@ -42,7 +42,7 @@ def test_empty_async(handler):
     time.sleep(0.0001)
     log = handler.last
     assert log is not None
-    assert log['module'] == test_empty.__module__
+    assert log['module'] == function_3.__module__
     assert log['function'] == function_3.__name__
 
 def test_message(handler):

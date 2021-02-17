@@ -24,7 +24,7 @@ class config:
         new_kwargs = {}
         for key, value in kwargs.items():
             if key not in config.allowed_settings.keys():
-                raise ValueError(f'"{key}" variable is not allowed for the log settings.')
+                raise KeyError(f'"{key}" variable is not allowed for the log settings.')
             allowed_types = config.allowed_settings.get(key)
             is_allowed = False
             for one in allowed_types:
