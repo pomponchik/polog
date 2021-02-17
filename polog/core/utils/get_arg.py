@@ -1,3 +1,6 @@
+from polog.core.utils.not_none_to_dict import not_none_to_dict
+
+
 def get_arg(obj, args, arg_name, key_name=None):
     """
     Извлекаем какой-то атрибут объекта по имени, после чего используем то же самое имя в качестве ключа для словарика, где в качестве значения этот объект сохраним.
@@ -14,5 +17,4 @@ def get_arg(obj, args, arg_name, key_name=None):
     if key_name is None:
         key_name = arg_name.replace('_', '')
     arg = getattr(obj, arg_name, None)
-    if arg:
-        args[key_name] = arg
+    not_none_to_dict(args, key_name, arg)
