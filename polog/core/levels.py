@@ -25,8 +25,10 @@ class Levels:
             if result is None:
                 raise KeyError(f'Logging level "{key}" is not exist.')
         else:
-            if not (type(key) is int) or key < 0:
+            if not (type(key) is int):
                 raise ValueError('Expected types for level: int or str.')
+            if key < 0:
+                raise ValueError('The level value must not be less than zero.')
             result = key
         return result
 
