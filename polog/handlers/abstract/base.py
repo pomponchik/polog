@@ -1,3 +1,6 @@
+from polog.core.utils.is_handler import is_handler
+
+
 class BaseHandler:
     """
     Базовый класс обработчика Polog.
@@ -9,11 +12,18 @@ class BaseHandler:
     3. __init__() - с возможным расширением сигнатуры.
     """
 
+    _input_proves = {
+        'only_errors': lambda x: isinstance(x, bool),
+        'filter': lambda x: x is None or is_handler(x),
+        'alt': lambda x: x is None or is_handler(x),
+    }
+
     def __init__(self, only_errors=False, filter=None, alt=None):
         """
         Образец метода __init__(), переопределение в наследниках обязательно.
         Входные параметры данного метода обязательны для всех наследников, и их необходимо с теми же именами записывать в экземпляр, поскольку от них зависят некоторые методы.
         """
+        self.do_input_proves(only_errors=only_errors, filter=filter, alt=alt)
         self.filter = filter
         self.only_errors = only_errors
         self.alt = alt
@@ -73,3 +83,20 @@ class BaseHandler:
         В большинстве реализаций обработчиков это будет специфически отформатированная строка.
         """
         raise NotImplementedError
+
+    def do_input_proves(self, **kwargs):
+        """
+        Здесь происходит проверка параметров обработчика.
+
+        Функции, которые применяются к аргументам, находятся в словаре self._input_proves. Если любая из них вернет False, значит проверка не пройдена и создать обработчик не получится.
+        В отнаследованном классе пользователь может определить словарь self.input_proves, содержащий функции для проверки прочих аргументов.
+        """
+        if hasattr(self, 'input_proves'):
+            input_proves = {**self._input_proves, **self.input_proves}
+        else:
+            input_proves = {**self._input_proves}
+        for key, value in kwargs.items():
+            if key in input_proves:
+                prove = input_proves[key]
+                if not prove(value):
+                    raise ValueError(f'The argument "{key}" does not pass the test. Please check its format. If necessary, refer to the documentation for the handler.')

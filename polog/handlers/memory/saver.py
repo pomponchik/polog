@@ -17,7 +17,7 @@ class memory_saver(ReadOnlySingleton, BaseHandler):
     def __init__(self):
         with Lock():
             if not hasattr(self, 'inited'):
-                super().__init__(self)
+                super().__init__()
                 self.all = []
                 self.inited = True
 

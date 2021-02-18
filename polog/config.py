@@ -1,5 +1,6 @@
 from polog.core.base_settings import BaseSettings
 from polog.core.levels import Levels
+from polog.core.utils.is_handler import is_handler
 
 
 class config:
@@ -83,6 +84,13 @@ class config:
     def add_handlers(*args):
         """
         Добавляем обработчики для логов. Сюда можно передать несколько обработчиков через запятую.
+
+        Каждый обработчик должен быть вызываеым объектом, имеющим следующую сигнатуру (названия параметров соблюдать не обязательно):
+
+        handler(function_input, **fields)
+
+        При несовпадении сигнатуры, будет поднято исключение.
+
         Если ранее тот же обработчик уже был добавлен, он не дублируется.
         """
         settings = BaseSettings()
@@ -90,6 +98,8 @@ class config:
         for handler in args:
             if not callable(handler):
                 raise ValueError(f'Object od type "{handler.__class__.__name__}" can not be a handler.')
+            if not is_handler(handler):
+                raise ValueError('This object cannot be a Polog handler, because the signatures do not match.')
             if id(handler) not in old_handlers_ids:
                 settings.handlers.append(handler)
 
@@ -97,10 +107,13 @@ class config:
     def add_fields(**fields):
         """
         Добавляем кастомные "поля" логов.
-        Поле - это некоторая функция, имеющая ту же сигнатуру, что и обработчики. Она будет вызываться при каждом формировании лога, а результат ее работы - передаваться обработчикам так же, как и все прочие поля.
+
+        Поле - это некоторый объект, имеющий метод .get_data() с той же сигнатурой, что у обработчиков (см. комментарий к методу .add_handlers() этого же класса). Он будет вызываться при каждом формировании лога, а результат его работы - передаваться обработчикам так же, как и все прочие поля.
 
         В данном случае поля передаются в виде именованных переменных, где имена переменных - это названия полей, а значения - сами функции.
         """
         settings = BaseSettings()
         for key, value in fields.items():
+            if not hasattr(value, 'get_data') or not is_handler(value.get_data):
+                raise ValueError('The signature of the field handler must be the same as that of other Polog handlers.')
             settings.extra_fields[key] = value
