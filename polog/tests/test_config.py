@@ -1,6 +1,8 @@
+import time
 import pytest
-from polog import config
+from polog import config, log
 from polog.core.base_settings import BaseSettings
+from polog.core.levels import Levels
 
 
 def test_set_valid_key_delay_before_exit():
@@ -63,3 +65,72 @@ def test_set_invalid_value():
         assert True
     except:
         assert False
+
+def test_levels_set_good_value():
+    """
+    Проверяем, что уровень меняется.
+    """
+    config.levels(lol=100)
+    assert Levels.get('lol') == 100
+    config.levels(lol=200)
+    assert Levels.get('lol') == 200
+
+def test_levels_set_wrong_value():
+    """
+    Проверяем, что невозможно установить уровень, не являющийся целым неотрицательным числом.
+    """
+    try:
+        config.levels(lol=-100)
+        assert False
+    except:
+        assert True
+    try:
+        config.levels(lol=1.5)
+        assert False
+    except:
+        assert True
+
+def test_standart_levels():
+    """
+    Проверяем, что уровни логирования из стандартной схемы устанавливаются.
+    """
+    config.standart_levels()
+    assert Levels.get('DEBUG') == 10
+    assert Levels.get('INFO') == 20
+    assert Levels.get('WARNING') == 30
+    assert Levels.get('ERROR') == 40
+    assert Levels.get('CRITICAL') == 50
+
+def test_add_handlers():
+    """
+    Проверяем, что новый обработчик добавляется и работает.
+    """
+    lst = []
+    def new_handler(args, **fields):
+        lst.append(fields['level'])
+    config.add_handlers(new_handler)
+    log('lol')
+    time.sleep(0.0001)
+    assert len(lst) > 0
+
+def test_add_handlers_wrong():
+    """
+    Проверяем, что, если попытаться скормить под видом обработчика не обработчик - поднимется исключение.
+    """
+    try:
+        config.add_handlers('lol')
+        assert False
+    except:
+        assert True
+
+def test_add_handlers_wrong_function():
+    """
+    Проверяем, функцию с некорректной сигнатурой невозможно добавить в качестве обработчика.
+    """
+    def new_handler(lol, kek):
+        pass
+    try:
+        config.add_handlers(new_handler)
+        assert False
+    except ValueError:
+        assert True
