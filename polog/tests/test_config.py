@@ -1,6 +1,6 @@
 import time
 import pytest
-from polog import config, log
+from polog import config, log, field, flog
 from polog.core.base_settings import BaseSettings
 from polog.core.levels import Levels
 
@@ -134,3 +134,35 @@ def test_add_handlers_wrong_function():
         assert False
     except ValueError:
         assert True
+
+def test_add_field(handler):
+    """
+    Проверяем, что кастомные поля добавляются и работают.
+    """
+    handler.clean()
+    def extractor(args, **kwargs):
+        return 'lol'
+    @flog
+    def function():
+        pass
+    config.add_fields(new_field=field(extractor))
+    function()
+    time.sleep(0.0001)
+    assert handler.last['new_field'] == 'lol'
+    config.delete_fields('new_field')
+
+def test_delete_field(handler):
+    """
+    Проверяем, что кастомные поля удаляются.
+    """
+    handler.clean()
+    def extractor(args, **kwargs):
+        return 'lol'
+    @flog
+    def function():
+        pass
+    config.add_fields(new_field=field(extractor))
+    config.delete_fields('new_field')
+    function()
+    time.sleep(0.0001)
+    assert handler.last.fields.get('new_field') is None

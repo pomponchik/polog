@@ -117,3 +117,14 @@ class config:
             if not hasattr(value, 'get_data') or not is_handler(value.get_data):
                 raise ValueError('The signature of the field handler must be the same as that of other Polog handlers.')
             settings.extra_fields[key] = value
+
+    @staticmethod
+    def delete_fields(*fields):
+        """
+        Удаляем кастомные поля по их названиям. См. метод .add_fields().
+        """
+        settings = BaseSettings()
+        for name in fields:
+            if not isinstance(name, str):
+                raise KeyError('Fields are deleted by name. The name is an instance of the str class.')
+            settings.extra_fields.pop(name)
