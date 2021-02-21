@@ -3,6 +3,9 @@ from polog.core.utils.log_exception_info import log_exception_info
 
 
 def test_base_info():
+    """
+    Проверяем, что базовая информация об исключении извлекается.
+    """
     data = {}
     try:
         raise ValueError('lol')
@@ -11,7 +14,7 @@ def test_base_info():
     assert data['exception_type'] == 'ValueError'
     assert data['exception_message'] == 'lol'
     assert data['time_of_work'] == 0.5
-    assert data['level'] == 0.5
+    assert data['level'] == 7
     assert data['success'] == False
     assert len(data['traceback']) > 0
     assert len(data['local_variables']) > 0
