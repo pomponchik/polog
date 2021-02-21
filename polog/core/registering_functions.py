@@ -78,6 +78,8 @@ class RegisteringFunctions:
     def is_decorated(self, func):
         """
         Проверка, является ли функция задекорированной ранее.
+
+        Важно: если функция была задекорирована, данный метод вернет True, только если ему скормить задекорированную версию. На оригинал он вернет False.
         """
         func_id = id(func)
         original_func = self.get_original(func)
