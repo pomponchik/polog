@@ -26,6 +26,7 @@ def error_function_2():
 def error_function_3():
     message(exception_type='ValueError', exception_message='new message')
 
+
 def test_basic(handler):
     """Проверяем, что дефолтное сообщение подменяется новым."""
     normal_function()
@@ -47,3 +48,15 @@ def test_basic_exception(handler):
     time.sleep(0.0001)
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'new message'
+
+def test_affects(handler):
+    handler.clean()
+    def function_without_flog():
+        message('lol', local_variables='kek')
+    @flog()
+    def function_with_flog():
+        message('lolkek')
+    function_without_flog()
+    function_with_flog()
+    time.sleep(0.0001)
+    assert handler.last['local_variables'] is None

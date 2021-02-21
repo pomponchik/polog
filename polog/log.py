@@ -15,6 +15,7 @@ ALLOWED_TYPES = {
     'vars': lambda x: type(x) is str, # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
     'success': lambda x: type(x) is bool, # Успех / провал операции, которая логируется.
     'level': lambda x: type(x) is str or type(x) is int, # Уровень важности лога.
+    'local_variables': lambda x: type(x) is str, # json с локальными переменными, либо строка от пользователя в свободном формате.
 }
 
 CONVERT_VALUES = {
