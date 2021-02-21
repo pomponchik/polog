@@ -11,7 +11,10 @@ class Levels:
 
     @classmethod
     def set(cls, name, value):
-        assert isinstance(value, int) and isinstance(name, str)
+        if not isinstance(name, str):
+            raise KeyError('The key for the logging level can only be a string.')
+        if not isinstance(value, int):
+            raise ValueError('The level value can only be an integer.')
         cls.levels[name] = value
         cls.levels_reverse[value] = name
 
