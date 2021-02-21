@@ -17,6 +17,7 @@ def log_normal_info(result, finish, start, args_dict, level, *args, **kwargs):
         args_dict['time_of_work'] = finish - start
         args_dict['level'] = level
         message.copy_context(args_dict)
+        message.clean_context()
         input_variables = json_vars(*args, **kwargs)
         if not (input_variables is None):
             args_dict['input_variables'] = input_variables
