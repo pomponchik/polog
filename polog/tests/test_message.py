@@ -50,6 +50,9 @@ def test_basic_exception(handler):
     assert handler.last['exception_message'] == 'new message'
 
 def test_affects(handler):
+    """
+    Пробуем зааффектить одним вызовом message() другой.
+    """
     handler.clean()
     def function_without_flog():
         message('lol', local_variables='kek')

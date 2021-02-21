@@ -15,7 +15,7 @@ class LogItem:
         """
         Возвращаем содержимое полей по ключу.
         """
-        return self.fields[key]
+        return self.fields.get(key)
 
     def __str__(self):
         """
