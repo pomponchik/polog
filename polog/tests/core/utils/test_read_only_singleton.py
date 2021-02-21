@@ -24,8 +24,12 @@ def test_stress():
     def target():
         for index in range(1000):
             ids.add(id(ExampleSingleton()))
+    treads = []
     for number in range(5):
         tread = Thread(target=target)
         tread.daemon = True
+        treads.append(tread)
         tread.start()
+    for thread in treads:
+        tread.join()
     assert len(ids) == 1
