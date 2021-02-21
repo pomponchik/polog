@@ -118,3 +118,15 @@ def test_get_function_or_wrapper_forbidden():
     register.forbid(function)
     returned = register.get_function_or_wrapper(function, function, wrapper, False)
     assert returned is function
+
+def test_get_function_or_wrapper_not_forbidden():
+    """
+    Проверяем, что для функций, декорирование которых НЕ запрещено, возвращается обертка.
+    """
+    def function():
+        pass
+    def wrapper():
+        pass
+    register = RegisteringFunctions()
+    returned = register.get_function_or_wrapper(function, function, wrapper, False)
+    assert returned is wrapper
