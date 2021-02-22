@@ -791,9 +791,6 @@ do(content)
 Вот пример суперпростого обработчика, который, однако, будет работать:
 
 ```python
-from polog.handlers.abstract.base import BaseHandler
-
-
 class StupidHandler(BaseHandler):
   def get_content(self, args, **kwargs):
     return str({**kwargs})
