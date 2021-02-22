@@ -48,6 +48,7 @@ class Message:
         if new_args is not None:
             for key, value in new_args.items():
                 old_args[key] = value
+        self.clean_context()
 
     def clean_context(self):
         """Обнуляем контекстную переменную."""

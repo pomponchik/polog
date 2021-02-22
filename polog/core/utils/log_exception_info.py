@@ -25,7 +25,6 @@ def log_exception_info(exc, finish, start, args_dict, errors_level, *args, **kwa
             args_dict['level'] = errors_level
             input_variables = json_vars(*args, **kwargs)
             message.copy_context(args_dict)
-            message.clean_context()
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
             extract_extra_fields((args, kwargs), args_dict)
