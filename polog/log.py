@@ -36,6 +36,7 @@ def log(*args, **kwargs):
     Именованный аргумент 'vars' соответствует переменной 'input_variables', передаваемой в обработчики, туда пишутся входные аргументы функций. Чтобы сгенерировать правильную строку для заполнения этого поля, желательно использовать функцию polog.utils.json_vars(), куда можно передать любые аргументы и получить в результате json с ними.
     Не обязательно передавать сюда все возможные именованные аргументы. Передавать нужно только то, что нужно залогировать, именно поэтому они не заданы жестко в данном случае.
     """
+    settings = BaseSettings()
     args_dict = {}
     if len(args) == 1:
         args_dict['message'] = str(args[0])
@@ -45,16 +46,20 @@ def log(*args, **kwargs):
     args_dict['time'] = datetime.datetime.now()
     for key, value in kwargs.items():
         if key not in ALLOWED_TYPES:
-            raise ValueError(f'Unknown argument name "{key}". Allowed arguments: {", ".join(ALLOWED_TYPES.keys())}.')
-        if not ALLOWED_TYPES[key](value):
-            raise ValueError(f'Type "{type(value).__name__}" is not allowed for variable "{key}".')
-        if key in CONVERT_VALUES:
-            value = CONVERT_VALUES[key](value)
-        if key in CONVERT_KEYS:
-            key = CONVERT_KEYS[key]
+            if key in settings.extra_fields:
+                args_dict[key] = str(value)
+            else:
+                raise KeyError(f'Unknown argument name "{key}". Allowed arguments: {", ".join(ALLOWED_TYPES.keys())} and users fields.')
+        else:
+            if not ALLOWED_TYPES[key](value):
+                raise ValueError(f'Type "{type(value).__name__}" is not allowed for variable "{key}".')
+            if key in CONVERT_VALUES:
+                value = CONVERT_VALUES[key](value)
+            if key in CONVERT_KEYS:
+                key = CONVERT_KEYS[key]
         not_none_to_dict(args_dict, key, value)
     if not ('level' in kwargs):
-        args_dict['level'] = BaseSettings().level
+        args_dict['level'] = settings.level
     if 'exception' in kwargs:
         # Проверяем, что передано само исключение, а не его название.
         if not (type(kwargs['exception']) is str):
@@ -64,7 +69,7 @@ def log(*args, **kwargs):
         args_dict['success'] = args_dict['success'] if 'success' in kwargs else False
         if not ('level' in kwargs):
             # Если передано исключение, используем уровень логирования, соответствующий ошибкам.
-            args_dict['level'] = BaseSettings().errors_level
+            args_dict['level'] = settings.errors_level
         args_dict.pop('exception')
     if 'function' in kwargs:
         # Проверяем, что передано не название функции, а она сама.

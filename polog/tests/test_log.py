@@ -1,7 +1,7 @@
 import time
 import json
 import pytest
-from polog import log, json_vars
+from polog import log, json_vars, field, config
 
 
 def test_base(handler):
@@ -93,3 +93,25 @@ def test_vars_from_exception(handler):
     log('kek', vars=json_vars(**locals()))
     time.sleep(0.0001)
     assert json.loads(handler.all[0]['local_variables']) == json.loads(handler.all[1]['local_variables'])
+
+def test_another_field(handler):
+    """
+    Проверяем, что регистрируются пользовательские поля.
+    """
+    handler.clean()
+    def extractor(a, **b):
+        pass
+    config.add_fields(lolkek=field(extractor))
+    log('kek', lolkek='lol')
+    time.sleep(0.0001)
+    assert handler.last['lolkek'] == 'lol'
+
+def test_unknown_field(handler):
+    """
+    Проверяем, что регистрируются пользовательские поля.
+    """
+    try:
+        log('kek', lolkekcheburek='lol')
+        assert False
+    except KeyError:
+        assert True
