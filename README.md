@@ -745,7 +745,7 @@ exception_message = division by zero
 exception_type = ZeroDivisionError
 success = False
 traceback = [" File \"some_path\", line 46, in wrapper\n result = func(*args, **kwargs)\n"," File \"test.py\", line 23, in do\n return x \/ y\n"]
-local_variables = {"x":{"value":1,"type":"int"},"y":{"value":0,"type":"int"}}
+local_variables = {"args":[{"value":55,"type":"int"},{"value":77,"type":"int"}]}
 time_of_work = 2.86102294921875e-06
 level = 2
 input_variables = {"args":[{"value":1,"type":"int"},{"value":0,"type":"int"}]}
