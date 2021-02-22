@@ -1,6 +1,6 @@
 import time
 import pytest
-from polog import flog, message
+from polog import flog, message, field, config
 
 
 @flog(message='base text')
@@ -63,3 +63,18 @@ def test_affects(handler):
     function_with_flog()
     time.sleep(0.0001)
     assert handler.last['local_variables'] is None
+
+def test_another_field(handler):
+    """
+    Проверяем, что работает прописывание собственных значений для пользовательских полей.
+    """
+    handler.clean()
+    def extractor(a, **b):
+        pass
+    config.add_fields(lolkek=field(extractor))
+    @flog
+    def function():
+        message('lolkek', lolkek='lolkek')
+    function()
+    time.sleep(0.0001)
+    assert handler.last['lolkek'] == 'lolkek'

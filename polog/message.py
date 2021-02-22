@@ -1,5 +1,6 @@
 from contextvars import ContextVar
 from polog.log import ALLOWED_TYPES, CONVERT_VALUES
+from polog.core.base_settings import BaseSettings
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
 
@@ -10,7 +11,10 @@ class Message:
     """
     При помощи данного класса можно редактировать сообщение и некоторые другие характеристики лога, записываемого через flog(), изнутри задекорированной функции.
     """
-    def __call__(self, *text, level=None, success=None, e=None, exception=None, exception_type=None, exception_message=None, local_variables=None):
+    def __init__(self):
+        self.settings = BaseSettings()
+
+    def __call__(self, *text, level=None, success=None, e=None, exception=None, exception_type=None, exception_message=None, local_variables=None, **other_fields):
         """
         При каждом вызове ообъекта класса Message происходит сохранение переданного сюда набора аргументов в словарь, а также сохранение этого словаря в контекстную переменную.
 
@@ -30,6 +34,11 @@ class Message:
         self.set_var('success', success, vars)
         self.set_var('local_variables', local_variables, vars)
         self.extract_exception(e, exception, exception_type, exception_message, vars)
+        for key, value in other_fields.items():
+            if key in self.settings.extra_fields:
+                self.set_var(key, str(value), vars)
+            else:
+                raise KeyError(f'Unknown argument name "{key}".')
         if vars:
             context.set(vars)
 
@@ -75,8 +84,13 @@ class Message:
         Сохраняем переданный пользователем объект в контекстную переменную. При условии, что объект ожидаемого типа. При необходимости, конвертируем в нужный тип.
         """
         if not not_none or var is not None:
-            if not ALLOWED_TYPES[name](var):
-                raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
+            prove = ALLOWED_TYPES.get(name)
+            if prove is None:
+                if name not in self.settings.extra_fields:
+                    raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
+            else:
+                if not prove(var):
+                    raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
             converter = CONVERT_VALUES.get(name)
             if converter is not None:
                 var = converter(var)
