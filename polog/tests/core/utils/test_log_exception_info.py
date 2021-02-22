@@ -18,3 +18,8 @@ def test_base_info():
     assert data['success'] == False
     assert len(data['traceback']) > 0
     assert len(data['local_variables']) > 0
+    assert data.get('message') is None
+    assert data.get('input_variables') is None
+    assert data.get('function') is None
+    assert data.get('module') is None
+    assert data.get('result') is None
