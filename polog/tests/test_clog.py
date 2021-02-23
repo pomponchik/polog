@@ -66,3 +66,19 @@ def test_flog(handler):
     time.sleep(0.0001)
     assert len(handler.all) == 1
     assert handler.last['level'] == 100
+
+def test_inherit_affect(handler):
+    """
+    Проверяем, что последний класс в иерархии наследования не аффектит работу своих предков при навешивании на него @clog.
+    """
+    handler.clean()
+    class A:
+        def a(self):
+            pass
+    @clog
+    class B(A):
+        def b(self):
+            pass
+    A().a()
+    time.sleep(0.0001)
+    assert handler.last is None
