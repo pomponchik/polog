@@ -375,6 +375,7 @@ def dynamic_function_generation():
   @flog
   def function():
     ...
+  return function
 ```
 
 
