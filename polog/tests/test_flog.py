@@ -1,7 +1,7 @@
 import time
 import asyncio
 import pytest
-from polog import flog
+from polog import flog, config
 
 
 @flog(message='base text')
@@ -20,6 +20,14 @@ async def function_3():
 @flog
 def function_4():
     return True
+
+@flog(level=7)
+def function_5():
+    pass
+
+@flog(level='lolkeklolkeklol')
+def function_6():
+    pass
 
 def test_empty(handler):
     """
@@ -76,3 +84,24 @@ def test_working_without_brackets():
     Проверяем, декоратор можно вызывать без скобок и функция остается рабочей.
     """
     assert function_4() == True
+
+def test_level(handler):
+    """
+    Проверяем, что установка уровня логирования работает.
+    """
+    function_5()
+    time.sleep(0.0001)
+    assert handler.last['level'] == 7
+
+def test_level(handler):
+    """
+    Проверяем, что установка уровня логирования идентификатором в виде строки работает.
+    """
+    config.levels(lolkeklolkeklol=88)
+    function_6()
+    time.sleep(0.0001)
+    assert handler.last['level'] == 88
+    config.levels(lolkeklolkeklol=77)
+    function_6()
+    time.sleep(0.0001)
+    assert handler.last['level'] == 77
