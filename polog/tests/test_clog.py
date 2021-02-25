@@ -109,3 +109,4 @@ def test_inherit_affect_2(handler):
     B().a()
     time.sleep(0.0001)
     assert len(handler.all) == 1
+    assert 'b' not in dir(A)
