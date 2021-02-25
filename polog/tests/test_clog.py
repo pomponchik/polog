@@ -82,3 +82,23 @@ def test_inherit_affect(handler):
     A().a()
     time.sleep(0.0001)
     assert handler.last is None
+
+def test_inherit_affect_2(handler):
+    """
+    Еще одна проверка, что декорирование класса не аффектит предков.
+    """
+    handler.clean()
+    @clog(message='message a')
+    class A:
+        def a(self):
+            pass
+    @clog(message='message b')
+    class B(A):
+        def b(self):
+            pass
+    A().a()
+    time.sleep(0.0001)
+    assert handler.last['message'] == 'message a'
+    B().b()
+    time.sleep(0.0001)
+    assert handler.last['message'] == 'message b'
