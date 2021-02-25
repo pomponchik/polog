@@ -1,3 +1,6 @@
+import weakref
+
+
 class RegisteringFunctions:
     """
     Класс для регистрации задекорированных функций и хранения их id. Используется, к примеру, для работы декоратора, запрещающего логирование другими декораторами. Для своей работы он должен сначала убедиться, что функция, логирование которой он запрещает, не была задекорирована логгером ранее.
@@ -15,10 +18,24 @@ class RegisteringFunctions:
         Добавляем функцию в реестр задекорированных.
         """
         decorated_id = id(decorated_function)
+        original_id = id(original_function)
         self.all_decorated_functions[decorated_id] = original_function
         if is_method:
-            original_id = id(original_function)
             self.decorated_methods.add(original_id)
+        self.create_finalizer(decorated_id, original_id, original_function)
+
+    def create_finalizer(self, decorated_id, original_id, function):
+        """
+        Регистрация финализатора для функции.
+
+        Финализатор нужен, чтобы стереть из Polog упоминания функции, когда заканчивается ее жизненный цикл. Актуально для функций с ограниченным жизненным циклом, например для тех, которые порождаются в других функциях.
+        Если этого не сделать, память из-под функции будет освобождена и ее может занять другой объект, например другая функция. При этом с точки зрения Polog это все еще прежняя функция, со всеми указанными для нее настройками (например, с запретом на логирование, если таковой был).
+        """
+        def finalize():
+            self.all_decorated_functions.pop(decorated_id, None)
+            self.forbidden_to_decorate.discard(original_id)
+            self.decorated_methods.discard(original_id)
+        weakref.finalize(function, finalize)
 
     def remove(self, func):
         """

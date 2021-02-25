@@ -1,4 +1,6 @@
 import pytest
+import time
+import gc
 from polog.core.registering_functions import RegisteringFunctions
 from polog import flog
 
@@ -130,3 +132,18 @@ def test_get_function_or_wrapper_not_forbidden():
     register = RegisteringFunctions()
     returned = register.get_function_or_wrapper(function, function, wrapper, False)
     assert returned is wrapper
+
+def test_finalize():
+    """
+    Проверяем, что после удаления функции, она удаляется и из регистрирующего класса при помощи коллбека.
+    """
+    def abcde():
+        pass
+    register = RegisteringFunctions()
+    function = flog()(abcde)
+    assert register.is_decorated(function) == True
+    function_id = id(function)
+    a = [function]
+    del abcde
+    del function
+    assert function_id not in register.all_decorated_functions
