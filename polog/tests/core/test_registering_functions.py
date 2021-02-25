@@ -1,6 +1,4 @@
 import pytest
-import time
-import gc
 from polog.core.registering_functions import RegisteringFunctions
 from polog import flog
 
@@ -143,7 +141,6 @@ def test_finalize():
     function = flog()(abcde)
     assert register.is_decorated(function) == True
     function_id = id(function)
-    a = [function]
-    del abcde
     del function
+    del abcde
     assert function_id not in register.all_decorated_functions

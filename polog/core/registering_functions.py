@@ -19,7 +19,7 @@ class RegisteringFunctions:
         """
         decorated_id = id(decorated_function)
         original_id = id(original_function)
-        self.all_decorated_functions[decorated_id] = original_function
+        self.all_decorated_functions[decorated_id] = weakref.ref(original_function)
         if is_method:
             self.decorated_methods.add(original_id)
         self.create_finalizer(decorated_id, original_id, original_function)
@@ -120,6 +120,8 @@ class RegisteringFunctions:
         """
         func_id = id(func)
         if func_id in self.all_decorated_functions:
-            result = self.all_decorated_functions.get(func_id)
-            return result
+            maybe_function = self.all_decorated_functions.get(func_id)
+            maybe_function = maybe_function()
+            if maybe_function is not None:
+                return maybe_function
         return func
