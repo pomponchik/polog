@@ -41,7 +41,7 @@ class RegisteringFunctions:
         """
         Удаляем функцию из реестра задекорированных.
         """
-        if self.is_decorated(func):
+        if self.is_decorator(func):
             original_function = self.get_original(func)
             func_id = id(func)
             self.all_decorated_functions.pop(func_id, None)
@@ -67,7 +67,7 @@ class RegisteringFunctions:
         """
         if self.is_forbidden(func):
             return func
-        if self.is_decorated(before_change_func):
+        if self.is_decorator(before_change_func):
             if self.is_method(before_change_func):
                 self.remove(before_change_func)
                 self.add(wrapper, func, is_method=is_method)
@@ -92,7 +92,7 @@ class RegisteringFunctions:
         result = func_id in self.forbidden_to_decorate
         return result
 
-    def is_decorated(self, func):
+    def is_decorator(self, func):
         """
         Проверка, является ли функция задекорированной ранее.
 

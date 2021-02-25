@@ -14,9 +14,9 @@ def test_is_decorated():
     def function():
         pass
     register = RegisteringFunctions()
-    assert register.is_decorated(function) == False
+    assert register.is_decorator(function) == False
     function = flog()(function)
-    assert register.is_decorated(function) == True
+    assert register.is_decorator(function) == True
     register.remove(function)
 
 def test_get_original():
@@ -63,11 +63,11 @@ def test_remove():
         pass
     register = RegisteringFunctions()
     decorated = flog()(function)
-    assert register.is_decorated(decorated) == True
+    assert register.is_decorator(decorated) == True
     register.remove(decorated)
-    assert register.is_decorated(decorated) == False
+    assert register.is_decorator(decorated) == False
     decorated = flog()(function)
-    assert register.is_decorated(decorated) == True
+    assert register.is_decorator(decorated) == True
     register.remove(decorated)
 
 def test_forbid():
@@ -139,7 +139,7 @@ def test_finalize():
         pass
     register = RegisteringFunctions()
     function = flog()(abcde)
-    assert register.is_decorated(function) == True
+    assert register.is_decorator(function) == True
     function_id = id(function)
     del function
     del abcde
