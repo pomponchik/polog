@@ -15,3 +15,15 @@ def get_methods(Class, *methods):
     else:
         methods = [x for x in methods]
     return methods
+
+def make_originals(Class, *methods):
+    if methods:
+        all = get_methods(Class)
+        print(all)
+        methods = set(methods)
+        print(methods)
+        result = tuple([x for x in all if x not in methods])
+        print(result)
+        return result
+    else:
+        return ()

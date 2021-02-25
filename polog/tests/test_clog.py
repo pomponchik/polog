@@ -127,3 +127,7 @@ def test_inherit_affect_3(handler):
     B().a()
     time.sleep(0.0001)
     assert handler.last is None
+    A().a()
+    time.sleep(0.0001)
+    assert handler.last is not None
+    assert handler.last['message'] == 'message a'

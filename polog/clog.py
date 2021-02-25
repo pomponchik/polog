@@ -1,6 +1,7 @@
 import inspect
 from polog.flog import flog
-from polog.core.utils.get_methods import get_methods
+from polog.core.registering_functions import RegisteringFunctions
+from polog.core.utils.get_methods import get_methods as get_logging_methods, make_originals
 
 
 def clog(*methods, message=None, level=1, errors_level=None):
@@ -11,7 +12,7 @@ def clog(*methods, message=None, level=1, errors_level=None):
     """
     def decorator(Class):
         # Получаем имена методов класса.
-        all_methods = get_methods(Class, *methods)
+        all_methods = get_logging_methods(Class, *methods)
         for method_name in all_methods:
             method = getattr(Class, method_name)
             # Конфигурируем декоратор для метода.
@@ -19,6 +20,14 @@ def clog(*methods, message=None, level=1, errors_level=None):
             # Применяем его.
             new_method = wrapper(method)
             setattr(Class, method_name, new_method)
+        # Получаем кортеж с именами методов, которые логировать НЕ надо.
+        # Если они уже залогированы - нужно вернуть оригиналы.
+        originals = make_originals(Class, *methods)
+        register = RegisteringFunctions()
+        for method_name in originals:
+            method = getattr(Class, method_name)
+            original = register.get_original(method)
+            setattr(Class, method_name, original)
         return Class
     if not len(methods):
         return decorator
