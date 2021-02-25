@@ -102,3 +102,10 @@ def test_inherit_affect_2(handler):
     B().b()
     time.sleep(0.0001)
     assert handler.last['message'] == 'message b'
+    B().a()
+    time.sleep(0.0001)
+    assert handler.last['message'] == 'message b'
+    handler.clean()
+    B().a()
+    time.sleep(0.0001)
+    assert len(handler.all) == 1
