@@ -7,7 +7,7 @@ def function_for_forbidden_test():
     pass
 
 
-def test_is_decorated():
+def test_is_decorator():
     """
     Проверяем, что только что созданная функция не определяется как задекорированная, а она же после декорирования - определяется.
     """
