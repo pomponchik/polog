@@ -131,3 +131,30 @@ def test_inherit_affect_3(handler):
     time.sleep(0.0001)
     assert handler.last is not None
     assert handler.last['message'] == 'message a'
+
+def test_get_logging_methods_empty(empty_class):
+    """
+    Проверяем, что из "пустого" класса (который без методов) не извлекаются никакие методы.
+    """
+    methods = clog.get_logging_methods(empty_class)
+    assert len(methods) == 0
+
+def test_get_logging_methods_one_method():
+    """
+    Проверяем, что из класса с одним методом извлекается только одно имя метода.
+    """
+    class TestClass:
+        def test_method(self):
+            pass
+    methods = clog.get_logging_methods(TestClass)
+    assert len(methods) == 1
+
+def test_get_logging_methods_not_danders():
+    """
+    Проверяем, что дандер-методы не учитываются.
+    """
+    class TestClass:
+        def __method__(self):
+            pass
+    methods = clog.get_logging_methods(TestClass)
+    assert len(methods) == 0
