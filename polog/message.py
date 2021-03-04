@@ -1,5 +1,5 @@
 from contextvars import ContextVar
-from polog.log import ALLOWED_TYPES, CONVERT_VALUES
+from polog.log import log
 from polog.core.base_settings import BaseSettings
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
@@ -85,14 +85,14 @@ class Message:
         Сохраняем переданный пользователем объект в контекстную переменную. При условии, что объект ожидаемого типа. При необходимости, конвертируем в нужный тип.
         """
         if not not_none or var is not None:
-            prove = ALLOWED_TYPES.get(name)
+            prove = log.ALLOWED_TYPES.get(name)
             if prove is None:
                 if name not in self.settings.extra_fields:
                     raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
             else:
                 if not prove(var):
                     raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
-            converter = CONVERT_VALUES.get(name)
+            converter = log.CONVERT_VALUES.get(name)
             if converter is not None:
                 var = converter(var)
             vars[name] = var
