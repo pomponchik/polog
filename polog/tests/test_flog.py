@@ -1,7 +1,9 @@
 import time
 import asyncio
 import pytest
-from polog import flog, config
+from polog import flog, config, LoggedError, field
+from polog.flog import FunctionLogger
+from polog.utils.json_vars import json_one_variable
 
 
 @flog(message='base text')
@@ -105,3 +107,169 @@ def test_level(handler):
     function_6()
     time.sleep(0.0001)
     assert handler.last['level'] == 77
+
+def test_get_base_args_dict():
+    """
+    Проверяем извлечение базовой информации из функции.
+    """
+    args = flog.get_base_args_dict(test_get_base_args_dict, 'kek')
+    assert args['auto'] == True
+    assert args['message'] == 'kek'
+    assert args['function'] == test_get_base_args_dict.__name__
+    assert args['module'] == test_get_base_args_dict.__module__
+
+def test_get_arg_base_empty(empty_class):
+    """
+    Проверка, что, если в исходном объекте нет нужного атрибута, ничего не происходит.
+    """
+    data = {}
+    obj = empty_class()
+    flog.get_arg(obj, data, 'lol')
+    assert data == {}
+
+def test_get_arg_base_full(empty_class):
+    """
+    Проверка, что все извлекается.
+    """
+    data = {}
+    obj = empty_class()
+    obj.lol = 'kek'
+    flog.get_arg(obj, data, 'lol')
+    assert data['lol'] == 'kek'
+
+def test_get_arg_base_full_handle_key(empty_class):
+    """
+    Проверка, что ключ подменяется вручную.
+    """
+    data = {}
+    obj = empty_class()
+    obj.lol = 'kek'
+    flog.get_arg(obj, data, 'lol', key_name='cheburek')
+    assert data['cheburek'] == 'kek'
+    assert data.get('lol') is None
+
+def test_get_arg_base_full_dander(empty_class):
+    """
+    Проверка, что из дандер-атрибутов все извлекается, но в словарь сохраняется без дандеров.
+    """
+    data = {}
+    obj = empty_class()
+    obj.__lol__ = 'kek'
+    flog.get_arg(obj, data, '__lol__')
+    assert data['lol'] == 'kek'
+
+def test_raise_original():
+    """
+    При настройке original_exceptions=True переподниматься должно оригинальное исключение.
+    """
+    config.set(original_exceptions=True)
+    try:
+        raise ValueError
+    except Exception as e:
+        try:
+            flog.reraise_exception(e)
+            assert False # Проверка, что исключение в принципе переподнимается.
+        except Exception as e2:
+            assert e is e2
+
+def test_raise_not_original():
+    """
+    При настройке original_exceptions=False переподниматься должно исключение LoggedError.
+    """
+    config.set(original_exceptions=False)
+    try:
+        raise ValueError
+    except Exception as e:
+        try:
+            flog.reraise_exception(e)
+            assert False # Проверка, что исключение в принципе переподнимается.
+        except LoggedError as e2:
+            assert True
+        except Exception as e2:
+            assert False
+
+def test_log_exception_info():
+    """
+    Проверяем, что базовая информация об исключении извлекается.
+    """
+    data = {}
+    try:
+        raise ValueError('lol')
+    except Exception as e:
+        flog.log_exception_info(e, 1.0, 0.5, data, 7)
+    assert data['exception_type'] == 'ValueError'
+    assert data['exception_message'] == 'lol'
+    assert data['time_of_work'] == 0.5
+    assert data['level'] == 7
+    assert data['success'] == False
+    assert len(data['traceback']) > 0
+    assert len(data['local_variables']) > 0
+    assert data.get('message') is None
+    assert data.get('input_variables') is None
+    assert data.get('function') is None
+    assert data.get('module') is None
+    assert data.get('result') is None
+
+def test_log_normal_info():
+    """
+    Проверяем, что базовая информация извлекается.
+    """
+    data = {}
+    flog.log_normal_info('kek', 1.0, 0.5, data, 7)
+    assert data.get('exception_type') is None
+    assert data.get('exception_message') is None
+    assert data['time_of_work'] == 0.5
+    assert data['level'] == 7
+    assert data['success'] == True
+    assert data.get('traceback') is None
+    assert data.get('local_variables') is None
+    assert data.get('message') is None
+    assert data.get('input_variables') is None
+    assert data.get('function') is None
+    assert data.get('module') is None
+    assert data.get('result') == json_one_variable('kek')
+
+def test_extract_extra_fields_base():
+    """
+    Проверяем, что в базовом случае дополнительные поля извлекаются.
+    """
+    def extractor_1(args, **kwargs):
+        return 'hello'
+    def extractor_2(args, **kwargs):
+        return 'world'
+    class FalseBaseSettings:
+        extra_fields = {'hello': field(extractor_1), 'world': field(extractor_2)}
+    args_dict = {}
+    local_flog = FunctionLogger(settings=FalseBaseSettings())
+    local_flog.extract_extra_fields(None, args_dict)
+    assert args_dict == {'hello': 'hello', 'world': 'world'}
+
+def test_extract_extra_fields_other_type_with_converter():
+    """
+    Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, но используется конвертер.
+    """
+    def extractor_1(args, **kwargs):
+        return 1
+    def extractor_2(args, **kwargs):
+        return 2
+    class FalseBaseSettings:
+        extra_fields = {'1': field(extractor_1, converter=lambda x: str(x) + ' converted'), '2': field(extractor_2, converter=lambda x: str(x) + ' converted')}
+    args_dict = {}
+    local_flog = FunctionLogger(settings=FalseBaseSettings())
+    local_flog.extract_extra_fields(None, args_dict)
+    assert args_dict == {'1': '1 converted', '2': '2 converted'}
+
+def test_extract_extra_fields_other_type_without_converter():
+    """
+    Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, и конвертер не используется.
+    """
+    def extractor_1(args, **kwargs):
+        return 1
+    def extractor_2(args, **kwargs):
+        return 2
+    class FalseBaseSettings:
+        extra_fields = {'1': field(extractor_1), '2': field(extractor_2)}
+    args_dict = {}
+    local_flog = FunctionLogger(settings=FalseBaseSettings())
+    local_flog.extract_extra_fields(None, args_dict)
+    assert args_dict == {'1': '1', '2': '2'}
