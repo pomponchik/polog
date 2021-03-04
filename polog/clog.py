@@ -7,9 +7,7 @@ class ClassLogger:
     """
     Экземпляры данного класса - готовые декораторы для других классов.
     """
-    def __init__(self):
-        pass
-
+    
     def __call__(self, *methods, message=None, level=1, errors_level=None):
         """
         Фабрика декораторов классов. Можно вызывать как со скобками, так и без.
