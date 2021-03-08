@@ -2,15 +2,30 @@ import random
 
 
 def pony_names_generator(epoch=0):
+    """
+    Бесконечный рандомный генератор имен поней из My Little Pony.
+    Имена образуются путем рекомбинации половинок оригинальных имен из сериала.
+
+    Исчерпав все варианты, повторяет их заново (но в другом порядке), добавив постфикс с римской записью поколения. К примеру:
+    Princess Skyre II
+    Derpy Pie II
+    Rari Dash II
+
+    Генератор реализован через рекурсию, так что технически он не совсем бесконечный, но на несколько десятков тысяч вариантов точно можно расчитывать.
+    """
     all_names = []
     def name_generator(first_halfs, second_halfs, prefix=''):
+        """
+        Берем два списка с половинками имен и кладем их декартово произведение в список all_names.
+        При необходимости, добавляем префиксы.
+        """
         for half in first_halfs:
             for half_2 in second_halfs:
                 full_name = prefix + half + half_2
                 all_names.append(full_name)
     def number_generator(number):
         """
-        Генератор римских цифр взят отсюда:
+        Генератор римских цифр, взят отсюда:
         https://py.checkio.org/mission/roman-numerals/publications/mdeakyne/python-3/first/share/53882d47af904f942fc8daf06c0ed270/
         """
         ones = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"]
