@@ -9,14 +9,18 @@ def pony_names_generator(epoch=0):
                 full_name = prefix + half + half_2
                 all_names.append(full_name)
     def number_generator(number):
-        ones = ["","I","II","III","IV","V","VI","VII","VIII","IX"]
-        tens = ["","X","XX","XXX","XL","L","LX","LXX","LXXX","XC"]
-        hunds = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM"]
-        thous = ["","M","MM","MMM","MMMM"]
+        """
+        Генератор римских цифр взят отсюда:
+        https://py.checkio.org/mission/roman-numerals/publications/mdeakyne/python-3/first/share/53882d47af904f942fc8daf06c0ed270/
+        """
+        ones = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"]
+        tens = ["", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"]
+        hunds = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"]
+        thous = ["", "M", "MM", "MMM", "MMMM"]
         thous = thous[number // 1000]
         hunds = hunds[number // 100 % 10]
         tens = tens[number // 10 % 10]
-        ones =  ones[number % 10]
+        ones = ones[number % 10]
         return thous + hunds + tens + ones
     name_generator(
         first_halfs = [
