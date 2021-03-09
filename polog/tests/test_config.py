@@ -135,6 +135,28 @@ def test_add_handlers_wrong_function():
     except ValueError:
         assert True
 
+def test_add_similar_handlers():
+    """
+    Проверяем, что один и тот же обработчик нельзя зарегистрировать дважды.
+    """
+    def new_handler(args, **fields):
+        pass
+    config.add_handlers(new_handler)
+    handlers_number = len(config.get_handlers())
+    config.add_handlers(new_handler)
+    assert len(config.get_handlers()) == handlers_number
+    def new_handler2(args, **fields):
+        pass
+    handlers_number = len(config.get_handlers())
+    config.add_handlers(new_handler2, new_handler2)
+    assert len(config.get_handlers()) == handlers_number + 1
+    def new_handler3(args, **fields):
+        pass
+    config.add_handlers(abc=new_handler3)
+    handlers_number = len(config.get_handlers())
+    config.add_handlers(abcd=new_handler3)
+    assert len(config.get_handlers()) == handlers_number
+
 def test_add_field(handler):
     """
     Проверяем, что кастомные поля добавляются и работают.

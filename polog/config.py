@@ -98,7 +98,7 @@ class config:
         """
         settings = BaseSettings()
         old_handlers_ids = {id(x) for x in settings.handlers.values()}
-        old_handlers_names = {id(x) for x in settings.handlers.keys()}
+        old_handlers_names = {x for x in settings.handlers.keys()}
         for handler in args:
             if not callable(handler):
                 raise ValueError(f'Object od type "{handler.__class__.__name__}" can not be a handler.')
@@ -107,6 +107,8 @@ class config:
             if id(handler) not in old_handlers_ids:
                 handler_name = next(cls.pony_names_generator)
                 settings.handlers[handler_name] = handler
+                old_handlers_ids.add(id(handler))
+                old_handlers_names.add(handler_name)
         for handler_name, handler in kwargs.items():
             if handler_name in old_handlers_names:
                 raise KeyError(f'A handler named "{handler_name}" is already registered.')
@@ -116,6 +118,8 @@ class config:
                 raise ValueError('This object cannot be a Polog handler, because the signatures do not match.')
             if id(handler) not in old_handlers_ids:
                 settings.handlers[handler_name] = handler
+                old_handlers_ids.add(id(handler))
+                old_handlers_names.add(handler_name)
 
     @staticmethod
     def get_handlers(*names):
@@ -127,12 +131,12 @@ class config:
         Если ранее не был зарегистрирован обработчик с указанным именем, в возвращаемом словаре вместо него будет None.
         """
         if not names:
-            return {**(BaseSettings().settings.handlers)}
+            return {**(BaseSettings().handlers)}
         result = {}
         for name in names:
             if not isinstance(name, str):
                 raise KeyError('The handler name must be a string.')
-            handler = BaseSettings().settings.handlers.get(name)
+            handler = BaseSettings().handlers.get(name)
             result[name] = handler
         return result
 
