@@ -157,6 +157,21 @@ def test_add_similar_handlers():
     config.add_handlers(abcd=new_handler3)
     assert len(config.get_handlers()) == handlers_number
 
+def test_get_handlers():
+    """
+    Проверяем, что config.get_handlers() работает с аргументами и без.
+    """
+    def new_handler(args, **fields):
+        pass
+    def new_handler2(args, **fields):
+        pass
+    config.add_handlers(lolkekcheburek=new_handler)
+    config.add_handlers(new_handler2)
+    assert 'lolkekcheburek' in config.get_handlers()
+    assert config.get_handlers()['lolkekcheburek'] is new_handler
+    assert len(config.get_handlers('lolkekcheburek')) == 1
+    assert len(config.get_handlers()) > 1
+
 def test_add_field(handler):
     """
     Проверяем, что кастомные поля добавляются и работают.
