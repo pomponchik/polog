@@ -138,24 +138,31 @@ def test_add_handlers_wrong_function():
 def test_add_similar_handlers():
     """
     Проверяем, что один и тот же обработчик нельзя зарегистрировать дважды.
+    В норме при такой попытке должно подниматься исключение.
     """
-    def new_handler(args, **fields):
-        pass
-    config.add_handlers(new_handler)
-    handlers_number = len(config.get_handlers())
-    config.add_handlers(new_handler)
-    assert len(config.get_handlers()) == handlers_number
-    def new_handler2(args, **fields):
-        pass
-    handlers_number = len(config.get_handlers())
-    config.add_handlers(new_handler2, new_handler2)
-    assert len(config.get_handlers()) == handlers_number + 1
-    def new_handler3(args, **fields):
-        pass
-    config.add_handlers(abc=new_handler3)
-    handlers_number = len(config.get_handlers())
-    config.add_handlers(abcd=new_handler3)
-    assert len(config.get_handlers()) == handlers_number
+    try:
+        def new_handler(args, **fields):
+            pass
+        config.add_handlers(new_handler)
+        config.add_handlers(new_handler)
+        assert False
+    except ValueError:
+        assert True
+    try:
+        def new_handler2(args, **fields):
+            pass
+        config.add_handlers(new_handler2, new_handler2)
+        assert False
+    except ValueError:
+        assert True
+    try:
+        def new_handler3(args, **fields):
+            pass
+        config.add_handlers(abc=new_handler3)
+        config.add_handlers(abcd=new_handler3)
+        assert False
+    except ValueError:
+        assert True
 
 def test_get_handlers():
     """

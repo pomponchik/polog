@@ -86,7 +86,8 @@ class config:
     @classmethod
     def add_handlers(cls, *args, **kwargs):
         """
-        Добавляем обработчики для логов. Сюда можно передать несколько обработчиков через запятую.
+        Добавляем обработчики для логов.
+        Сюда можно передать несколько обработчиков через запятую. Если их передавать как именованные переменные, они будут сохранены под соответствующими именами. Если как неименованные - имена будут сгенерированы автоматически.
 
         Каждый обработчик должен быть вызываеым объектом, имеющим следующую сигнатуру (названия параметров соблюдать не обязательно):
 
@@ -94,32 +95,33 @@ class config:
 
         При несовпадении сигнатуры, будет поднято исключение.
 
-        Если ранее тот же обработчик уже был добавлен, он не дублируется.
+        Один и тот же объект обработчика нельзя зарегистрировать дважды. Также нельзя использовать для двух обработчиков одно имя. В обоих случаях будет поднято исключение.
+        """
+        for handler in args:
+            handler_name = next(cls.pony_names_generator)
+            cls.set_handler(handler_name, handler)
+        for handler_name, handler in kwargs.items():
+            cls.set_handler(handler_name, handler)
+
+    @classmethod
+    def set_handler(cls, name, handler):
+        """
+        Сохраняем обработчик под каким-то именем.
         """
         settings = BaseSettings()
         old_handlers_ids = {id(x) for x in settings.handlers.values()}
+        old_ids_and_names = {id(y): x for x, y in settings.handlers.items()}
         old_handlers_names = {x for x in settings.handlers.keys()}
-        for handler in args:
-            if not callable(handler):
-                raise ValueError(f'Object od type "{handler.__class__.__name__}" can not be a handler.')
-            if not is_handler(handler):
-                raise ValueError('This object cannot be a Polog handler, because the signatures do not match.')
-            if id(handler) not in old_handlers_ids:
-                handler_name = next(cls.pony_names_generator)
-                settings.handlers[handler_name] = handler
-                old_handlers_ids.add(id(handler))
-                old_handlers_names.add(handler_name)
-        for handler_name, handler in kwargs.items():
-            if handler_name in old_handlers_names:
-                raise KeyError(f'A handler named "{handler_name}" is already registered.')
-            if not callable(handler):
-                raise ValueError(f'Object od type "{handler.__class__.__name__}" can not be a handler.')
-            if not is_handler(handler):
-                raise ValueError('This object cannot be a Polog handler, because the signatures do not match.')
-            if id(handler) not in old_handlers_ids:
-                settings.handlers[handler_name] = handler
-                old_handlers_ids.add(id(handler))
-                old_handlers_names.add(handler_name)
+        if name in old_handlers_names:
+            raise KeyError(f'A handler named "{name}" is already registered.')
+        if id(handler) in old_handlers_ids:
+            name = [x for x, y in settings.handlers.items() if id(y) == id(handler)][0]
+            raise ValueError(f'Handler {handler} is already registered under the name "{name}".')
+        if not callable(handler):
+            raise ValueError(f'Object od type "{type(handler).__name__}" can not be a handler.')
+        if not is_handler(handler):
+            raise ValueError('This object cannot be a Polog handler, because the signatures do not match.')
+        settings.handlers[name] = handler
 
     @staticmethod
     def get_handlers(*names):
