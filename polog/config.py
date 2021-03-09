@@ -143,6 +143,28 @@ class config:
         return result
 
     @staticmethod
+    def delete_handlers(*names):
+        """
+        Удаление ранее зарегистрированного обработчика. Сюда можно передать как имя обработчика, так и сам обработчик.
+        Если обработчик будет найден по имени или по id, он будет удален. В противном случае - поднимется исключение.
+        Возможно удаление нескольких обработчиков, перечисленных через запятую.
+        """
+        ids_to_names = {id(handler): name for name, handler in BaseSettings().handlers.items()}
+        for maybe_name in names:
+            if isinstance(maybe_name, str):
+                try:
+                    BaseSettings().handlers.pop(maybe_name)
+                except KeyError:
+                    raise KeyError(f'Object {maybe_name} was not registered as a handler.')
+            else:
+                object_id = id(maybe_name)
+                if object_id in ids_to_names:
+                    handler_name = ids_to_names[object_id]
+                    BaseSettings().handlers.pop(handler_name)
+                else:
+                    raise ValueError(f'Object {maybe_name} was not registered as a handler.')
+
+    @staticmethod
     def add_fields(**fields):
         """
         Добавляем кастомные "поля" логов.

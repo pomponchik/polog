@@ -180,6 +180,26 @@ def test_get_handlers():
     assert len(config.get_handlers('lolkekcheburek')) == 1
     assert len(config.get_handlers()) > 1
 
+def test_delete_handlers():
+    """
+    Проверка удаления обработчиков.
+    Должна работать как по имени, так и прямой передачей объекта.
+    """
+    def new_handler(args, **fields):
+        pass
+    def new_handler2(args, **fields):
+        pass
+    config.add_handlers(lolkek123=new_handler)
+    config.delete_handlers('lolkek123')
+    assert config.get_handlers().get('lolkek123') is None
+    config.add_handlers(lolkek123=new_handler)
+    config.delete_handlers(new_handler)
+    assert config.get_handlers().get('lolkek123') is None
+    config.add_handlers(lolkek123=new_handler, lolkek345=new_handler2)
+    config.delete_handlers('lolkek123', new_handler2)
+    assert config.get_handlers().get('lolkek123') is None
+    assert config.get_handlers().get('lolkek345') is None
+
 def test_add_field(handler):
     """
     Проверяем, что кастомные поля добавляются и работают.
