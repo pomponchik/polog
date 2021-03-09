@@ -14,7 +14,7 @@ class BaseSettings(ReadOnlySingleton):
     service_name = 'base'
     errors_level = 2
     delay_before_exit = 1.0
-    handlers = []
+    handlers = {}
     extra_fields = {}
 
     def __init__(self, **kwargs):

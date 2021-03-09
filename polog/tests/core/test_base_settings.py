@@ -14,7 +14,7 @@ def test_set_and_get():
             'service_name': 'lol',
             'errors_level': 7,
             'delay_before_exit': 5,
-            'handlers': [],
+            'handlers': {},
             'extra_fields': {},
         },
         {
@@ -24,7 +24,7 @@ def test_set_and_get():
             'service_name': 'kek',
             'errors_level': 12,
             'delay_before_exit': 3,
-            'handlers': [],
+            'handlers': {},
             'extra_fields': {},
         },
     ]
