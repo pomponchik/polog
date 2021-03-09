@@ -169,6 +169,7 @@ def test_get_handlers():
     config.add_handlers(new_handler2)
     assert 'lolkekcheburek' in config.get_handlers()
     assert config.get_handlers()['lolkekcheburek'] is new_handler
+    assert config.get_handlers('lolkekcheburek')['lolkekcheburek'] is new_handler
     assert len(config.get_handlers('lolkekcheburek')) == 1
     assert len(config.get_handlers()) > 1
 
