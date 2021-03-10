@@ -56,7 +56,7 @@ def test_affects(handler):
     handler.clean()
     def function_without_flog():
         message('lol', local_variables='kek')
-    @flog()
+    @flog
     def function_with_flog():
         message('lolkek')
     function_without_flog()
@@ -78,3 +78,28 @@ def test_another_field(handler):
     function()
     time.sleep(0.0001)
     assert handler.last['lolkek'] == 'lolkek'
+
+def test_unknown_argument():
+    """
+    Проверяем, что функция поднимает исключение, если подать неизвестный именованный аргумент.
+    """
+    @flog
+    def function():
+        message('lolkek', unknown_argument='kek')
+    config.set(original_exceptions=True)
+    try:
+        function()
+        assert False
+    except KeyError:
+        assert True
+
+def test_wrong_type():
+    @flog
+    def function():
+        message('lolkek', success='kek')
+    config.set(original_exceptions=True)
+    try:
+        function()
+        assert False
+    except ValueError:
+        assert True
