@@ -9,6 +9,7 @@ def test_basic(handler):
     def normal_function():
         message('new text', level=5)
         return True
+    handler.clean()
     normal_function()
     time.sleep(0.0001)
     assert handler.last['message'] == 'new text'
