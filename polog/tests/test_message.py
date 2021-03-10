@@ -94,6 +94,9 @@ def test_unknown_argument():
         assert True
 
 def test_wrong_type():
+    """
+    Проверяем, что если в одно из стандартных полей подать переменную неправильного типа, поднимется исключение.
+    """
     @flog
     def function():
         message('lolkek', success='kek')
