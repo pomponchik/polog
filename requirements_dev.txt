@@ -4,3 +4,4 @@ pip==19.0.3
 twine==1.13.0
 pyparsing>=2.0.2
 pytest==6.1.2
+coverage==5.5
