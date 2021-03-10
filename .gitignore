@@ -12,3 +12,4 @@ build
 .pytest_cache
 *.log
 .coverage
+htmlcov
