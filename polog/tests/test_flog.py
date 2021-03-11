@@ -232,10 +232,10 @@ def test_extract_extra_fields_base():
         return 'hello'
     def extractor_2(args, **kwargs):
         return 'world'
-    class FalseBaseSettings:
+    class FalseSettingsStore:
         extra_fields = {'hello': field(extractor_1), 'world': field(extractor_2)}
     args_dict = {}
-    local_flog = FunctionLogger(settings=FalseBaseSettings())
+    local_flog = FunctionLogger(settings=FalseSettingsStore())
     local_flog.extract_extra_fields(None, args_dict)
     assert args_dict == {'hello': 'hello', 'world': 'world'}
 
@@ -247,10 +247,10 @@ def test_extract_extra_fields_other_type_with_converter():
         return 1
     def extractor_2(args, **kwargs):
         return 2
-    class FalseBaseSettings:
+    class FalseSettingsStore:
         extra_fields = {'1': field(extractor_1, converter=lambda x: str(x) + ' converted'), '2': field(extractor_2, converter=lambda x: str(x) + ' converted')}
     args_dict = {}
-    local_flog = FunctionLogger(settings=FalseBaseSettings())
+    local_flog = FunctionLogger(settings=FalseSettingsStore())
     local_flog.extract_extra_fields(None, args_dict)
     assert args_dict == {'1': '1 converted', '2': '2 converted'}
 
@@ -262,9 +262,9 @@ def test_extract_extra_fields_other_type_without_converter():
         return 1
     def extractor_2(args, **kwargs):
         return 2
-    class FalseBaseSettings:
+    class FalseSettingsStore:
         extra_fields = {'1': field(extractor_1), '2': field(extractor_2)}
     args_dict = {}
-    local_flog = FunctionLogger(settings=FalseBaseSettings())
+    local_flog = FunctionLogger(settings=FalseSettingsStore())
     local_flog.extract_extra_fields(None, args_dict)
     assert args_dict == {'1': '1', '2': '2'}

@@ -2,7 +2,7 @@ from threading import Lock
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 
 
-class BaseSettings(ReadOnlySingleton):
+class SettingsStore(ReadOnlySingleton):
     """
     Здесь хранятся все базовые настройки Polog.
     Данный класс не предназначен для доступа "снаружи". Его должны использовать только другие части Polog.

@@ -1,7 +1,7 @@
 import datetime
 from polog.core.writer import Writer
 from polog.core.levels import Levels
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 from polog.core.utils.not_none_to_dict import not_none_to_dict
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
@@ -31,7 +31,7 @@ class BaseLogger:
         'vars': 'local_variables',
     }
 
-    def __init__(self, settings=BaseSettings()):
+    def __init__(self, settings=SettingsStore()):
         self.settings = settings
 
     def __call__(self, *args, **kwargs):

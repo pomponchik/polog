@@ -2,7 +2,7 @@ import time
 import inspect
 import datetime
 from functools import wraps
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 from polog.core.writer import Writer
 from polog.core.levels import Levels
 from polog.core.registering_functions import RegisteringFunctions
@@ -20,7 +20,7 @@ class FunctionLogger:
     Экземпляры данного класса - декораторы, включающие автоматическое логирование для функций.
     """
 
-    def __init__(self, settings=BaseSettings()):
+    def __init__(self, settings=SettingsStore()):
         self.settings = settings
 
     def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False):

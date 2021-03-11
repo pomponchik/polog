@@ -4,7 +4,7 @@ import pytest
 from polog.handlers.file.base_formatter_fields_extractors import BaseFormatterFieldsExtractors as Extractors
 from polog.core.utils.get_traceback import get_traceback
 from polog import config, json_vars
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 
 
 def test_full_time():
@@ -69,14 +69,14 @@ def test_full_function():
     Поля function и module визуально объединяются, также к ним конкатенируется имя сервиса.
     Проверяем, что это происходит. Проверяем наличие префикса "where: ".
     """
-    assert Extractors.function(**{'function': 'lol'}) == f'where: {BaseSettings.service_name}.lol()'
-    assert Extractors.function(**{'function': 'lol', 'module': 'kek'}) == f'where: {BaseSettings.service_name}.kek.lol()'
+    assert Extractors.function(**{'function': 'lol'}) == f'where: {SettingsStore.service_name}.lol()'
+    assert Extractors.function(**{'function': 'lol', 'module': 'kek'}) == f'where: {SettingsStore.service_name}.kek.lol()'
 
 def test_empty_function():
     """
     Проверка, что при отсутствии поля function возвращается None.
     """
-    assert Extractors.function(**{}) == f'where: {BaseSettings.service_name}.?'
+    assert Extractors.function(**{}) == f'where: {SettingsStore.service_name}.?'
 
 def test_full_input_variables():
     """

@@ -1,4 +1,4 @@
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 from polog.core.levels import Levels
 from polog.core.utils.is_handler import is_handler
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
@@ -37,7 +37,7 @@ class config:
         Новые параметры передаются в виде именованных аргументов. Разрешенные названия аргументов - ключи в self.allowed_settings. Разрешенные типы перечислены в кортежах, которые являются значениями в self.allowed_settings.
         При попытке установить настройку не разрешенного типа - поднимется KeyError.
 
-        Настройки фактически сохраняются в классе BaseSettings. В настоящий момент возможность защита от конкурентной записи настроек НЕ гарантируется.
+        Настройки фактически сохраняются в классе SettingsStore. В настоящий момент возможность защита от конкурентной записи настроек НЕ гарантируется.
 
         Важно: Polog гарантирует применение настроек только в том случае, если они были установлены ДО момента первой записи лога.
         Рекомендуется устанавливать все настройки во входном файле программы, до того, как начнет исполняться основной код.
@@ -58,7 +58,7 @@ class config:
                 handler = config.convert_values[key]
                 value = handler(value)
             new_kwargs[key] = value
-        BaseSettings(**new_kwargs)
+        SettingsStore(**new_kwargs)
 
     @staticmethod
     def levels(**kwargs):
@@ -108,7 +108,7 @@ class config:
         """
         Сохраняем обработчик под каким-то именем.
         """
-        settings = BaseSettings()
+        settings = SettingsStore()
         old_handlers_ids = {id(x) for x in settings.handlers.values()}
         old_ids_and_names = {id(y): x for x, y in settings.handlers.items()}
         old_handlers_names = {x for x in settings.handlers.keys()}
@@ -133,12 +133,12 @@ class config:
         Если ранее не был зарегистрирован обработчик с указанным именем, в возвращаемом словаре вместо него будет None.
         """
         if not names:
-            return {**(BaseSettings().handlers)}
+            return {**(SettingsStore().handlers)}
         result = {}
         for name in names:
             if not isinstance(name, str):
                 raise KeyError('The handler name must be a string.')
-            handler = BaseSettings().handlers.get(name)
+            handler = SettingsStore().handlers.get(name)
             result[name] = handler
         return result
 
@@ -149,18 +149,18 @@ class config:
         Если обработчик будет найден по имени или по id, он будет удален. В противном случае - поднимется исключение.
         Возможно удаление нескольких обработчиков, перечисленных через запятую.
         """
-        ids_to_names = {id(handler): name for name, handler in BaseSettings().handlers.items()}
+        ids_to_names = {id(handler): name for name, handler in SettingsStore().handlers.items()}
         for maybe_name in names:
             if isinstance(maybe_name, str):
                 try:
-                    BaseSettings().handlers.pop(maybe_name)
+                    SettingsStore().handlers.pop(maybe_name)
                 except KeyError:
                     raise KeyError(f'Object {maybe_name} was not registered as a handler.')
             else:
                 object_id = id(maybe_name)
                 if object_id in ids_to_names:
                     handler_name = ids_to_names[object_id]
-                    BaseSettings().handlers.pop(handler_name)
+                    SettingsStore().handlers.pop(handler_name)
                 else:
                     raise ValueError(f'Object {maybe_name} was not registered as a handler.')
 
@@ -173,7 +173,7 @@ class config:
 
         В данном случае поля передаются в виде именованных переменных, где имена переменных - это названия полей, а значения - сами функции.
         """
-        settings = BaseSettings()
+        settings = SettingsStore()
         for key, value in fields.items():
             if not hasattr(value, 'get_data') or not is_handler(value.get_data):
                 raise ValueError('The signature of the field handler must be the same as that of other Polog handlers.')
@@ -184,7 +184,7 @@ class config:
         """
         Удаляем кастомные поля по их названиям. См. метод .add_fields().
         """
-        settings = BaseSettings()
+        settings = SettingsStore()
         for name in fields:
             if not isinstance(name, str):
                 raise KeyError('Fields are deleted by name. The name is an instance of the str class.')

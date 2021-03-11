@@ -1,7 +1,7 @@
 from queue import Queue
 from threading import Thread, Lock
 from polog.core.worker import Worker
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 
 
@@ -12,7 +12,7 @@ class Writer(ReadOnlySingleton):
     is_completed = {}
 
     def __init__(self):
-        settings = BaseSettings()
+        settings = SettingsStore()
         if not hasattr(settings, 'pool_size'):
             raise AttributeError('Atribute "pool_size" is not determinated. Use Config.settings(pool_size=<INTEGER>).')
         self.pool_size = settings.pool_size

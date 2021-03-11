@@ -1,5 +1,5 @@
 import pytest
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 
 
 def test_set_and_get():
@@ -31,5 +31,5 @@ def test_set_and_get():
     for values in all_values:
         for key, value in values.items():
             to_set = {key: value}
-            BaseSettings(**to_set)
-            assert getattr(BaseSettings, key) == value
+            SettingsStore(**to_set)
+            assert getattr(SettingsStore, key) == value

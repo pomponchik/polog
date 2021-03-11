@@ -2,7 +2,7 @@ import inspect
 import importlib
 import ujson as json
 from polog.core.levels import Levels
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 
 
 class BaseFormatterFieldsExtractors:
@@ -89,7 +89,7 @@ class BaseFormatterFieldsExtractors:
         """
         function = kwargs.get('function')
         module = kwargs.get('module')
-        service = BaseSettings.service_name
+        service = SettingsStore.service_name
         if (function is not None) and (module is not None):
             function = cls.search_function_name(function, module)
             result = f'where: {service}.{module}.{function}()'

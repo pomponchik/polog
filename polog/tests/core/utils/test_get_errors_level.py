@@ -1,6 +1,6 @@
 import pytest
 from polog.core.utils.get_errors_level import get_errors_level
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 from polog import config
 
 
@@ -8,7 +8,7 @@ def test_get_base_level():
     """
     Проверяем, что, если локальный уровень логирования в декораторе / функции не установлен, он берется из настроек.
     """
-    assert get_errors_level(None) == BaseSettings().errors_level
+    assert get_errors_level(None) == SettingsStore().errors_level
 
 def test_handle_level():
     """
@@ -24,5 +24,5 @@ def test_error_level():
     Если указать идентификатор уровня, ранее не зарегистрированный в Polog, вернуться должен стандартный уровень логирования для ошибок.
     То же самое должно произойти, если указать невозможный идентификатор уровня (в примере - отрицательный).
     """
-    assert get_errors_level('lolkek') == BaseSettings().errors_level
-    assert get_errors_level(-500) == BaseSettings().errors_level
+    assert get_errors_level('lolkek') == SettingsStore().errors_level
+    assert get_errors_level(-500) == SettingsStore().errors_level

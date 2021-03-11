@@ -1,13 +1,13 @@
 import time
 import atexit
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 
 
 class Worker:
     """
     Экземпляр класса соответствует одному потоку. Здесь происходит непосредственно выполнение функций-обработчиков.
     """
-    def __init__(self, queue, index, settings=BaseSettings()):
+    def __init__(self, queue, index, settings=SettingsStore()):
         self.index = index
         self.queue = queue
         # Метка full нужна, чтобы не завершить поток раньше времени, когда он уже взял таску из очереди, но еще не успел ее обработать.

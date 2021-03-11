@@ -1,6 +1,6 @@
 from contextvars import ContextVar
 from polog.log import log
-from polog.core.base_settings import BaseSettings
+from polog.core.settings_store import SettingsStore
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
 
@@ -12,7 +12,7 @@ class Message:
     При помощи данного класса можно редактировать сообщение и некоторые другие характеристики лога, записываемого через flog(), изнутри задекорированной функции.
     """
     def __init__(self):
-        self.settings = BaseSettings()
+        self.settings = SettingsStore()
 
     def __call__(self, *text, level=None, success=None, e=None, exception=None, exception_type=None, exception_message=None, local_variables=None, **other_fields):
         """
