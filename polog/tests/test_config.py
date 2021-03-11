@@ -46,25 +46,15 @@ def test_set_invalid_key():
     """
     Проверяем, что неправильный ключ настройки использовать не получется и поднимется исключение.
     """
-    try:
+    with pytest.raises(KeyError):
         config.set(invalid_key='lol')
-        assert False
-    except KeyError:
-        assert True
-    except:
-        assert False
 
 def test_set_invalid_value():
     """
     Проверяем, что значение настройки с неправильным типом данных использовать не получется и поднимется исключение.
     """
-    try:
+    with pytest.raises(TypeError):
         config.set(delay_before_exit='lol')
-        assert False
-    except TypeError:
-        assert True
-    except:
-        assert False
 
 def test_levels_set_good_value():
     """
@@ -79,16 +69,10 @@ def test_levels_set_wrong_value():
     """
     Проверяем, что невозможно установить уровень, не являющийся целым неотрицательным числом.
     """
-    try:
+    with pytest.raises(ValueError):
         config.levels(lol=-100)
-        assert False
-    except:
-        assert True
-    try:
+    with pytest.raises(TypeError):
         config.levels(lol=1.5)
-        assert False
-    except:
-        assert True
 
 def test_standart_levels():
     """
@@ -117,11 +101,8 @@ def test_add_handlers_wrong():
     """
     Проверяем, что, если попытаться скормить под видом обработчика не обработчик - поднимется исключение.
     """
-    try:
+    with pytest.raises(ValueError):
         config.add_handlers('lol')
-        assert False
-    except:
-        assert True
 
 def test_add_handlers_wrong_function():
     """
@@ -129,40 +110,29 @@ def test_add_handlers_wrong_function():
     """
     def new_handler(lol, kek):
         pass
-    try:
+    with pytest.raises(ValueError):
         config.add_handlers(new_handler)
-        assert False
-    except ValueError:
-        assert True
 
 def test_add_similar_handlers():
     """
     Проверяем, что один и тот же обработчик нельзя зарегистрировать дважды.
     В норме при такой попытке должно подниматься исключение.
     """
-    try:
+    with pytest.raises(ValueError):
         def new_handler(args, **fields):
             pass
         config.add_handlers(new_handler)
         config.add_handlers(new_handler)
-        assert False
-    except ValueError:
-        assert True
-    try:
+    with pytest.raises(ValueError):
         def new_handler2(args, **fields):
             pass
         config.add_handlers(new_handler2, new_handler2)
-        assert False
-    except ValueError:
-        assert True
-    try:
+    with pytest.raises(ValueError):
         def new_handler3(args, **fields):
             pass
         config.add_handlers(abc=new_handler3)
         config.add_handlers(abcd=new_handler3)
-        assert False
-    except ValueError:
-        assert True
+
 
 def test_get_handlers():
     """

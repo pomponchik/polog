@@ -3,13 +3,6 @@ import pytest
 from polog import flog, logging_is_forbidden
 
 
-
-
-
-
-
-
-
 def test_before(handler):
     """
     Проверяем ситуацию, когда @logging_is_forbidden стоит до логирующего декоратора.

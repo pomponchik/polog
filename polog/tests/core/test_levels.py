@@ -15,22 +15,13 @@ def test_set_and_get_raises():
     """
     Проверяем проверки типов данных для уровней логирования и их алиасов при их чтении / изменении.
     """
-    try:
+    with pytest.raises(KeyError):
         Levels.get(set()) # Пробуем использовать в качестве ключа объект с неподходящим типом данных.
-        assert False
-    except KeyError:
-        assert True
-    try:
+    with pytest.raises(ValueError):
         Levels.set('lol', 'kek') # Пытаемся назначить алиас на алиас.
         # TODO: а почему бы, кстати, не разрешить так делать?
-        assert False
-    except ValueError:
-        assert True
-    try:
+    with pytest.raises(KeyError):
         Levels.set(5, 'kek') # Алиас и числовое значение уровня перепутаны местами.
-        assert False
-    except KeyError:
-        assert True
 
 def test_get_int():
     """

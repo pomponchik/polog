@@ -180,13 +180,8 @@ def test_raise_not_original():
     try:
         raise ValueError
     except Exception as e:
-        try:
+        with pytest.raises(LoggedError):
             flog.reraise_exception(e)
-            assert False # Проверка, что исключение в принципе переподнимается.
-        except LoggedError as e2:
-            assert True
-        except Exception as e2:
-            assert False
 
 def test_log_exception_info():
     """

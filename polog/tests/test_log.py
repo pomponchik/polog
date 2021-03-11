@@ -108,10 +108,7 @@ def test_another_field(handler):
 
 def test_unknown_field(handler):
     """
-    Проверяем, что при попытке записать в поле, не зарегистрированное ранее через конфиг, поднимется исключение.
+    Проверяем, что при попытке записать в поле, не зарегистрированное ранее через config, поднимется исключение.
     """
-    try:
+    with pytest.raises(KeyError):
         log('kek', lolkekcheburek='lol')
-        assert False
-    except KeyError:
-        assert True
