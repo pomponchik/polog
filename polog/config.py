@@ -12,7 +12,7 @@ class config:
     config.set(pool_size=5)
     """
     # Проверки введенных пользователем значений.
-    # Через метод .set() невозможно установить настройку с иным названием или неподходящим типом данных, поднимется KeyError.
+    # Через метод .set() невозможно установить настройку с иным названием (поднимется KeyError) или неподходящим типом данных (ValueError).
     allowed_settings = {
         'pool_size': lambda x: isinstance(x, int) and x > 0,
         'service_name': lambda x: isinstance(x, str) and x.isidentifier(),
