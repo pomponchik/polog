@@ -53,7 +53,7 @@ def test_set_invalid_value():
     """
     Проверяем, что значение настройки с неправильным типом данных использовать не получется и поднимется исключение.
     """
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         config.set(delay_before_exit='lol')
 
 def test_levels_set_good_value():

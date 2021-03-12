@@ -11,15 +11,15 @@ class config:
     Все методы тут статические, что позволяет вызывать их просто через точку, например:
     config.set(pool_size=5)
     """
-    # Разрешенные настройки и соответствующие им типы данных.
+    # Проверки введенных пользователем значений.
     # Через метод .set() невозможно установить настройку с иным названием или неподходящим типом данных, поднимется KeyError.
     allowed_settings = {
-        'pool_size': (int, ),
-        'service_name': (str, ),
-        'level': (int, str),
-        'errors_level': (int, str),
-        'original_exceptions': (bool, ),
-        'delay_before_exit': (float, int, ),
+        'pool_size': lambda x: isinstance(x, int) and x > 0,
+        'service_name': lambda x: isinstance(x, str) and x.isidentifier(),
+        'level': lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str),
+        'errors_level': lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str),
+        'original_exceptions': lambda x: isinstance(x, bool),
+        'delay_before_exit': lambda x: isinstance(x, int) or isinstance(x, float),
     }
     # Функции, которые применяются к пользовательскому вводу настроек перед тем, как их сохранить.
     convert_values = {
@@ -46,14 +46,10 @@ class config:
         for key, value in kwargs.items():
             if key not in config.allowed_settings.keys():
                 raise KeyError(f'"{key}" variable is not allowed for the log settings.')
-            allowed_types = config.allowed_settings.get(key)
-            is_allowed = False
-            for one in allowed_types:
-                if isinstance(value, one):
-                    is_allowed = True
+            prove = config.allowed_settings.get(key)
+            is_allowed = prove(value)
             if not is_allowed:
-                allowed_types = ', '.join(allowed_types)
-                raise TypeError(f'Variable "{key}" has not one of types: {allowed_types}.')
+                raise ValueError(f'The {value} value cannot be used to set the {key} setting.')
             if key in config.convert_values:
                 handler = config.convert_values[key]
                 value = handler(value)
