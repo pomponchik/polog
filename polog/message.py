@@ -85,14 +85,14 @@ class Message:
         Сохраняем переданный пользователем объект в контекстную переменную. При условии, что объект ожидаемого типа. При необходимости, конвертируем в нужный тип.
         """
         if not not_none or var is not None:
-            prove = log.ALLOWED_TYPES.get(name)
+            prove = log._allowed_types.get(name)
             if prove is None:
                 if name not in self.settings.extra_fields:
                     raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
             else:
                 if not prove(var):
                     raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
-            converter = log.CONVERT_VALUES.get(name)
+            converter = log._convert_values.get(name)
             if converter is not None:
                 var = converter(var)
             vars[name] = var

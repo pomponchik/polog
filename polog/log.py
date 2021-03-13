@@ -12,7 +12,7 @@ class BaseLogger:
     Экземпляры данного класса - вызываемые объекты, каждый вызов которых означает создание лога.
     """
 
-    ALLOWED_TYPES = {
+    _allowed_types = {
         'function': lambda x: type(x) is str or callable(x), # Функция, событие в которой логируется. Ожидается либо сам объект функции, либо строка с ее названием.
         'module': lambda x: type(x) is str, # Модуль, событие в котором логируется. Ожидается только название.
         'message': lambda x: type(x) is str, # Сообщение лога, любая строка.
@@ -22,12 +22,12 @@ class BaseLogger:
         'level': lambda x: type(x) is str or type(x) is int, # Уровень важности лога.
         'local_variables': lambda x: type(x) is str, # json с локальными переменными, либо строка от пользователя в свободном формате.
     }
-    CONVERT_VALUES = {
+    _convert_values = {
         'function': lambda x: x if isinstance(x, str) else x.__name__,
         'exception': lambda x: x if isinstance(x, str) else type(x).__name__,
         'level': Levels.get,
     }
-    CONVERT_KEYS = {
+    _convert_keys = {
         'vars': 'local_variables',
     }
 
@@ -39,7 +39,7 @@ class BaseLogger:
         Ручное создание лога.
 
         Первым и единственным позиционным аргументом можно передать сообщение.
-        Именованные аргументы могут быть только с именами, которые перечислены как ключи в ALLOWED_TYPES и с типами значений, которые соответствуют этим ключам.
+        Именованные аргументы могут быть только с именами, которые перечислены как ключи в _allowed_types и с типами значений, которые соответствуют этим ключам.
         Именованный аргумент 'vars' соответствует переменной 'input_variables', передаваемой в обработчики, туда пишутся входные аргументы функций. Чтобы сгенерировать правильную строку для заполнения этого поля, желательно использовать функцию polog.utils.json_vars(), куда можно передать любые аргументы и получить в результате json с ними.
         Не обязательно передавать сюда все возможные именованные аргументы. Передавать нужно только то, что нужно залогировать, именно поэтому они не заданы жестко в данном случае.
         """
@@ -51,18 +51,18 @@ class BaseLogger:
 
         args_dict['time'] = datetime.datetime.now()
         for key, value in kwargs.items():
-            if key not in self.ALLOWED_TYPES:
+            if key not in self._allowed_types:
                 if key in self.settings.extra_fields:
                     args_dict[key] = str(value)
                 else:
-                    raise KeyError(f'Unknown argument name "{key}". Allowed arguments: {", ".join(self.ALLOWED_TYPES.keys())} and users fields.')
+                    raise KeyError(f'Unknown argument name "{key}". Allowed arguments: {", ".join(self._allowed_types.keys())} and users fields.')
             else:
-                if not self.ALLOWED_TYPES[key](value):
+                if not self._allowed_types[key](value):
                     raise ValueError(f'Type "{type(value).__name__}" is not allowed for variable "{key}".')
-                if key in self.CONVERT_VALUES:
-                    value = self.CONVERT_VALUES[key](value)
-                if key in self.CONVERT_KEYS:
-                    key = self.CONVERT_KEYS[key]
+                if key in self._convert_values:
+                    value = self._convert_values[key](value)
+                if key in self._convert_keys:
+                    key = self._convert_keys[key]
             not_none_to_dict(args_dict, key, value)
         if not ('level' in kwargs):
             args_dict['level'] = self.settings.level
