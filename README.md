@@ -777,7 +777,7 @@ config.add_handlers(file_writer('file.log', rotation='200 megabytes >> archive.l
 
 ### Включаем оповещения по электронной почте
 
-Еще один встроенных [обработчиков](#обработчики) Polog позволяет вам настроить отправку электронных писем по [SMTP](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)-протоколу. Вам это может пригодиться для быстрого реагирования на какие-то особо критичные события в вашем сервисе.
+Еще один встроенных [обработчиков](#обработчики) Polog позволяет настроить отправку электронных писем по [SMTP](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)-протоколу. Вам это может пригодиться для быстрого реагирования на какие-то особо критичные события в вашем сервисе.
 
 Подключается так:
 
@@ -786,7 +786,7 @@ from polog import config, SMTP_sender
 
 
 # Адреса и пароль абсолютно случайны.
-config.add_handlers(SMTP_sender('from_me42@yandex.com', 'JHjhhb87TY(*Ny08z)', 'smtp.yandex.ru', 'to_me@yandex.ru'))
+config.add_handlers(SMTP_sender('from_me42@yandex.com', 'JHjhhb87TY*Ny08z)', 'smtp.yandex.ru', 'to_me@yandex.ru'))
 ```
 
 ```SMTP_sender``` - это вызываемый класс. Обязательных аргументов для его инициализации 4: адрес, с которого мы посылаем письма, пароль от ящика, адрес сервера, к которому мы подключаемся, и адрес, куда мы посылаем письма.
