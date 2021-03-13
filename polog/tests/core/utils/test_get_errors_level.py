@@ -24,5 +24,5 @@ def test_error_level():
     Если указать идентификатор уровня, ранее не зарегистрированный в Polog, вернуться должен стандартный уровень логирования для ошибок.
     То же самое должно произойти, если указать невозможный идентификатор уровня (в примере - отрицательный).
     """
-    assert get_errors_level('lolkek') == SettingsStore().errors_level
+    assert get_errors_level('lolkekololo') == SettingsStore().errors_level
     assert get_errors_level(-500) == SettingsStore().errors_level

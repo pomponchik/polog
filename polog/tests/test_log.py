@@ -112,3 +112,14 @@ def test_unknown_field(handler):
     """
     with pytest.raises(KeyError):
         log('kek', lolkekcheburek='lol')
+
+def test_getattribute(handler):
+    """
+    log() должно быть возможно вызывать не только непосредственно, но и через методы, имена которых соответствуют зарегистрированным пользователем уровням логирования.
+    """
+    handler.clean()
+    config.levels(lolkek=777)
+    log.lolkek("kek, i'm a cheburek")
+    time.sleep(0.0001)
+    assert handler.last['level'] == 777
+    assert handler.last['message'] == "kek, i'm a cheburek"

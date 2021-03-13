@@ -1,4 +1,5 @@
 import datetime
+import functools
 from polog.core.writer import Writer
 from polog.core.levels import Levels
 from polog.core.settings_store import SettingsStore
@@ -85,6 +86,16 @@ class BaseLogger:
         args_dict['auto'] = False
         # TODO: переписать это говно нормально.
         Writer().write((None, None), **args_dict)
+
+    def __getattribute__(self, name):
+        """
+        Экземпляр класса BaseLogger можно вызывать как непосредственно, так и через "методы", названия которых соответствуют зарегистрированным пользователем уровням логирования.
+        Если использован второй вариант, уровень логирования подхватится автоматически.
+        """
+        getattr = lambda name: object.__getattribute__(self, name)
+        if name in Levels.levels:
+            return functools.partial(self, level=name)
+        return getattr(name)
 
 
 log = BaseLogger()
