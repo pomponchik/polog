@@ -123,3 +123,10 @@ def test_getattribute(handler):
     time.sleep(0.0001)
     assert handler.last['level'] == 777
     assert handler.last['message'] == "kek, i'm a cheburek"
+
+def test_multiple_args():
+    """
+    Проверяем, что поднимается исключение, если вызвать log() с более чем одним позиционным аргументом.
+    """
+    with pytest.raises(ValueError):
+        log('lol', 'kek')
