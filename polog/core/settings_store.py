@@ -14,6 +14,7 @@ class SettingsStore(ReadOnlySingleton):
     service_name = 'base'
     errors_level = 2
     delay_before_exit = 1.0
+    silent_internal_exceptions = False
     handlers = {}
     extra_fields = {}
 

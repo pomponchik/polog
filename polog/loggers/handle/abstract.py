@@ -1,5 +1,6 @@
 import functools
 from polog.core.levels import Levels
+from polog.core.settings_store import SettingsStore
 
 
 class AbstractHandleLogger:
@@ -24,9 +25,21 @@ class AbstractHandleLogger:
 
     def __getattribute__(self, name):
         """
-        Экземпляр класса BaseLogger можно вызывать как непосредственно, так и через "методы", названия которых соответствуют зарегистрированным пользователем уровням логирования.
-        Если использован второй вариант, уровень логирования подхватится автоматически.
+        Экземпляр класса-наследника можно вызывать как непосредственно, так и через "методы", названия которых соответствуют зарегистрированным пользователем уровням логирования.
+        Если использован второй вариант, уровень логирования подставится автоматически.
         """
         if name in Levels.levels:
             return functools.partial(self, level=name)
         return object.__getattribute__(self, name)
+
+    @staticmethod
+    def maybe_raise(exception, message):
+        """
+        При реальном использовании логгер не должен аффектить работу основной программы.
+        Даже в случае, когда он был использован неправильно, он должен подавить возникшее исключение и по возможности залогировать хоть что-то.
+        На этапе отладки наоборот, рекомендуется отключить подавление исключений, чтобы ошибки использования логгера были явными.
+
+        Управлять режимом подавления исключений можно через config, манипулируя настройкой silent_internal_exceptions.
+        """
+        if not SettingsStore().silent_internal_exceptions:
+            raise exception(message)

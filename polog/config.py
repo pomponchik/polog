@@ -20,6 +20,7 @@ class config:
         'errors_level': lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str),
         'original_exceptions': lambda x: isinstance(x, bool),
         'delay_before_exit': lambda x: isinstance(x, int) or isinstance(x, float),
+        'silent_internal_exceptions': lambda x: isinstance(x, bool),
     }
     # Функции, которые применяются к пользовательскому вводу настроек перед тем, как их сохранить.
     convert_values = {
