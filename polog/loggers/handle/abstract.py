@@ -56,13 +56,9 @@ class AbstractHandleLogger:
         return object.__getattribute__(self, name)
 
     def __call__(self, *args, **kwargs):
-        print('kek 1')
         fields = self._prepare_data(args, kwargs)
-        print('kek 2')
         self._specific_processing(fields)
-        print('kek 3')
         self._push(fields)
-        print('kek 4')
 
     def _specific_processing(self, fields):
         pass
@@ -140,7 +136,6 @@ class AbstractHandleLogger:
 
     def _extract_exception(self, fields, change_success=False, change_level=False):
         if 'exception' in fields:
-            print('before exc', fields)
             if isinstance(fields['exception'], Exception):
 
                 exception_to_dict(fields, fields['exception'])
@@ -154,7 +149,6 @@ class AbstractHandleLogger:
                 fields['success'] = False
             if change_level and not ('level' in fields):
                 fields['level'] = self.settings.errors_level
-            print('after exc', fields)
 
     @staticmethod
     def _maybe_raise(exception, message):
