@@ -17,10 +17,9 @@ def test_empty(handler):
     config.set(level=1)
     function()
     time.sleep(0.0001)
-    log = handler.last
-    assert log is not None
-    assert log['module'] == function.__module__
-    assert log['function'] == function.__name__
+    assert handler.last is not None
+    assert handler.last['module'] == function.__module__
+    assert handler.last['function'] == function.__name__
 
 def test_empty_async(handler):
     """
@@ -49,8 +48,7 @@ def test_message(handler):
     config.set(level=1)
     function()
     time.sleep(0.0001)
-    message = handler.last['message']
-    assert message == 'base text'
+    assert handler.last['message'] == 'base text'
 
 def test_double(handler):
     """

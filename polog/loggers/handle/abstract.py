@@ -10,7 +10,10 @@ class AbstractHandleLogger:
     """
     Базовый класс для всех "ручных" логгеров.
     Автоматизирует проверку аргументов и прочие общие моменты.
+
     Для создания нового ручного логгера достаточно отнаследоваться и переопределить метод ._push().
+    Также необходимо переопределить ._specific_processing(), если извлеченным полям лога требуется какая-то дополнительная обработка.
+    Переопределив словарь ._default_values, можно изменить набор полей, значения к которым проставляются автоматически.
     """
     # Ключи в словаре - названия полей, значения - функции для проверки содержимого аргументов функций.
     _allowed_types = {
@@ -25,7 +28,6 @@ class AbstractHandleLogger:
     }
     # Функции, изменяющие исходные аргументы функций.
     _convert_values = {
-        'function': lambda x: x if isinstance(x, str) else x.__name__,
         'level': Levels.get,
     }
     # Сокращения аргументов и их полные формы.
@@ -137,11 +139,9 @@ class AbstractHandleLogger:
     def _extract_exception(self, fields, change_success=False, change_level=False):
         if 'exception' in fields:
             if isinstance(fields['exception'], Exception):
-
                 exception_to_dict(fields, fields['exception'])
                 fields['traceback'] = get_traceback()
                 fields['local_variables'] = get_locals_from_traceback()
-
             elif isinstance(fields['exception'], str):
                 fields['exception_type'] = fields['exception']
             fields.pop('exception')
