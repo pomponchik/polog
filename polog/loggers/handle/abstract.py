@@ -37,6 +37,9 @@ class AbstractHandleLogger:
     _position_args = {
         1: 'message',
     }
+    # Ключи - названия полей, значения - функции.
+    # Каждая из этих функций должна принимать словарь с уже ранее извлеченными значениями полей и возвращать значение поля, название которого является ключом.
+    _default_values = {}
 
     def __init__(self, settings=SettingsStore()):
         self.settings = settings
@@ -54,10 +57,21 @@ class AbstractHandleLogger:
         fields = {}
         self._position_args_to_dict(args, fields, self._position_args)
         self._kwargs_to_dict(kwargs, fields)
+        self._extract_exception(fields)
+        self._defaults_to_dict(fields)
         self._push(fields)
 
     def _push(self, fields):
         raise NotImplementedError
+
+    def _defaults_to_dict(self, fields):
+        """
+        Некоторые значения являются обязательными, но от пользователя не поступили. В этом случае мы генерируем их автоматически.
+        В словаре self._default_values по ключам в виде названий полей лога хранятся функции. Каждая такая функция должна принимать словарь с ранее уже извлеченными полями лога и возвращать содержимое обязательного поля.
+        """
+        for key, get_default in self._default_values.items():
+            if key not in fields:
+                fields[key] = get_default(fields)
 
     def _kwargs_to_dict(self, kwargs, destination, raise_if_collision=True):
         """
@@ -107,6 +121,23 @@ class AbstractHandleLogger:
                 destination[name] = position_args[index]
             except IndexError:
                 pass
+
+    def _extract_exception(self, fields):
+        if 'exception' in fields:
+            if not (type(kwargs['exception']) is str):
+                exception_to_dict(args_dict, kwargs['exception'])
+
+        if 'exception' in kwargs:
+            # Проверяем, что передано само исключение, а не его название.
+            if not (type(kwargs['exception']) is str):
+                exception_to_dict(args_dict, kwargs['exception'])
+                args_dict['traceback'] = get_traceback()
+                args_dict['local_variables'] = get_locals_from_traceback()
+            args_dict['success'] = args_dict['success'] if 'success' in kwargs else False
+            if not ('level' in kwargs):
+                # Если передано исключение, используем уровень логирования, соответствующий ошибкам.
+                args_dict['level'] = self.settings.errors_level
+            args_dict.pop('exception')
 
     @staticmethod
     def _maybe_raise(exception, message):
