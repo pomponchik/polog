@@ -1,6 +1,6 @@
 import time
 import pytest
-from polog import clog, flog
+from polog import clog, flog, config
 
 
 @clog('important_method', message='base_message')
@@ -27,6 +27,7 @@ def test_important_method(handler):
     Проверка, что указанные в декораторе класса по именам методы логируются.
     """
     handler.clean()
+    config.set(level=1)
     ExampleOne().important_method()
     time.sleep(0.0001)
     assert handler.last is not None
@@ -52,6 +53,7 @@ def test_none_names(handler):
     Проверка, что, если в декораторе класса не указаны имена методов, то логируются все.
     """
     handler.clean()
+    config.set(level=1)
     ExampleTwo().one_method()
     time.sleep(0.0001)
     assert handler.last is not None
@@ -62,6 +64,7 @@ def test_flog(handler):
     Проверка, что при перекрестном логировании с flog все идет по плану.
     """
     handler.clean()
+    config.set(level=1)
     ExampleTwo().two_method()
     time.sleep(0.0001)
     assert len(handler.all) == 1
@@ -72,6 +75,7 @@ def test_inherit_affect(handler):
     Проверяем, что последний класс в иерархии наследования не аффектит работу своих предков при навешивании на него @clog.
     """
     handler.clean()
+    config.set(level=1)
     class A:
         def a(self):
             pass
@@ -88,6 +92,7 @@ def test_inherit_affect_2(handler):
     Еще одна проверка, что декорирование класса не аффектит предков.
     """
     handler.clean()
+    config.set(level=1)
     @clog(message='message a')
     class A:
         def a(self):
@@ -116,6 +121,7 @@ def test_inherit_affect_3(handler):
     Проверяем, что когда мы указываем в некоем классе список методов для логирования, унаследованные от залогированного класса методы, не перечисленные в данном списке, логироваться не будут.
     """
     handler.clean()
+    config.set(level=1)
     @clog(message='message a')
     class A:
         def a(self):

@@ -1,5 +1,5 @@
 import inspect
-from polog.flog import flog
+from polog.loggers.auto.flog import flog
 from polog.core.registering_functions import RegisteringFunctions
 
 
@@ -7,7 +7,7 @@ class ClassLogger:
     """
     Экземпляры данного класса - готовые декораторы для других классов.
     """
-    
+
     def __call__(self, *methods, message=None, level=1, errors_level=None):
         """
         Фабрика декораторов классов. Можно вызывать как со скобками, так и без.

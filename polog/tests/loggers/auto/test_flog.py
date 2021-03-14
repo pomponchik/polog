@@ -2,7 +2,7 @@ import time
 import asyncio
 import pytest
 from polog import flog, config, LoggedError, field
-from polog.flog import FunctionLogger
+from polog.loggers.auto.flog import FunctionLogger
 from polog.utils.json_vars import json_one_variable
 
 
@@ -14,6 +14,7 @@ def test_empty(handler):
     def function():
         return True
     handler.clean()
+    config.set(level=1)
     function()
     time.sleep(0.0001)
     log = handler.last
@@ -29,8 +30,9 @@ def test_empty_async(handler):
     async def function():
         return True
     handler.clean()
+    config.set(level=1)
     asyncio.run(function())
-    time.sleep(0.0001)
+    time.sleep(0.001)
     log = handler.last
     assert log is not None
     assert log['module'] == function.__module__
@@ -44,6 +46,7 @@ def test_message(handler):
     def function():
         return True
     handler.clean()
+    config.set(level=1)
     function()
     time.sleep(0.0001)
     message = handler.last['message']
@@ -58,6 +61,7 @@ def test_double(handler):
     def function():
         return True
     handler.clean()
+    config.set(level=1)
     function()
     time.sleep(0.0001)
     assert len(handler.all) == 1

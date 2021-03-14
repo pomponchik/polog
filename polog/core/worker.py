@@ -37,7 +37,6 @@ class Worker:
         """
         Выполняем кастомные обработчики для записи логов. Если один из них поднимет исключение, гасим его и продолжаем выполнять оставшиеся обработчики.
         """
-
         for handler in self.settings.handlers.values():
             try:
                 handler(args, **kwargs, service_name=self.settings.service_name)

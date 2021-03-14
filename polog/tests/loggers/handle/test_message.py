@@ -31,16 +31,19 @@ def test_basic_exception(handler):
     @flog(message='base text')
     def error_function_3():
         message(exception_type='ValueError', exception_message='new message')
+    handler.clean()
     error_function()
-    time.sleep(0.0001)
+    time.sleep(0.01)
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'exception text'
+    handler.clean()
     error_function_2()
-    time.sleep(0.0001)
+    time.sleep(0.01)
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'exception text 2'
+    handler.clean()
     error_function_3()
-    time.sleep(0.0001)
+    time.sleep(0.01)
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'new message'
 
