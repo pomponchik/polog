@@ -141,14 +141,11 @@ class FunctionLogger:
                     args_dict['input_variables'] = input_variables
                 self.extract_extra_fields((args, kwargs), args_dict)
                 Writer().write((args, kwargs), **args_dict)
-        else:
-            print('else error')
 
     def log_normal_info(self, result, finish, start, args_dict, level, *args, **kwargs):
         """
         Заполнение автоматических полей в случае, когда исключения не было.
         """
-        print(args_dict)
         level = Levels.get(level)
         if level >= self.settings.level:
             args_dict['success'] = True
@@ -161,8 +158,6 @@ class FunctionLogger:
                 args_dict['input_variables'] = input_variables
             self.extract_extra_fields((args, kwargs), args_dict)
             Writer().write((args, kwargs), **args_dict)
-        else:
-            print('else orig', level, self.settings.level)
 
     def extract_extra_fields(self, args, args_dict):
         """

@@ -6,31 +6,13 @@ from polog.core.settings_store import SettingsStore
 from polog.core.utils.not_none_to_dict import not_none_to_dict
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
+from polog.loggers.handle.abstract import AbstractHandleLogger
 
 
-class BaseLogger:
+class BaseLogger(AbstractHandleLogger):
     """
     Экземпляры данного класса - вызываемые объекты, каждый вызов которых означает создание лога.
     """
-
-    _allowed_types = {
-        'function': lambda x: type(x) is str or callable(x), # Функция, событие в которой логируется. Ожидается либо сам объект функции, либо строка с ее названием.
-        'module': lambda x: type(x) is str, # Модуль, событие в котором логируется. Ожидается только название.
-        'message': lambda x: type(x) is str, # Сообщение лога, любая строка.
-        'exception': lambda x: type(x) is str or isinstance(x, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, поля с названием исключения и его сообщением будут заполнены автоматически.
-        'vars': lambda x: type(x) is str, # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
-        'success': lambda x: type(x) is bool, # Успех / провал операции, которая логируется.
-        'level': lambda x: type(x) is str or type(x) is int, # Уровень важности лога.
-        'local_variables': lambda x: type(x) is str, # json с локальными переменными, либо строка от пользователя в свободном формате.
-    }
-    _convert_values = {
-        'function': lambda x: x if isinstance(x, str) else x.__name__,
-        'exception': lambda x: x if isinstance(x, str) else type(x).__name__,
-        'level': Levels.get,
-    }
-    _convert_keys = {
-        'vars': 'local_variables',
-    }
 
     def __init__(self, settings=SettingsStore()):
         self.settings = settings
@@ -86,16 +68,6 @@ class BaseLogger:
         args_dict['auto'] = False
         # TODO: переписать это говно нормально.
         Writer().write((None, None), **args_dict)
-
-    def __getattribute__(self, name):
-        """
-        Экземпляр класса BaseLogger можно вызывать как непосредственно, так и через "методы", названия которых соответствуют зарегистрированным пользователем уровням логирования.
-        Если использован второй вариант, уровень логирования подхватится автоматически.
-        """
-        getattr = lambda name: object.__getattribute__(self, name)
-        if name in Levels.levels:
-            return functools.partial(self, level=name)
-        return getattr(name)
 
 
 log = BaseLogger()

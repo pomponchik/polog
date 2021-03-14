@@ -1,13 +1,13 @@
 from contextvars import ContextVar
-from polog.loggers.handle.log import log
 from polog.core.settings_store import SettingsStore
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
+from polog.loggers.handle.abstract import AbstractHandleLogger
 
 
 context = ContextVar('context')
 
-class Message:
+class Message(AbstractHandleLogger):
     """
     При помощи данного класса можно редактировать сообщение и некоторые другие характеристики лога, записываемого через flog(), изнутри задекорированной функции.
     """
@@ -85,14 +85,14 @@ class Message:
         Сохраняем переданный пользователем объект в контекстную переменную. При условии, что объект ожидаемого типа. При необходимости, конвертируем в нужный тип.
         """
         if not not_none or var is not None:
-            prove = log._allowed_types.get(name)
+            prove = self._allowed_types.get(name)
             if prove is None:
                 if name not in self.settings.extra_fields:
                     raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
             else:
                 if not prove(var):
                     raise ValueError(f'Type "{type(var).__name__}" is not allowed for variable "{name}".')
-            converter = log._convert_values.get(name)
+            converter = self._convert_values.get(name)
             if converter is not None:
                 var = converter(var)
             vars[name] = var
