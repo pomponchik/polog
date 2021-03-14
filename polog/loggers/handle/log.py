@@ -14,9 +14,6 @@ class BaseLogger(AbstractHandleLogger):
     Экземпляры данного класса - вызываемые объекты, каждый вызов которых означает создание лога.
     """
 
-    def __init__(self, settings=SettingsStore()):
-        self.settings = settings
-
     def __call__(self, *args, **kwargs):
         """
         Ручное создание лога.
