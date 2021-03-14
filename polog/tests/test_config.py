@@ -41,6 +41,11 @@ def test_set_valid_key_delay_before_exit():
     assert SettingsStore().pool_size == 1
     config.set(pool_size=2)
     assert SettingsStore().pool_size == 2
+    # silent_internal_exceptions
+    config.set(silent_internal_exceptions=True)
+    assert SettingsStore().silent_internal_exceptions == True
+    config.set(silent_internal_exceptions=False)
+    assert SettingsStore().silent_internal_exceptions == False
 
 def test_set_invalid_key():
     """
