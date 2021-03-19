@@ -35,7 +35,7 @@ class FunctionLogger:
                 """
                 Обертка для корутин, вызов обернутой функции происходит через await.
                 """
-                _message.clean_context()
+                _message._clean_context()
                 args_dict = self.get_base_args_dict(func, message)
                 try:
                     start = time.time()
@@ -53,7 +53,7 @@ class FunctionLogger:
                 """
                 Обертка для обычных функций.
                 """
-                _message.clean_context()
+                _message._clean_context()
                 args_dict = self.get_base_args_dict(func, message)
                 try:
                     start = time.time()
@@ -136,7 +136,7 @@ class FunctionLogger:
                 args_dict['time_of_work'] = finish - start
                 args_dict['level'] = errors_level
                 input_variables = json_vars(*args, **kwargs)
-                _message.copy_context(args_dict)
+                _message._copy_context(args_dict)
                 if not (input_variables is None):
                     args_dict['input_variables'] = input_variables
                 self.extract_extra_fields((args, kwargs), args_dict)
@@ -152,7 +152,7 @@ class FunctionLogger:
             args_dict['result'] = json_one_variable(result)
             args_dict['time_of_work'] = finish - start
             args_dict['level'] = level
-            _message.copy_context(args_dict)
+            _message._copy_context(args_dict)
             input_variables = json_vars(*args, **kwargs)
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables

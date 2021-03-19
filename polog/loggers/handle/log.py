@@ -1,6 +1,7 @@
 import datetime
 from polog.core.writer import Writer
 from polog.core.settings_store import SettingsStore
+from polog.core.utils.is_level_sufficient import is_level_sufficient
 from polog.loggers.handle.abstract import AbstractHandleLogger
 
 
@@ -19,13 +20,30 @@ class BaseLogger(AbstractHandleLogger):
         self._extract_function_data(fields)
 
     def _extract_function_data(self, fields):
+        """
+        Если пользователь передал объект функции, из него извлекаются название функции и модуль, в котором она была объявлена.
+        Также пользователь может передать название функции, в этом случае никаких преобразований с ним делаться не будет.
+
+        fields - словарь с извлеченными из переданных пользователем аргументов данными.
+        """
         function = fields.get('function')
         if function is not None and callable(function):
-            fields['function'] = function.__name__
-            fields['module'] = function.__module__
+            try:
+                fields['function'] = function.__name__
+            except AttributeError:
+                pass
+            try:
+                fields['module'] = function.__module__
+            except AttributeError:
+                pass
 
     def _push(self, fields):
-        Writer().write((None, None), **fields)
+        """
+        Передаем словарь fields в общую очередь логов.
+        Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать.
+        """
+        if is_level_sufficient(fields.get('success'), fields.get('level')):
+            Writer().write((None, None), **fields)
 
 
 log = BaseLogger()
