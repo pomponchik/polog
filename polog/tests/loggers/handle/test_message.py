@@ -30,7 +30,7 @@ def test_basic_exception(handler):
             message(exception=e)
     @flog(message='base text')
     def error_function_3():
-        message(exception_type='ValueError', exception_message='new message')
+        message(exception=ValueError('new message'))
     handler.clean()
     error_function()
     time.sleep(0.01)

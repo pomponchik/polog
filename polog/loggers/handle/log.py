@@ -1,7 +1,6 @@
 import datetime
 from polog.core.writer import Writer
 from polog.core.settings_store import SettingsStore
-from polog.core.utils.is_level_sufficient import is_level_sufficient
 from polog.loggers.handle.abstract import AbstractHandleLogger
 
 
@@ -42,7 +41,7 @@ class BaseLogger(AbstractHandleLogger):
         Передаем словарь fields в общую очередь логов.
         Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать.
         """
-        if is_level_sufficient(fields.get('success'), fields.get('level')):
+        if fields.get('level') >= self.settings.level:
             Writer().write((None, None), **fields)
 
 
