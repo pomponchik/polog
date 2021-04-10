@@ -85,6 +85,7 @@ def test_unknown_argument():
     def function():
         message('lolkek', unknown_argument='kek')
     config.set(original_exceptions=True)
+    config.set(silent_internal_exceptions=False)
     with pytest.raises(KeyError):
         function()
 
@@ -96,5 +97,6 @@ def test_wrong_type():
     def function():
         message('lolkek', success='kek')
     config.set(original_exceptions=True)
+    config.set(silent_internal_exceptions=False)
     with pytest.raises(ValueError):
         function()

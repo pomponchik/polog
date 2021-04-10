@@ -53,11 +53,9 @@ def test_raise(handler):
     Проверка, что при неправильно поданном типе именованной переменной возникает исключение.
     """
     handler.clean()
-    try:
+    config.set(silent_internal_exceptions=False)
+    with pytest.raises(ValueError):
         log('lol', function=1)
-        assert False
-    except ValueError:
-        pass
 
 non_local = []
 
@@ -110,6 +108,7 @@ def test_unknown_field(handler):
     """
     Проверяем, что при попытке записать в поле, не зарегистрированное ранее через config, поднимется исключение.
     """
+    config.set(silent_internal_exceptions=False)
     with pytest.raises(KeyError):
         log('kek', lolkekcheburek='lol')
 
@@ -128,5 +127,6 @@ def test_multiple_args():
     """
     Проверяем, что поднимается исключение, если вызвать log() с более чем одним позиционным аргументом.
     """
+    config.set(silent_internal_exceptions=False)
     with pytest.raises(ValueError):
         log('lol', 'kek')

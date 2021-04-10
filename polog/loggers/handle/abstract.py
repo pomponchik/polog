@@ -52,7 +52,7 @@ class AbstractHandleLogger:
     _forbidden_fields = set()
 
     def __init__(self, settings=SettingsStore()):
-        self.settings = settings
+        self._settings = settings
 
     def __getattribute__(self, name):
         """
@@ -138,7 +138,7 @@ class AbstractHandleLogger:
                 if not prove(value):
                     self._maybe_raise(ValueError, f'The "{key}" argument is in the wrong format.')
                     continue
-            elif key in self.settings.extra_fields:
+            elif key in self._settings.extra_fields:
                 value = str(value)
             else:
                 self._maybe_raise(KeyError, f'Unknown argument name "{key}". Allowed arguments: {", ".join(self._allowed_types.keys())} and users fields.')
@@ -199,7 +199,7 @@ class AbstractHandleLogger:
             if change_success:
                 fields['success'] = False
             if change_level and not ('level' in fields):
-                fields['level'] = self.settings.errors_level
+                fields['level'] = self._settings.errors_level
 
     @staticmethod
     def _maybe_raise(exception, message):
@@ -208,7 +208,7 @@ class AbstractHandleLogger:
         Даже в случае, когда он был использован неправильно, он должен подавить возникшее исключение и по возможности залогировать хоть что-то.
         На этапе отладки наоборот, рекомендуется отключить подавление исключений, чтобы ошибки использования логгера были явными.
 
-        Управлять режимом подавления исключений можно через config, манипулируя настройкой silent_internal_exceptions.
+        Управлять режимом подавления исключений можно через config(), манипулируя настройкой silent_internal_exceptions.
 
         exception - класс исключения, которое может быть поднято.
         message - сообщение, с которым исключение exception может быть поднято.

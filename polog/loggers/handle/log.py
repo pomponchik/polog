@@ -41,7 +41,7 @@ class BaseLogger(AbstractHandleLogger):
         Передаем словарь fields в общую очередь логов.
         Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать.
         """
-        if fields.get('level') >= self.settings.level:
+        if fields.get('level') >= self._settings.level:
             Writer().write((None, None), **fields)
 
 
