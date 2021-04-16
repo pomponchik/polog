@@ -206,3 +206,28 @@ def test_delete_field(handler):
     function()
     time.sleep(0.0001)
     assert handler.last.fields.get('new_field') is None
+
+def test_double_name_set_handler():
+    """
+    Запрещено дважды пытаться присвоить одно и то же имя одному или нескольким обработчикам.
+    Проверяем, что в этом случае поднимается исключение.
+    """
+    def local_handler(a, **b):
+        pass
+    with pytest.raises(KeyError):
+        config.add_handlers(ggg=local_handler)
+        config.add_handlers(ggg=local_handler)
+
+def test_get_handlers_not_str():
+    """
+    Проверяем, что поднимается исключение, когда мы вместо имени обработчика (то есть строки) используем любой другой объект.
+    """
+    with pytest.raises(KeyError):
+        handlers = config.get_handlers(1)
+
+def test_delete_fields_not_str():
+    """
+    Проверяем, что поднимается исключение, когда мы вместо имени поля (то есть строки) используем любой другой объект.
+    """
+    with pytest.raises(KeyError):
+        handlers = config.delete_fields(1)
