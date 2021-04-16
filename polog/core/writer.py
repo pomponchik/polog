@@ -13,8 +13,6 @@ class Writer(ReadOnlySingleton):
 
     def __init__(self):
         settings = SettingsStore()
-        if not hasattr(settings, 'pool_size'):
-            raise AttributeError('Atribute "pool_size" is not determinated. Use Config.settings(pool_size=<INTEGER>).')
         self.pool_size = settings.pool_size
         assert self.pool_size > 0
         assert type(self.pool_size) is int
