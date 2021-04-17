@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from polog.core.utils.is_handler import is_handler
 
 
@@ -68,6 +69,7 @@ class BaseHandler:
         if callable(self.alt):
             return self.alt(args, **kwargs)
 
+    @abstractmethod
     def do(self, content):
         """
         Здесь происходит "магия" - лог записывается или отправляется куда-то.
@@ -75,14 +77,15 @@ class BaseHandler:
 
         Рекомендуем отделить класс, непосредственно работающий с низкоуровневым механизмом записи / отправки логов, от класса, унаследованного от BaseHandler, и здесь вызывать только какой-то его метод.
         """
-        raise NotImplementedError
+        pass # pragma: no cover
 
+    @abstractmethod
     def get_content(self, args, **kwargs):
         """
         Метод, который возвращает объект, с которым что-то будет делать self.do().
         В большинстве реализаций обработчиков это будет специфически отформатированная строка.
         """
-        raise NotImplementedError
+        pass # pragma: no cover
 
     def do_input_proves(self, **kwargs):
         """
