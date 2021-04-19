@@ -1,7 +1,7 @@
 import time
 import json
 import pytest
-from polog import log, json_vars, field, config
+from polog import handle_log as log, json_vars, field, config
 
 
 def test_base(handler):

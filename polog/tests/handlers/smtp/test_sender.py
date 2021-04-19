@@ -1,7 +1,7 @@
 import time
 import pytest
 from polog.handlers.smtp.sender import SMTP_sender
-from polog import log, config
+from polog import handle_log as log, config
 
 
 lst = []

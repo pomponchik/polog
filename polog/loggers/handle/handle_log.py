@@ -45,4 +45,4 @@ class BaseLogger(AbstractHandleLogger):
             Writer().write((None, None), **fields)
 
 
-log = BaseLogger()
+handle_log = BaseLogger()

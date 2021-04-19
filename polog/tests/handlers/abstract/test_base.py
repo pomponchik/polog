@@ -1,7 +1,7 @@
 import time
 import pytest
 from polog.handlers.abstract.base import BaseHandler
-from polog import log, json_vars
+from polog import handle_log as log, json_vars
 
 
 class ConcreteHandler(BaseHandler):

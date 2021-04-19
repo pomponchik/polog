@@ -2,7 +2,7 @@ import time
 import asyncio
 import pytest
 from polog import flog, config, LoggedError, field
-from polog.loggers.auto.flog import FunctionLogger
+from polog.loggers.auto.function_logger import FunctionLogger
 from polog.utils.json_vars import json_one_variable
 
 

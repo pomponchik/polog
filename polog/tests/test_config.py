@@ -1,6 +1,6 @@
 import time
 import pytest
-from polog import config, log, field, flog
+from polog import config, handle_log as log, field, flog
 from polog.core.settings_store import SettingsStore
 from polog.core.levels import Levels
 
