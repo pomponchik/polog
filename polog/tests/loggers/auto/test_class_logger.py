@@ -3,7 +3,7 @@ import pytest
 from polog import clog, flog, config
 
 
-@clog('important_method', message='base_message')
+@clog(methods=('important_method',), message='base_message')
 class ExampleOne:
     field = 'test'
 
@@ -126,7 +126,7 @@ def test_inherit_affect_3(handler):
     class A:
         def a(self):
             pass
-    @clog('b', message='message b')
+    @clog(methods=('b',), message='message b')
     class B(A):
         def b(self):
             pass

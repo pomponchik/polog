@@ -8,7 +8,7 @@ class ClassLogger:
     Экземпляры данного класса - готовые декораторы для других классов.
     """
 
-    def __call__(self, methods=(), message=None, level=1, errors_level=None):
+    def __call__(self, *args, methods=(), message=None, level=1, errors_level=None):
         """
         Фабрика декораторов классов. Можно вызывать как со скобками, так и без.
         В задекорированном классе @flog() применяется ко всем методам, кроме тех, чье название начинается с '__'.
@@ -33,10 +33,10 @@ class ClassLogger:
                 original = register.get_original(method)
                 setattr(Class, method_name, original)
             return Class
-        if not len(methods):
+        if not len(args):
             return decorator
-        elif len(methods) == 1 and inspect.isclass(methods[0]):
-            return decorator(methods[0])
+        elif len(args) == 1 and inspect.isclass(args[0]):
+            return decorator(args[0])
         return decorator
 
     def make_originals(self, Class, *methods):
