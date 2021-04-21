@@ -18,8 +18,8 @@ def test_base_use_dotlevel(handler):
     """
     handler.clean()
     config.set(level=1)
-    config.levels(test_function_decorator_with_breacks_and_message_and_dotlevel_3=44)
-    log.test_function_decorator_with_breacks_and_message_and_dotlevel_3('kek')
+    config.levels(test_base_use_dotlevel=44)
+    log.test_base_use_dotlevel('kek')
     time.sleep(0.0001)
     assert handler.last['message'] == 'kek'
     assert handler.last['level'] == 44
@@ -91,14 +91,14 @@ def test_function_decorator_with_breacks_and_message_and_dotlevel(handler):
     assert handler.last['message'] == 'kek'
     assert handler.last['level'] == 42
 
-def test_function_decorator_with_breacks_and_message_and_dotlevel(handler):
+def test_function_decorator_without_breacks_and_message_and_dotlevel(handler):
     """
     Проверка, что декоратор функций без скобок, но с уровнем логирования через точку, работает.
     """
     handler.clean()
     config.set(level=1)
-    config.levels(test_function_decorator_with_breacks_and_message_and_dotlevel_2=43)
-    @log.test_function_decorator_with_breacks_and_message_and_dotlevel_2
+    config.levels(test_function_decorator_without_breacks_and_message_and_dotlevel=43)
+    @log.test_function_decorator_without_breacks_and_message_and_dotlevel
     def function(a, b):
         return a + b
     assert function(1, 3) == 4
