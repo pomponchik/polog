@@ -57,6 +57,7 @@ def test_double(handler):
     @flog(message='base text 2')
     @flog(message='base text')
     def function():
+        time.sleep(0.0001)
         return True
     handler.clean()
     config.set(level=1)
@@ -98,9 +99,11 @@ def test_level(handler):
     """
     Проверяем, что установка уровня логирования идентификатором в виде строки работает.
     """
+    config.set(level=1)
     @flog(level='lolkeklolkeklol')
     def function():
         pass
+    handler.clean()
     config.levels(lolkeklolkeklol=88)
     function()
     time.sleep(0.0001)

@@ -1,6 +1,7 @@
 import inspect
 from polog.loggers.auto.function_logger import flog
 from polog.core.registering_functions import RegisteringFunctions
+from polog.errors import IncorrectUseOfTheDecoratorError
 
 
 class ClassLogger:
@@ -37,7 +38,7 @@ class ClassLogger:
             return decorator
         elif len(args) == 1 and inspect.isclass(args[0]):
             return decorator(args[0])
-        return decorator
+        raise IncorrectUseOfTheDecoratorError('The @clog decorator could be used only for classes.')
 
     def make_originals(self, Class, *methods):
         """

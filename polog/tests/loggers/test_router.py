@@ -105,3 +105,19 @@ def test_function_decorator_without_breacks_and_message_and_dotlevel(handler):
     time.sleep(0.0001)
     assert handler.last
     assert handler.last['level'] == 43
+
+def test_message(handler):
+    """
+    Проверка, что редактирование сообщений лога работает.
+    """
+    handler.clean()
+    config.set(level=1)
+    @log
+    def function(a, b):
+        log.message('kek', level=5)
+        return a + b
+    assert function(1, 3) == 4
+    time.sleep(0.0001)
+    assert handler.last
+    assert handler.last['message'] == 'kek'
+    assert handler.last['level'] == 5

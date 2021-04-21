@@ -93,3 +93,10 @@ def test_alt(handler):
     concrete((None, None), message='kek')
     time.sleep(0.0001)
     assert handler.last['message'] == 'lol'
+
+def test_wrong_perams():
+    """
+    Проверка, что при неправильном использовании обработчика поднимается исключение.
+    """
+    with pytest.raises(ValueError):
+        concrete = ConcreteHandler(only_errors='kek')

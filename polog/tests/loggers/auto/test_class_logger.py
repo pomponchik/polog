@@ -1,6 +1,7 @@
 import time
 import pytest
 from polog import clog, flog, config
+from polog.errors import IncorrectUseOfTheDecoratorError
 
 
 @clog(methods=('important_method',), message='base_message')
@@ -164,3 +165,10 @@ def test_get_logging_methods_not_danders():
             pass
     methods = clog.get_logging_methods(TestClass)
     assert len(methods) == 0
+
+def test_wrong_using():
+    """
+    Проверяем, что если передать в декоратор не класс, поднимется исключение.
+    """
+    with pytest.raises(IncorrectUseOfTheDecoratorError):
+        clog('kek')
