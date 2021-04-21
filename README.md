@@ -627,8 +627,8 @@ def bar(a, b, c, other=None):
 Рассмотрим пример дополнительного поля, в которое будет извлекаться ip-адрес клиента из [обработчика запроса Django](https://django.readthedocs.io/en/stable/topics/http/views.html). Сам обработчик запросов выглядит примерно вот так:
 
 ```python
-from django.http import HttpResponse
 import datetime
+from django.http import HttpResponse
 from polog import log
 
 
