@@ -231,3 +231,24 @@ def test_delete_fields_not_str():
     """
     with pytest.raises(KeyError):
         handlers = config.delete_fields(1)
+
+def test_delete_not_existed_handler():
+    """
+    При попытке удалить обработчик с несуществующим именем должно подняться исключение.
+    """
+    with pytest.raises(KeyError):
+        config.delete_handlers('lolkek123')
+
+def test_add_wrong_field():
+    """
+    Проверяем, что поднимается исключение, если вместо поля скормить объект с неподходящей сигнатурой.
+    """
+    with pytest.raises(ValueError):
+        config.add_fields(press_f='kek')
+
+def test_delete_wrong_type_handler():
+    """
+    Пробуем удалить из списка обработчиков объект, который ранее не был зарегистрирован в качестве обработчика.
+    """
+    with pytest.raises(ValueError):
+        config.delete_handlers(1)
