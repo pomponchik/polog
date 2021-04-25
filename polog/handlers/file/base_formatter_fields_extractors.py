@@ -23,7 +23,7 @@ class BaseFormatterFieldsExtractors:
         """
         time = kwargs.get("time")
         if time is None:
-            return None
+            return '[----time not specified----]'
         return f'[{time}]'
 
     @staticmethod
@@ -33,7 +33,10 @@ class BaseFormatterFieldsExtractors:
 
         Важно: если одному уровню логирования присвоено несколько имен, выводится последнее из них.
         """
-        result = Levels.get_level_name(kwargs.get('level'))
+        level = kwargs.get('level')
+        if level is None:
+            return 'UNKNOWN'
+        result = Levels.get_level_name(level)
         return result
 
     @staticmethod

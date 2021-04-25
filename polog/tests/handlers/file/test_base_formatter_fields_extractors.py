@@ -19,7 +19,7 @@ def test_empty_time():
     """
     Проверка, что при отсутствии поля time возвращается None.
     """
-    assert Extractors.time(**{}) is None
+    assert Extractors.time(**{}) == '[----time not specified----]'
 
 def test_full_level():
     """
@@ -33,7 +33,7 @@ def test_empty_level():
     """
     Проверка, что при отсутствии поля level возвращается None.
     """
-    assert Extractors.level(**{}) is None
+    assert Extractors.level(**{}) == 'UNKNOWN'
 
 def test_full_message():
     """

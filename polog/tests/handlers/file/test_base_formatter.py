@@ -1,8 +1,9 @@
+import re
 import json
 import datetime
 from inspect import Signature
 import pytest
-from polog import json_vars
+from polog import json_vars, config
 from polog.handlers.file.base_formatter import BaseFormatter
 
 

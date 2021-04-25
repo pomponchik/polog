@@ -92,7 +92,7 @@ class BaseFormatter:
         Второй элемент - индикатор выравнивания (см. https://www.python.org/dev/peps/pep-3101/#standard-format-specifiers).
         """
         result = {
-            'level': (max([len(x) for x in Levels.get_all_names()], default=2), '^'), # Длина самого длинного названия уровня логирования.
+            'level': (max(max([len(x) for x in Levels.get_all_names()], default=2), len('UNKNOWN')), '^'), # Длина самого длинного названия уровня логирования.
             'success': (7, '^'),
             'auto': (6, '^'),
         }
