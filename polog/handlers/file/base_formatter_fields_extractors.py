@@ -144,10 +144,14 @@ class BaseFormatterFieldsExtractors:
         """
         if 'result' in kwargs:
             variables = kwargs.get('result')
-            variables = json.loads(variables)
-            variables = cls.json_variable_to_human_readable_text(variables)
-            result = f"result: {variables}"
-            return result
+            if isinstance(variables, str):
+                try:
+                    variables = json.loads(variables)
+                    variables = cls.json_variable_to_human_readable_text(variables)
+                    return  f"result: {variables}"
+                except ValueError:
+                    return f'result: {str(variables)} ({type(variables)})'
+            return f'result: {str(variables)} ({type(variables)})'
         return None
 
     @staticmethod

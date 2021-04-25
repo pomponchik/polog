@@ -8,6 +8,7 @@ class BaseFormatter:
     """
 
     # Названия полей исходного словаря с данными, которые игнорируются.
+    # Их содержимое никак не видоизменяется.
     FORBIDDEN_EXTRA_FIELDS = {
         'module',
         'service_name',
@@ -91,8 +92,7 @@ class BaseFormatter:
         Второй элемент - индикатор выравнивания (см. https://www.python.org/dev/peps/pep-3101/#standard-format-specifiers).
         """
         result = {
-            # Длина самого длинного названия уровня логирования.
-            'level': (max([len(x) for x in Levels.get_all_names()], default=2), '^'),
+            'level': (max([len(x) for x in Levels.get_all_names()], default=2), '^'), # Длина самого длинного названия уровня логирования.
             'success': (7, '^'),
             'auto': (6, '^'),
         }
