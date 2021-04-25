@@ -1,6 +1,6 @@
 from polog.core.levels import Levels
 from polog.handlers.file.base_formatter_fields_extractors import BaseFormatterFieldsExtractors
-
+import types
 
 class BaseFormatter:
     """
@@ -34,17 +34,17 @@ class BaseFormatter:
         self.FIELD_HANDLERS = self.get_base_field_handlers()
         self.ALIGN_NORMS = self.get_align_norms()
 
-    def __call__(self, args, **kwargs):
+    def get_formatted_string(self, args, **kwargs):
         """
         При первом вызове объекта данный метод будет переопределен методом __second_call__().
         Здесь происходит вызов вторичной инициализации объекта, после чего происходит запись лога и метод становится не нужным.
         """
         self.__init_on_run__()
-        result = self.__second_call__(args, **kwargs)
-        self.__call__ = self.__second_call__
+        result = self._get_formatted_string(args, **kwargs)
+        self.get_formatted_string = self._get_formatted_string
         return result
 
-    def __second_call__(self, args, **kwargs):
+    def _get_formatted_string(self, args, **kwargs):
         """
         Начиная со второго вызова объекта, будет сразу вызван данный метод, т. к. он заменит собою __call__().
 

@@ -45,7 +45,7 @@ class file_writer(BaseHandler):
         """
         Стандартный метод для создания строки лога из исходных данных. Использует стандартный форматтер.
         """
-        return self.formatter(args, **kwargs)
+        return self.formatter.get_formatted_string(args, **kwargs)
 
     def maybe_flush(self):
         """
@@ -86,4 +86,4 @@ class file_writer(BaseHandler):
         """
         Метод, где вызывается базовый форматтер.
         """
-        return self.base_formatter(args, **kwargs)
+        return self.base_formatter.get_formatted_string(args, **kwargs)
