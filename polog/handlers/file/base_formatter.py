@@ -144,6 +144,8 @@ class BaseFormatter:
     def width_and_align(self, data):
         """
         Для некоторых полей заданы нормы форматирования (self.ALIGN_NORMS). Здесь происходит применение этих норм.
+
+        data - словарь с полями лога.
         """
         for field_name in self.ALIGN_NORMS:
             item = data.get(field_name, None)

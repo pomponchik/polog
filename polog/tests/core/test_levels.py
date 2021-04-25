@@ -56,3 +56,9 @@ def test_add_get_all_names():
     assert 'lolkeklolkek' not in Levels.get_all_names()
     Levels.set('lolkeklolkek', 777)
     assert 'lolkeklolkek' in Levels.get_all_names()
+
+def test_get_level_name_none_request():
+    """
+    Проверяем, что если запросить имя уровня логирования передачей в качестве аргумента None - вернется None.
+    """
+    assert Levels.get_level_name(None) is None

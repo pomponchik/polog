@@ -108,3 +108,33 @@ def test_get_base_field_handlers_calls():
                     assert isinstance(handler(**test_data), str)
         elif isinstance(data_items, dict):
             assert isinstance(handler(**data_items), str)
+
+def test_format():
+    """
+    Проверяем, что итоговая строка правильно склеивается из исходного словаря.
+    """
+    formatter = BaseFormatter('\n')
+    assert formatter.format({'lol': 'lol', 'kek': 'kek'}) == 'lol | kek\n'
+    formatter = BaseFormatter('cheburek')
+    assert formatter.format({'lol': 'lol', 'kek': 'kek'}) == 'lol | kekcheburek'
+
+def test_width_and_align():
+    """
+    Проверяем, что поля, по которым заданы нормы форматирования, таки форматируются по длине строки.
+    Также проверяем, что поля, для которых специальных норм нет, не затрагиваются.
+    """
+    formatter = BaseFormatter('\n')
+    formatter.get_formatted_string((1, 2), **{'lol': 'lol', 'kek': 'kek'})
+    norms = formatter.ALIGN_NORMS
+    data = {
+        'level': '_',
+        'success': '_',
+        'auto': '_',
+        'lol': 'kek',
+    }
+    formatter.width_and_align(data)
+    assert len(data['lol']) == 3
+    for key, value in data.items():
+        if key in norms:
+            norm_lenth = norms[key][0]
+            assert len(value) >= norm_lenth
