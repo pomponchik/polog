@@ -74,7 +74,7 @@ def test_get_base_field_handlers_parameters():
 def test_get_base_field_handlers_calls():
     """
     Пробуем скормить тестовые данные в базовые обработчики полей и смотрим на результат.
-    
+
     В базовом случае должна возвращаться строка.
     Если мы скормили обработчику None, в некоторых случаях он может вернуть None, а в некоторых - строку.
     При любом раскладе не должно возникать исключений (иначе поле записано не будет и данные из лога потеряются).
@@ -90,7 +90,7 @@ def test_get_base_field_handlers_calls():
         'function': ('lol', None),
         'time_of_work': (0.1, 2, None),
         'input_variables': (json_vars(1, 2, 3, kek='lol'), json_vars(), json_vars('lol'), json_vars(1, 2, 3), json_vars(kek='lol'), None),
-        'local_variables': (json_vars(1, 2, 3, kek='lol'), json_vars(), json_vars('lol'), json_vars(1, 2, 3), json_vars(kek='lol'), None),
+        'local_variables': (json_vars(1, 2, 3, kek='lol'), json_vars(), json_vars('lol'), json_vars(1, 2, 3), json_vars(kek='lol'), 'kek', None),
         'result': (json_vars(1, 2, 3, kek='lol'), json_vars(), json_vars('lol'), json_vars(1, 2, 3), json_vars(kek='lol'), 'kek', None),
         'exception': {'exception_type': 'ValueError', 'exception_message': 'kek'},
         'traceback': (json.dumps([]), None),
@@ -101,7 +101,6 @@ def test_get_base_field_handlers_calls():
         if isinstance(data_items, tuple):
             for item in data_items:
                 test_data = {name: item}
-                print(test_data, handler)
                 if item is None:
                     assert handler(**test_data) is None or isinstance(handler(**test_data), str)
                 else:
