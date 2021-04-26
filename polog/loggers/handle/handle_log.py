@@ -30,7 +30,7 @@ class BaseLogger(AbstractHandleLogger):
             try:
                 fields['function'] = function.__name__
             except AttributeError:
-                pass
+                fields['function'] = str(function)
             try:
                 fields['module'] = function.__module__
             except AttributeError:

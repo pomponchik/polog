@@ -130,3 +130,24 @@ def test_multiple_args():
     config.set(silent_internal_exceptions=False)
     with pytest.raises(ValueError):
         log('lol', 'kek')
+
+def test_extract_function_data_wrong_function_object():
+    """
+    Скармливаем псевдо-функцию.
+    Если информацию о модуле невозможно извлечь, ничего не должно произойти.
+    Если у функции отсутствует атрибут __name__, который извлекается по умолчанию, все равно функция в словаре будет заменена строкой.
+    """
+    class PseudoFunction:
+        def __call__(self):
+            return 'kek'
+        @property
+        def __module__(self):
+            pass
+        @__module__.getter
+        def __module__(self):
+            raise AttributeError('kek')
+    pseudo = PseudoFunction()
+    data = {'function': pseudo}
+    log._extract_function_data(data)
+    assert isinstance(data['function'], str)
+    assert 'module' not in data['function']
