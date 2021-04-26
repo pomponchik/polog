@@ -44,3 +44,17 @@ def test_django_example_error(handler):
         pass
     time.sleep(0.0001)
     assert handler.last['ip'] == '123.456.789.010'
+
+def test_not_called_extractor():
+    """
+    Скармливаем невызываемый объект в виде экстрактора.
+    """
+    with pytest.raises(ValueError):
+        field('kek')
+
+def test_not_called_converter():
+    """
+    Скармливаем невызываемый объект в виде конвертера.
+    """
+    with pytest.raises(ValueError):
+        field(ip_extractor, converter='kek')
