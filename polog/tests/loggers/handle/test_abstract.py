@@ -34,7 +34,6 @@ def test_hidden_fields():
     """
     logger = HandleLogger()
     for name in dir(logger):
-        print(name, type(name))
         if name != 'logs_store':
             assert name.startswith('_')
 

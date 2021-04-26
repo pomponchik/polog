@@ -63,7 +63,7 @@ class file_writer(BaseHandler):
         try:
             self.rotator.maybe_do()
         except Exception as e:
-            print(e)
+            pass
 
     def get_formatter(self, maybe_formatter):
         """
