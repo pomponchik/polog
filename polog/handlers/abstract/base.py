@@ -1,3 +1,7 @@
+from abc import abstractmethod
+from polog.core.utils.is_handler import is_handler
+
+
 class BaseHandler:
     """
     Базовый класс обработчика Polog.
@@ -9,15 +13,21 @@ class BaseHandler:
     3. __init__() - с возможным расширением сигнатуры.
     """
 
+    _input_proves = {
+        'only_errors': lambda x: isinstance(x, bool),
+        'filter': lambda x: x is None or is_handler(x),
+        'alt': lambda x: x is None or is_handler(x),
+    }
+
     def __init__(self, only_errors=False, filter=None, alt=None):
         """
         Образец метода __init__(), переопределение в наследниках обязательно.
         Входные параметры данного метода обязательны для всех наследников, и их необходимо с теми же именами записывать в экземпляр, поскольку от них зависят некоторые методы.
         """
+        self.do_input_proves(only_errors=only_errors, filter=filter, alt=alt)
         self.filter = filter
         self.only_errors = only_errors
         self.alt = alt
-        raise NotImplementedError
 
     def __call__(self, args, **kwargs):
         """
@@ -30,7 +40,6 @@ class BaseHandler:
             content = self.get_content(args, **kwargs)
             self.do(content)
         except Exception as e:
-            raise e
             self.run_alt(args, **kwargs)
 
     def to_do_or_not_to_do(self, args, **kwargs):
@@ -60,6 +69,7 @@ class BaseHandler:
         if callable(self.alt):
             return self.alt(args, **kwargs)
 
+    @abstractmethod
     def do(self, content):
         """
         Здесь происходит "магия" - лог записывается или отправляется куда-то.
@@ -67,11 +77,29 @@ class BaseHandler:
 
         Рекомендуем отделить класс, непосредственно работающий с низкоуровневым механизмом записи / отправки логов, от класса, унаследованного от BaseHandler, и здесь вызывать только какой-то его метод.
         """
-        raise NotImplementedError
+        pass # pragma: no cover
 
+    @abstractmethod
     def get_content(self, args, **kwargs):
         """
         Метод, который возвращает объект, с которым что-то будет делать self.do().
         В большинстве реализаций обработчиков это будет специфически отформатированная строка.
         """
-        raise NotImplementedError
+        pass # pragma: no cover
+
+    def do_input_proves(self, **kwargs):
+        """
+        Здесь происходит проверка параметров обработчика.
+
+        Функции, которые применяются к аргументам, находятся в словаре self._input_proves. Если любая из них вернет False, значит проверка не пройдена и создать обработчик не получится.
+        В отнаследованном классе пользователь может определить словарь self.input_proves, содержащий функции для проверки прочих аргументов.
+        """
+        if hasattr(self, 'input_proves'):
+            input_proves = {**self._input_proves, **self.input_proves}
+        else:
+            input_proves = {**self._input_proves}
+        for key, value in kwargs.items():
+            if key in input_proves:
+                prove = input_proves[key]
+                if not prove(value):
+                    raise ValueError(f'The argument "{key}" does not pass the test. Please check its format. If necessary, refer to the documentation for the handler.')

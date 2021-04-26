@@ -1,23 +1,26 @@
 from polog.handlers.file.rotation.rules.rules.abstract_rule import AbstractRule
 from polog.handlers.file.rotation.rules.rules.tokenization.tokens.size_token import SizeToken
-#from polog.handlers.file.file_dependency_wrapper import
 
 
 class FileSizeRule(AbstractRule):
-    @classmethod
-    def prove_source(cls, source):
-        keys = SizeToken.get_all_keys()
-        for key in keys:
-            if key in keys:
-                return True
-        return False
+    """
+    Правило для ротации логов в зависимости от размера файла, куда они пишутся.
+    """
+    def prove_source(self):
+        result = self.tokens.check_regexp('ns')
+        return result
 
     def check(self):
-        file_wrapper = self.handler.file
-        if file_wrapper.get_size >= self.size_limit:
-            pass
+        file_wrapper = self.file
+        return file_wrapper.get_size() >= self.size_limit
 
     def extract_data_from_string(self):
-        number = tokens[0].content
-        dimension = tokens[1].content
+        """
+        Заполняем self.size_limit.
+        self.size_limit - это количество байт размера файла, которое нельзя превышать.
+        Образуется путем перемножения 2-х переменных: количества и размерности.
+        Скажем, в строке '5 megabytes' количество - это 5, а размерность - количество байт в мегабайте.
+        """
+        number = self.tokens['n'][0].content
+        dimension = self.tokens['s'][0].content
         self.size_limit = number * dimension

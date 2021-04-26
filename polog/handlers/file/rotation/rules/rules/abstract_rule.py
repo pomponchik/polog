@@ -2,10 +2,23 @@ from polog.handlers.file.rotation.rules.rules.tokenization.tokenizator import To
 
 
 class AbstractRule:
-    def __init__(self, handler, source):
+    """
+    Абстрактный класс, все правила ротации должны быть отнаследованы от него.
+    Благодаря такой компоновке добавлять в систему новые правила становится гораздо проще, нужно всего лишь переопределить несколько методов.
+
+    Правило ротации - это некий класс, экземпляр которого перед каждой записью лога должен решать, нужна сейчас ротация или нет.
+    Правила могут быть самыми разными. Одни будут смотреть на размер файла, другие на то, когда была произведена последняя ротация, и т. д.
+    Интерфейс у всех правил должен быть одинаковым. Если хотя бы одно правило требует ротации, она будет произведена. Если ротации требуют 2 и более правил, она будет проведена 1 раз.
+
+    Правила ротации пользователь задает в виде обычного текста в определенном формате. Этот текст "скармливается" правилу ротации, после чего оно может определить, подходит он по формату или нет.
+
+    Для упрощения парсинга правил ротации из текста в Polog реализованы собственные движки для токенизации текста и обработки высокоуровневых регулярных выражений.
+    """
+    def __init__(self, source, file):
         self.source = source
+        self.file = file
         self.tokens = self.get_tokens(source)
-        self.extract_data_from_string(source)
+        self.extract_data_from_string()
 
     def __repr__(self):
         type_name = type(self).__name__
@@ -14,7 +27,8 @@ class AbstractRule:
         return result
 
     def get_tokens(self, source):
-        self.tokens = Tokenizator(source).tokens
+        tokens = Tokenizator(source).generate_tokens()
+        return tokens
 
     def extract_data_from_string(self, source):
         """

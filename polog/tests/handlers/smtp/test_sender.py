@@ -1,7 +1,7 @@
 import time
 import pytest
 from polog.handlers.smtp.sender import SMTP_sender
-from polog import log, config
+from polog import handle_log as log, config
 
 
 lst = []
@@ -13,7 +13,8 @@ class DependencyWrapper:
     def send(self, message):
         lst.append(message)
 
-config.add_handlers(SMTP_sender('fff', 'fff', 'fff', 'fff', smtp_wrapper=DependencyWrapper))
+sender = SMTP_sender('fff', 'fff', 'fff', 'fff', smtp_wrapper=DependencyWrapper)
+config.add_handlers(sender)
 
 
 def test_send_normal():
@@ -26,7 +27,16 @@ def test_send_normal():
     lst.pop()
 
 def test_send_error():
+    """
+    Проверка, что при исключении тоже что-то приходит в обработчик.
+    """
     log('hello', exception=ValueError())
     time.sleep(0.0001)
     assert lst[0]
     lst.pop()
+
+def test_repr():
+    """
+    Проверяем, что метод .__repr__ обработчика подчиняется заданному формату отображения.
+    """
+    assert repr(sender) == 'SMTP_sender(email_from="fff", password=<HIDDEN>, smtp_server="fff", email_to="fff", port=465, text_assembler=None, subject_assembler=None, alt=None)'

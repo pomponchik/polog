@@ -1,5 +1,6 @@
 import os
 import shutil
+import pathlib
 
 
 class FileDependencyWrapper:
@@ -51,6 +52,27 @@ class FileDependencyWrapper:
         """
         self.file.write(log_string)
 
+    def close(self):
+        """
+        Закрываем файл.
+        """
+        self.file.close()
+
+    def open(self, filename):
+        """
+        Открываем файл.
+        Работает только в том случае, если исходно пользователь передал имя файла, а не файловый объект.
+        """
+        self.file = open(filename, 'a', encoding='utf-8')
+
+    def reopen(self):
+        """
+        Закрываем файл и открываем снова.
+        Работает только в том случае, если исходно пользователь передал имя файла, а не файловый объект.
+        """
+        self.close()
+        self.open(self.filename)
+
     def flush(self):
         """
         Сброс буфера в файл.
@@ -73,7 +95,19 @@ class FileDependencyWrapper:
         """
         if self.filename is None:
             raise ValueError('Copying is not possible, the name of the source file is unknown.')
-        shutil.move(self.filename, path_to_copy)
+        try:
+            shutil.move(self.filename, path_to_copy)
+        except FileNotFoundError:
+            self.make_dirs_for_path(path_to_copy)
+            shutil.move(self.filename, path_to_copy)
+
+    def make_dirs_for_path(self, path):
+        """
+        Для указанного пути данный метод создает все промежуточные директории, которые еще не были созданы.
+        Используется, к примеру, при ротации логов, когда директория для перекладывания туда файлов еще не создана.
+        """
+        path = pathlib.Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
 
     def file_exist(self, filename):
         """

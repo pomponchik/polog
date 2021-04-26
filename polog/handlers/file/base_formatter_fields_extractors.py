@@ -1,7 +1,8 @@
 import inspect
 import importlib
 import ujson as json
-from polog.levels import Levels
+from polog.core.levels import Levels
+from polog.core.settings_store import SettingsStore
 
 
 class BaseFormatterFieldsExtractors:
@@ -20,7 +21,10 @@ class BaseFormatterFieldsExtractors:
         """
         Выводим дату и время в квадратных скобках.
         """
-        return f'[{kwargs.get("time")}]'
+        time = kwargs.get("time")
+        if time is None:
+            return '[----time not specified----]'
+        return f'[{time}]'
 
     @staticmethod
     def level(**kwargs):
@@ -29,7 +33,10 @@ class BaseFormatterFieldsExtractors:
 
         Важно: если одному уровню логирования присвоено несколько имен, выводится последнее из них.
         """
-        result = Levels.get_level_name(kwargs.get('level'))
+        level = kwargs.get('level')
+        if level is None:
+            return 'UNKNOWN'
+        result = Levels.get_level_name(level)
         return result
 
     @staticmethod
@@ -49,7 +56,7 @@ class BaseFormatterFieldsExtractors:
         Выводим метку успешности операции.
 
         Существуют 3 опции успешности: 'SUCCESS', 'ERROR' и 'UNKNOWN'.
-        Последний вариант присваивается в том случае, если информации об успешности операци нет.
+        Последний вариант присваивается в том случае, если информации об успешности операции нет.
         Как правило, такое случается при ручном логировании.
         """
         success = kwargs.get('success')
@@ -85,10 +92,13 @@ class BaseFormatterFieldsExtractors:
         """
         function = kwargs.get('function')
         module = kwargs.get('module')
-        service = kwargs.get('service_name')
+        service = SettingsStore.service_name
         if (function is not None) and (module is not None):
             function = cls.search_function_name(function, module)
             result = f'where: {service}.{module}.{function}()'
+            return result
+        elif function is not None:
+            result = f'where: {service}.{function}()'
             return result
         return f'where: {service}.?'
 
@@ -104,7 +114,10 @@ class BaseFormatterFieldsExtractors:
         key = (function_name, module_name)
         if key in cls.FULL_FUNCTIONS_NAMES:
             return cls.FULL_FUNCTIONS_NAMES[key]
-        module = importlib.import_module(module_name)
+        try:
+            module = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            return function_name
         if hasattr(module, function_name):
             maybe_function = getattr(module, function_name)
             if callable(maybe_function):
@@ -134,10 +147,14 @@ class BaseFormatterFieldsExtractors:
         """
         if 'result' in kwargs:
             variables = kwargs.get('result')
-            variables = json.loads(variables)
-            variables = cls.json_variable_to_human_readable_text(variables)
-            result = f"result: {variables}"
-            return result
+            if isinstance(variables, str):
+                try:
+                    variables = json.loads(variables)
+                    variables = cls.json_variable_to_human_readable_text(variables)
+                    return  f"result: {variables}"
+                except ValueError:
+                    return f'result: {str(variables)} ({type(variables)})'
+            return f'result: {str(variables)} ({type(variables)})'
         return None
 
     @staticmethod
@@ -176,6 +193,8 @@ class BaseFormatterFieldsExtractors:
         """
         if json_text is None:
             return None
+        if not json_text:
+            return None
         json_dict = json.loads(json_text)
         args = json_dict.get('args')
         kwargs = json_dict.get('kwargs')
@@ -213,17 +232,27 @@ class BaseFormatterFieldsExtractors:
         variables = kwargs.get('local_variables')
         if variables is None:
             return None
-        args = json.loads(variables)
-        result = ', '.join([f'{x} = {cls.json_variable_to_human_readable_text(y)}' for x, y in args.items()])
-        result = f'local variables: {result}'
-        return result
+        try:
+            result = cls.json_variables_to_text(variables)
+            if result is None:
+                return result
+            result = f'local variables: {result}'
+            return result
+        except:
+            return f'local variables: {variables}'
 
     @staticmethod
     def time_of_work(**kwargs):
         """
         Время работы функции в формате строки, где оно указывается вещественным числом секунд с точностью до 8 знаков после запятой.
+        Все ненужные ноли справа удаляются.
         """
-        result = f"time of work: {kwargs.get('time_of_work'):.8f} sec." if 'time_of_work' in kwargs else None
+        var = kwargs.get('time_of_work')
+        if var is None:
+            return None
+        number = f'{var:.8f}'
+        number = number.rstrip('0.')
+        result = f"time of work: {number} sec."
         return result
 
     @staticmethod
@@ -243,6 +272,8 @@ class BaseFormatterFieldsExtractors:
         """
         traceback = kwargs.get('traceback')
         if traceback is not None:
+            if not traceback:
+                return 'no traceback'
             traceback = json.loads(traceback)
             if not traceback:
                 return 'no traceback'

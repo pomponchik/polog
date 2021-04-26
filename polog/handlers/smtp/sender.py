@@ -1,4 +1,5 @@
 from email.mime.text import MIMEText
+from polog.core.utils.is_handler import is_handler
 from polog.handlers.abstract.base import BaseHandler
 from polog.handlers.smtp.smtp_dependency_wrapper import SMTPDependencyWrapper
 
@@ -9,7 +10,19 @@ class SMTP_sender(BaseHandler):
     Объект класса является вызываемым благодаря наличию метода .__call__().
     При вызове объекта данного класса происходит отправка электронного письма через SMTP-протокол. В конструкторе возможно конфигурирование условий, при которых отправка писем не производится.
     """
-    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, only_errors=None, filter=None, alt=None, is_html=False, smtp_wrapper=SMTPDependencyWrapper):
+
+    input_proves = {
+        'email_from': lambda x: isinstance(x, str),
+        'password': lambda x: isinstance(x, str),
+        'email_to': lambda x: isinstance(x, str),
+        'port': lambda x: isinstance(x, int),
+        'smtp_server': lambda x: isinstance(x, str),
+        'text_assembler': lambda x: x is None or is_handler(x),
+        'subject_assembler': lambda x: x is None or is_handler(x),
+        'is_html': lambda x: isinstance(x, bool),
+    }
+
+    def __init__(self, email_from, password, smtp_server, email_to, port=465, text_assembler=None, subject_assembler=None, only_errors=False, filter=None, alt=None, is_html=False, smtp_wrapper=SMTPDependencyWrapper):
         """
         Здесь происходит конфигурирование отправщика писем.
 
@@ -27,7 +40,10 @@ class SMTP_sender(BaseHandler):
         filter (function) - дополнительный пользовательский фильтр на отправку сообщений. По умолчанию он отсутствует, т. е. отправляются сообщения обо всех событиях, прошедших через фильтр "only_errors" (см. строчкой выше). Пользователь может передать сюда свою функцию, которая должна принимать набор аргументов, аналогичный методу .__call__() текущего класса, и возвращать bool. Возвращенное значение True из данной функции будет означать, что сообщение нужно отправлять, а False - что нет.
         alt (function) - функция, которая будет выполнена в случае, если отправка сообщения не удалась или запрещена фильтрами. Должна принимать тот же набор аргументов, что и метод .__call__() текущего класса. Возвращаемые значения не используются.
         is_html (bool) - флаг, является ли отправляемое содержимое HTML-документом. По умолчанию False.
+        smtp_wrapper (SMTPDependencyWrapper или иной тип с аналогичным протоколом) - класс, в котором реализована вся низкоуровневая обвязка для отправки писем по протоколу SMTP. Таким образом класс SMTP_sender становится более тестируемым, поскольку содержит только "политику" отправки писем.
         """
+        super().__init__(only_errors=only_errors, filter=filter, alt=alt)
+        self.do_input_proves(email_from=email_from, password=password, email_to=email_to, port=port, smtp_server=smtp_server, text_assembler=text_assembler, subject_assembler=subject_assembler, is_html=is_html)
         self.email_from = email_from
         self.password = password
         self.email_to = email_to
@@ -35,9 +51,6 @@ class SMTP_sender(BaseHandler):
         self.smtp_server = smtp_server
         self.text_assembler = text_assembler
         self.subject_assembler = subject_assembler
-        self.filter = filter
-        self.only_errors = only_errors
-        self.alt = alt
         self.is_html = is_html
         self.smtp_wrapper = smtp_wrapper(self.smtp_server, self.port, self.email_from, self.password, self.email_to)
 
