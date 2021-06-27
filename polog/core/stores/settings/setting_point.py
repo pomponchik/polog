@@ -29,8 +29,7 @@ class SettingPoint:
             self.changed = True
 
     def get(self):
-        with self.lock:
-            return self.value
+        return self.value
 
     def set_store_object(self, store):
         self.store = store
