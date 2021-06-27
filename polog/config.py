@@ -1,5 +1,5 @@
-from polog.core.settings_store import SettingsStore
-from polog.core.levels import Levels
+from polog.core.stores.settings.settings_store import SettingsStore
+from polog.core.stores.levels import Levels
 from polog.core.utils.is_handler import is_handler
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
 
@@ -11,22 +11,6 @@ class config:
     Все методы тут статические, что позволяет вызывать их просто через точку, например:
     config.set(pool_size=5)
     """
-    # Проверки введенных пользователем значений.
-    # Через метод .set() невозможно установить настройку с иным названием (поднимется KeyError) или неподходящим типом данных (ValueError).
-    allowed_settings = {
-        'pool_size': lambda x: isinstance(x, int) and x > 0,
-        'service_name': lambda x: isinstance(x, str) and x.isidentifier(),
-        'level': lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str),
-        'errors_level': lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str),
-        'original_exceptions': lambda x: isinstance(x, bool),
-        'delay_before_exit': lambda x: isinstance(x, int) or isinstance(x, float),
-        'silent_internal_exceptions': lambda x: isinstance(x, bool),
-    }
-    # Функции, которые применяются к пользовательскому вводу настроек перед тем, как их сохранить.
-    convert_values = {
-        'level': Levels.get,
-        'errors_level': Levels.get,
-    }
     # Генератор имен для обработчиков.
     pony_names_generator = PonyNamesGenerator().get_next_pony()
 
@@ -43,19 +27,8 @@ class config:
         Важно: Polog гарантирует применение настроек только в том случае, если они были установлены ДО момента первой записи лога.
         Рекомендуется устанавливать все настройки во входном файле программы, до того, как начнет исполняться основной код.
         """
-        new_kwargs = {}
         for key, value in kwargs.items():
-            if key not in config.allowed_settings.keys():
-                raise KeyError(f'"{key}" variable is not allowed for the log settings.')
-            prove = config.allowed_settings.get(key)
-            is_allowed = prove(value)
-            if not is_allowed:
-                raise ValueError(f'The {value} value cannot be used to set the {key} setting.')
-            if key in config.convert_values:
-                handler = config.convert_values[key]
-                value = handler(value)
-            new_kwargs[key] = value
-        SettingsStore(**new_kwargs)
+            SettingsStore()[key] = value
 
     @staticmethod
     def levels(**kwargs):

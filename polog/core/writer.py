@@ -1,7 +1,7 @@
 from queue import Queue
 from threading import Thread, Lock
 from polog.core.worker import Worker
-from polog.core.settings_store import SettingsStore
+from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 
 
@@ -13,7 +13,7 @@ class Writer(ReadOnlySingleton):
 
     def __init__(self):
         settings = SettingsStore()
-        self.pool_size = settings.pool_size
+        self.pool_size = settings['pool_size']
         assert self.pool_size > 0
         assert type(self.pool_size) is int
 

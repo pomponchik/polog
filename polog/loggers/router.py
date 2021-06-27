@@ -1,6 +1,6 @@
 import inspect
 import functools
-from polog.core.levels import Levels
+from polog.core.stores.levels import Levels
 from polog.loggers.handle.handle_log import handle_log
 from polog.loggers.handle.message import message
 from polog.loggers.auto.class_logger import clog

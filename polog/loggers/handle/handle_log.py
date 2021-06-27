@@ -1,6 +1,6 @@
 import datetime
 from polog.core.writer import Writer
-from polog.core.settings_store import SettingsStore
+from polog.core.stores.settings.settings_store import SettingsStore
 from polog.loggers.handle.abstract import AbstractHandleLogger
 
 
@@ -9,7 +9,7 @@ class BaseLogger(AbstractHandleLogger):
     Экземпляры данного класса - вызываемые объекты, каждый вызов которых означает создание лога.
     """
     _default_values = {
-        'level': lambda fields: SettingsStore().level if fields.get('success', True) else SettingsStore().errors_level,
+        'level': lambda fields: SettingsStore()['level'] if fields.get('success', True) else SettingsStore()['errors_level'],
         'time': lambda fields: datetime.datetime.now(),
     }
 
@@ -41,7 +41,7 @@ class BaseLogger(AbstractHandleLogger):
         Передаем словарь fields в общую очередь логов.
         Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать.
         """
-        if fields.get('level') >= self._settings.level:
+        if fields.get('level') >= self._settings['level']:
             Writer().write((None, None), **fields)
 
 

@@ -1,6 +1,6 @@
 import time
 import atexit
-from polog.core.settings_store import SettingsStore
+from polog.core.stores.settings.settings_store import SettingsStore
 
 
 class Worker:
@@ -39,7 +39,7 @@ class Worker:
         """
         for handler in self.settings.handlers.values():
             try:
-                handler(args, **kwargs, service_name=self.settings.service_name)
+                handler(args, **kwargs, service_name=self.settings['service_name'])
             except Exception as e:
                 pass
 
@@ -54,7 +54,7 @@ class Worker:
             while True:
                 maybe_finish = time.time()
                 time_delta = maybe_finish - start_awaiting_time
-                if time_delta > self.settings.delay_before_exit:
+                if time_delta > self.settings['delay_before_exit']:
                     break
                 if (not self.full) and self.queue.empty():
                     break

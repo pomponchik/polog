@@ -1,5 +1,5 @@
-from polog.core.settings_store import SettingsStore
-from polog.core.levels import Levels
+from polog.core.stores.settings.settings_store import SettingsStore
+from polog.core.stores.levels import Levels
 
 
 def get_errors_level(default_in_function):
@@ -13,8 +13,8 @@ def get_errors_level(default_in_function):
     То же самое происходит, если указан невозможный уровень логирования (отрицательный, например).
     """
     if default_in_function is None:
-        return SettingsStore().errors_level
+        return SettingsStore()['errors_level']
     try:
         return Levels.get(default_in_function)
     except (KeyError, ValueError):
-        return SettingsStore().errors_level
+        return SettingsStore()['errors_level']

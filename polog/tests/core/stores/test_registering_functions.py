@@ -1,5 +1,5 @@
 import pytest
-from polog.core.registering_functions import RegisteringFunctions
+from polog.core.stores.registering_functions import RegisteringFunctions
 from polog import flog
 
 

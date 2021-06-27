@@ -1,5 +1,5 @@
 import pytest
-from polog.core.levels import Levels
+from polog.core.stores.levels import Levels
 
 
 def test_set_and_get():

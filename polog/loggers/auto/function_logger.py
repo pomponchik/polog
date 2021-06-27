@@ -2,10 +2,10 @@ import time
 import inspect
 import datetime
 from functools import wraps
-from polog.core.settings_store import SettingsStore
+from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.writer import Writer
-from polog.core.levels import Levels
-from polog.core.registering_functions import RegisteringFunctions
+from polog.core.stores.levels import Levels
+from polog.core.stores.registering_functions import RegisteringFunctions
 from polog.core.utils.not_none_to_dict import not_none_to_dict
 from polog.core.utils.get_errors_level import get_errors_level
 from polog.core.utils.exception_to_dict import exception_to_dict
@@ -116,7 +116,7 @@ class FunctionLogger:
         """
         Здесь решается, какое исключение поднять - оригинальное или встроенное в Polog, в зависимости от настроек.
         """
-        if self.settings.original_exceptions:
+        if self.settings['original_exceptions']:
             raise exc
         raise LoggedError(str(exc)) from exc
 
@@ -128,7 +128,7 @@ class FunctionLogger:
         exc_type = type(exc)
         if not (exc_type is LoggedError):
             errors_level = get_errors_level(errors_level)
-            if errors_level >= self.settings.level:
+            if errors_level >= self.settings['level']:
                 exception_to_dict(args_dict, exc)
                 args_dict['success'] = False
                 args_dict['traceback'] = get_traceback()
@@ -147,7 +147,7 @@ class FunctionLogger:
         Заполнение автоматических полей в случае, когда исключения не было.
         """
         level = Levels.get(level)
-        if level >= self.settings.level:
+        if level >= self.settings['level']:
             args_dict['success'] = True
             args_dict['result'] = json_one_variable(result)
             args_dict['time_of_work'] = finish - start

@@ -13,3 +13,16 @@ class IncorrectUseOfTheDecoratorError(ValueError):
     Когда в декоратор передали что-то не то.
     """
     pass
+
+class DoubleSettingError(ValueError):
+    """
+    Некоторые поля настроек пользователю может быть запрещено изменять дважды.
+    Если он это делает, поднимается данное исключение.
+    """
+    pass
+
+class AfterStartSettingError(ValueError):
+    """
+    Поднимается при попытке изменить настройку, которую запрещено изменять после записи первого лога.
+    """
+    pass

@@ -1,5 +1,4 @@
 from contextvars import ContextVar
-from polog.core.settings_store import SettingsStore
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
 from polog.loggers.handle.abstract import AbstractHandleLogger
