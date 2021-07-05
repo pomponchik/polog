@@ -49,7 +49,7 @@ class SettingsStore(ReadOnlySingleton):
         Считывание настроек является неблокирующей операцией.
         """
         if key not in self.points:
-            raise KeyError()
+            raise KeyError(f'{key} - there is no settings point with this name.')
         point = self.points[key]
         value = point.get()
         return value
@@ -64,6 +64,6 @@ class SettingsStore(ReadOnlySingleton):
         При установке нового значения пункта настроек, блокируется только данный пункт. Прочие пункты настроек в этот момент можно изменять из других потоков. Старая настройка доступна для считывания, пока устанавливается новое значение, то есть блокировка распространяется только на операции записи.
         """
         if key not in self.points:
-            raise KeyError()
+            raise KeyError(f'{key} - there is no settings point with this name.')
         point = self.points[key]
         point.set(value)
