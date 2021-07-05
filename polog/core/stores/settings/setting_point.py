@@ -53,7 +53,7 @@ class SettingPoint:
             if self.converter is not None:
                 self.value = self.converter(self.value)
             self.value = value
-            # lock нужен вот поэтому
+            # lock нужен вот поэтому.
             self.changed = True
 
     def get(self):
