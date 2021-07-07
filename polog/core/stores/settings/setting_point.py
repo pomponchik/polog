@@ -51,7 +51,7 @@ class SettingPoint:
             if not self.prove_value(value):
                 raise ValueError(f"You can't use the \"{value}\" object to change the settings in this case. Read the documentation.")
             if self.converter is not None:
-                self.value = self.converter(self.value)
+                value = self.converter(value)
             self.value = value
             # lock нужен вот поэтому.
             self.changed = True
