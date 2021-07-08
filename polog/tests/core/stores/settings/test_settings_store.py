@@ -48,3 +48,13 @@ def test_set_error_values():
         for value in local_values:
             with pytest.raises(ValueError):
                 store[key] = value
+
+def test_error_keys():
+    """
+    Проверяем, что при использовании неправильного ключа - поднимется KeyError.
+    """
+    store = SettingsStore()
+    with pytest.raises(KeyError):
+        value = store['lol']
+    with pytest.raises(KeyError):
+        store['lol'] = 'kek'
