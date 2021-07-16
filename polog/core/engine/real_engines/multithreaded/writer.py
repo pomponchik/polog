@@ -1,27 +1,22 @@
 from queue import Queue
 from threading import Thread, Lock
-from polog.core.worker import Worker
-from polog.core.stores.settings.settings_store import SettingsStore
-from polog.core.utils.read_only_singleton import ReadOnlySingleton
+from polog.core.engine.real_engines.multithreaded.worker import Worker
+from polog.core.engine.real_engines.abstract import AbstractRealEngine
 
 
-class Writer(ReadOnlySingleton):
+class MultiThreadedRealEngine(AbstractRealEngine):
     """
     Класс, в котором создаются потоки с логгерами и передаются в них задания.
     """
     is_completed = {}
 
-    def __init__(self):
-        settings = SettingsStore()
-        self.pool_size = settings['pool_size']
-        assert self.pool_size > 0
-        assert type(self.pool_size) is int
-
+    def __init__(self, settings):
+        super().__init__(settings)
         with Lock():
             if not hasattr(self, 'workers'):
                 # Очередь общая для всех потоков.
                 self.queue = Queue()
-                self.workers = [Thread(target=Worker(self.queue, index + 1).run) for index in range(self.pool_size)]
+                self.workers = [Thread(target=Worker(self.queue, index + 1, settings).run) for index in range(self.settings['pool_size'])]
                 for worker in self.workers:
                     worker.daemon = True
                     worker.start()

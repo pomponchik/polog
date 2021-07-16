@@ -1,11 +1,12 @@
 import time
 from queue import Queue
 import pytest
-from polog.core.worker import Worker
+from polog.core.engine.real_engines.multithreaded.worker import Worker
+from polog.core.stores.settings.settings_store import SettingsStore
 
 
 queue = Queue()
-worker = Worker(queue, 1)
+worker = Worker(queue, 1, SettingsStore())
 
 
 def test_do(handler):

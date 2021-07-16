@@ -3,7 +3,7 @@ import inspect
 import datetime
 from functools import wraps
 from polog.core.stores.settings.settings_store import SettingsStore
-from polog.core.writer import Writer
+from polog.core.engine.engine import Engine
 from polog.core.stores.levels import Levels
 from polog.core.stores.registering_functions import RegisteringFunctions
 from polog.core.utils.not_none_to_dict import not_none_to_dict
@@ -22,6 +22,7 @@ class FunctionLogger:
 
     def __init__(self, settings=SettingsStore()):
         self.settings = settings
+        self.engine = Engine()
 
     def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False):
         """
@@ -140,7 +141,7 @@ class FunctionLogger:
                 if not (input_variables is None):
                     args_dict['input_variables'] = input_variables
                 self.extract_extra_fields((args, kwargs), args_dict)
-                Writer().write((args, kwargs), **args_dict)
+                self.engine.write((args, kwargs), **args_dict)
 
     def log_normal_info(self, result, finish, start, args_dict, level, *args, **kwargs):
         """
@@ -157,7 +158,7 @@ class FunctionLogger:
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
             self.extract_extra_fields((args, kwargs), args_dict)
-            Writer().write((args, kwargs), **args_dict)
+            self.engine.write((args, kwargs), **args_dict)
 
     def extract_extra_fields(self, args, args_dict):
         """

@@ -1,5 +1,4 @@
 import datetime
-from polog.core.writer import Writer
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.loggers.handle.abstract import AbstractHandleLogger
 
@@ -42,7 +41,7 @@ class BaseLogger(AbstractHandleLogger):
         Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать.
         """
         if fields.get('level') >= self._settings['level']:
-            Writer().write((None, None), **fields)
+            self._engine.write((None, None), **fields)
 
 
 handle_log = BaseLogger()

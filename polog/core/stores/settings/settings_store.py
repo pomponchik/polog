@@ -1,12 +1,15 @@
+import inspect
 from threading import Lock
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 from polog.core.stores.settings.setting_point import SettingPoint
 from polog.core.stores.levels import Levels
+from polog.core.engine.real_engines.fabric import real_engine_fabric
 
 
 class SettingsStore(ReadOnlySingleton):
     """
     Здесь хранятся все базовые настройки Polog.
+
     Данный класс не предназначен для доступа "снаружи". Его должны использовать только другие части Polog.
     Потокобезопасный синглтон, с экземпляром можно обращаться как со словарем (только в плане считывания и записи значений по ключам).
     """
@@ -19,9 +22,10 @@ class SettingsStore(ReadOnlySingleton):
         'level': SettingPoint(1, prove=lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str), converter=Levels.get),
         'errors_level': SettingPoint(2, prove=lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str), converter=Levels.get),
         'service_name': SettingPoint('base', prove=lambda x: isinstance(x, str) and x.isidentifier()),
-        'delay_before_exit': SettingPoint(1.0, prove=lambda x: (isinstance(x, int) or isinstance(x, float)) and x >= 0),
         'silent_internal_exceptions': SettingPoint(False, prove=lambda x: isinstance(x, bool)),
-        'started': SettingPoint(False, prove=lambda x: isinstance(x, bool) and x == True, no_check_first_time=True),
+        'delay_before_exit': SettingPoint(1.0, prove=lambda x: (isinstance(x, int) or isinstance(x, float)) and x > 0),
+        'started': SettingPoint(False, prove=lambda x: isinstance(x, bool) and x == True, no_check_first_time=True, change_once=True),
+        'engine': SettingPoint(real_engine_fabric, prove=lambda x: inspect.isclass(x), no_check_first_time=True),
     }
     points_are_informed = False
     handlers = {}
