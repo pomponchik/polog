@@ -32,24 +32,31 @@ class Engine(ReadOnlySingleton):
             self.blocked = False
 
     def __second_init__(self):
+        """
+        Вторая стадия инициализации движка.
+        Осуществляется при первой записи лога.
+
+        Подгрузка движка является "ленивой" операцией и осуществляется только на этом этапе. Поэтому запись первого лога займет чуть больше времени.
+        """
         self.settings['started'] = True
         self.load()
-        print('kek')
 
     def write(self, function_input_data, **fields):
         """
         Запись лога.
-        """
-        self._write(function_input_data, **fields)
 
-    def _write(self, function_input_data, **fields):
+        При первом вызове данного метода будет выполнена вторичная инициализация, после чего метод будет подменен на тот, что непосредственно записывает лог.
+        """
         with self.lock:
             if not self.settings['started']:
                 self.__second_init__()
-                self._write = self._new_write
-        self._write(function_input_data, **fields)
+                self.write = self._new_write
+        self.write(function_input_data, **fields)
 
     def _new_write(self, function_input_data, **fields):
+        """
+        Данный метод фактически вызывается каждый раз при вызове метода self.write().
+        """
         self.real_engine.write(function_input_data, **fields)
 
     def reload(self):
@@ -66,7 +73,7 @@ class Engine(ReadOnlySingleton):
 
     def load(self):
         """
-        Загрузка движка.
+        Загрузка, то есть создание нового экземпляра, движка.
         """
         self.real_engine = self.settings['engine'](self.settings)
 
