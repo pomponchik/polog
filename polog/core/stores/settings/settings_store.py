@@ -24,6 +24,8 @@ class SettingsStore(ReadOnlySingleton):
         'service_name': SettingPoint('base', prove=lambda x: isinstance(x, str) and x.isidentifier()),
         'silent_internal_exceptions': SettingPoint(False, prove=lambda x: isinstance(x, bool)),
         'delay_before_exit': SettingPoint(1.0, prove=lambda x: (isinstance(x, int) or isinstance(x, float)) and x > 0),
+        'time_quant': SettingPoint(0.01, prove=lambda x: (isinstance(x, int) or isinstance(x, float)) and x > 0),
+        'max_queue_size': SettingPoint(0, prove=lambda x: isinstance(x, int) and x >= 0),
         'started': SettingPoint(False, prove=lambda x: isinstance(x, bool) and x == True, no_check_first_time=True, change_once=True),
         'engine': SettingPoint(real_engine_fabric, prove=lambda x: inspect.isclass(x), no_check_first_time=True),
     }

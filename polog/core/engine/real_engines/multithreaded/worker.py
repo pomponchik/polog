@@ -1,5 +1,7 @@
 import time
 import atexit
+from queue import Empty
+from threading import Thread
 
 
 class Worker:
@@ -12,25 +14,51 @@ class Worker:
         # Метка full нужна, чтобы не завершить поток раньше времени, когда он уже взял таску из очереди, но еще не успел ее обработать.
         # По умолчанию метка в фиктивном положительном положении, чтобы исключить ситуацию с преждевременным прекращением потока при очень быстром завершении программы. Если метка по умолчанию будет отрицательной, функция ожидания завершения не будет дожидаться окончания записи и прервет поток на самом интересном месте.
         self.full = True
+        self.stopped = False
         self.settings = settings
-        self.await_empty_queue()
+        self.thread = self.start_thread()
+        self.atexit_handler = self.atexit_register()
 
     def run(self):
         """
         Принимаем из очереди данные и что-то с ними делаем.
         """
+        stopped_from_flag = False
         while True:
             try:
-                items = self.queue.get()
+                while True:
+                    try:
+                        items = self.queue.get(timeout=self.settings['time_quant'])
+                        break
+                    except Empty:
+                        if self.stopped:
+                            stopped_from_flag = True
+                            break
+                if stopped_from_flag:
+                    break
                 self.full = True
                 # items - это всегда кортеж из 2-х элементов.
                 self.do_anything(items[0], **(items[1]))
                 self.queue.task_done()
                 self.full = False
             except Exception as e:
+                print(e)
                 self.queue.task_done()
                 # Если не удалось записать лог, запись уничтожается.
                 self.full = False
+
+    def start_thread(self):
+        thread = Thread(target=self.run)
+        thread.daemon = True
+        thread.start()
+        return thread
+
+    def set_stop_flag(self):
+        self.stopped = True
+
+    def stop(self):
+        self.thread.join()
+        self.atexit_unregister()
 
     def do_anything(self, args, **kwargs):
         """
@@ -42,7 +70,7 @@ class Worker:
             except Exception as e:
                 pass
 
-    def await_empty_queue(self):
+    def atexit_register(self):
         """
         Прежде, чем завершить программу, дожидаемся, пока все потоки обработают последние сообщения.
         Лимит на ожидание берется из настроек. Он необходим для разрешения ситуации, когда поток еще ни разу не писал в лог сообщений, и соответственно статус заполненности у него фиктивный, в результате чего из него невозможно выйти.
@@ -57,3 +85,7 @@ class Worker:
                     break
                 if (not self.full) and self.queue.empty():
                     break
+        return full_checker
+
+    def atexit_unregister(self):
+        atexit.unregister(self.atexit_handler)

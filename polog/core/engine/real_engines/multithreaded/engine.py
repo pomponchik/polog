@@ -1,6 +1,6 @@
 from queue import Queue
 from threading import Thread, Lock
-from polog.core.engine.real_engines.multithreaded.worker import Worker
+from polog.core.engine.real_engines.multithreaded.pool import ThreadPool
 from polog.core.engine.real_engines.abstract import AbstractRealEngine
 
 
@@ -12,7 +12,7 @@ class MultiThreadedRealEngine(AbstractRealEngine):
     Таким образом, каждый поток берет из очереди следующее событие сразу после того, как разобрался с предыдущим.
 
     Многопоточная реализация движка подразумевает 2 главных риска:
-    1. Отсутствие гарантии правильной последовательности записи логов. Логи попадают в очередь обработки практически в правильном порядке, однако забирают их оттуда воркеры, каждый из которых может отрабатывать разное время, в результате чего запись логов к конкретное хранилище может осуществляться уже в неправильном порядке. Обычно это не имеет значения, однако стоит иметь ввиду.
+    1. Отсутствие гарантии правильной последовательности записи логов. Логи попадают в очередь обработки практически в правильном порядке, однако забирают их оттуда воркеры, каждый из которых может отрабатывать разное время, в результате чего запись логов в конкретное хранилище может осуществляться уже в неправильном порядке. Обычно это не имеет значения, однако стоит иметь ввиду.
     2. Возможность потери не успевших записаться логов в случае внештатного прекращения работы программы, например при внезапном отключении электричества. В этом случае те логи, которые все еще ждали своего часа в очереди, а также те, с которыми в тот момент работали обработчики, просто теряются. К сожалению, этот риск для асинхронных движков логирования непреодолим ввиду самого принципа их работы.
 
     Стоит отметить, что при штатном завершении программы все логи должны успеть записаться. Для этого через atexit регистрируется специальный обработчик, который следит, что программа будет завершена не раньше, чем очередь опустошится, и каждый из воркеров корректно завершит свою работу. Как уже было сказано, угроза потери данных актуальна только в случае нештатного прекращения работы программы - такого, как отключение питания компьютера.
@@ -24,25 +24,20 @@ class MultiThreadedRealEngine(AbstractRealEngine):
 
     def __init__(self, settings):
         super().__init__(settings)
-        with Lock():
-            if not hasattr(self, 'workers'):
-                # Очередь общая для всех потоков.
-                self.queue = Queue()
-                self.workers = [Thread(target=Worker(self.queue, index + 1, settings).run) for index in range(self.settings['pool_size'])]
-                for worker in self.workers:
-                    worker.daemon = True
-                    worker.start()
+        self.pool = ThreadPool(settings)
 
     def write(self, function_input_data, **fields):
         """
         Кладем аргументы оригинальной функции и извлеченные логгером данные в очередь на запись.
         """
-        self.queue.put_nowait((function_input_data, fields))
+        self.pool.put((function_input_data, fields))
+
+    def stop(self):
+        self.pool.stop()
 
     def queue_size(self):
         """
         ПРИМЕРНЫЙ размер очереди, см. документацию:
         https://docs.python.org/3/library/queue.html#queue.Queue.qsize
         """
-        size = self.queue.qsize()
-        return size
+        return self.pool.queue.qsize()

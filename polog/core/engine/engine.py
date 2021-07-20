@@ -28,8 +28,10 @@ class Engine(ReadOnlySingleton):
         Осуществляется при запуске программы.
         """
         with self.lock:
-            self.settings = SettingsStore()
-            self.blocked = False
+            if not hasattr(self, 'inited'):
+                self.settings = SettingsStore()
+                self.blocked = False
+                self.inited = True
 
     def __second_init__(self):
         """
@@ -51,13 +53,17 @@ class Engine(ReadOnlySingleton):
             if not self.settings['started']:
                 self.__second_init__()
                 self.write = self._new_write
-        self.write(function_input_data, **fields)
+        self._new_write(function_input_data, **fields)
 
     def _new_write(self, function_input_data, **fields):
         """
         Данный метод фактически вызывается каждый раз при вызове метода self.write().
         """
         self.real_engine.write(function_input_data, **fields)
+
+    def _blocked_write(self, function_input_data, **fields):
+        with self.lock:
+            self._new_write(function_input_data, **fields)
 
     def reload(self):
         """
@@ -66,16 +72,20 @@ class Engine(ReadOnlySingleton):
         При перезагрузке учитываются все актуальные на момент ее проведения настройки, таким образом их становится возможным менять в процессе работы программы.
         На момент перезагрузки движка, операции записи блокируются для всех потоков.
         """
-        self.block()
-        self.stop()
-        self.load()
-        self.unlock()
+        if self.settings['started']:
+            self.block()
+            self.stop()
+            self.load()
+            self.unlock()
 
     def load(self):
         """
         Загрузка, то есть создание нового экземпляра, движка.
         """
-        self.real_engine = self.settings['engine'](self.settings)
+        try:
+            self.real_engine = self.settings['engine'](self.settings)
+        except RuntimeError:
+            self.real_engine = self.settings['engine'](self.settings)
 
     def stop(self):
         """
@@ -87,10 +97,13 @@ class Engine(ReadOnlySingleton):
         """
         Блокировка обертки движка, чтобы, пока происходит перезагрузка, нельзя было записывать логи.
         """
-        pass
+        if self.settings['started']:
+            self.lock.acquire()
+            self.write = self._blocked_write
 
     def unlock(self):
         """
         Разблокировка обертки движка.
         """
-        pass
+        self.write = _new_write
+        self.lock.release()
