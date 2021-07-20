@@ -1,5 +1,3 @@
-from queue import Queue
-from threading import Thread, Lock
 from polog.core.engine.real_engines.multithreaded.pool import ThreadPool
 from polog.core.engine.real_engines.abstract import AbstractRealEngine
 

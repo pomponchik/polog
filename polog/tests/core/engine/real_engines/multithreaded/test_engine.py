@@ -5,16 +5,17 @@ from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.engine.real_engines.multithreaded.engine import MultiThreadedRealEngine
 
 
-def test_write_and_size():
+def test_write_and_size(settings_mock):
     """
     Проверяем, что новые сообщения попадают в очередь.
     """
     time.sleep(0.0001)
-    engine = MultiThreadedRealEngine({'started': True, 'pool_size': 2, 'delay_before_exit': 0.1, 'max_queue_size': 50, 'time_quant': 0.001})
+    engine = MultiThreadedRealEngine(settings_mock)
     assert engine.queue_size() == 0
     engine.write(None, **{'lol': 'kek'})
     engine.write(None, **{'lol': 'kek'})
     assert engine.queue_size() == 2
+    engine.stop()
 
 def test_number_of_threads(handler):
     """
@@ -29,3 +30,30 @@ def test_number_of_threads(handler):
     engine.stop()
     after = active_count()
     assert after == before
+
+def test_lost_items_on_stop(settings_mock, handler):
+    """
+    Проверяем, что при остановке движка логи не теряются.
+    """
+    handler.clean()
+    settings_mock.handlers['lol'] = handler
+    engine = MultiThreadedRealEngine(settings_mock)
+
+    number_of_items = 5000
+
+    for index in range(number_of_items):
+        engine.write((None, None), **{'lol': 'kek'})
+    engine.stop()
+
+    assert len(handler.all) == number_of_items
+
+def test_get_size(settings_mock):
+    """
+    Проверяем, что счетчик числа элементов в очереди работает.
+    """
+    engine = MultiThreadedRealEngine(settings_mock)
+    engine.write((None, None), **{'lol': 'kek'})
+    assert engine.queue_size() == 1
+    engine.write((None, None), **{'lol': 'kek'})
+    assert engine.queue_size() == 2
+    engine.stop()

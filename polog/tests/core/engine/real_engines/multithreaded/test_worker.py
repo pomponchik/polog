@@ -16,3 +16,5 @@ def test_do(handler):
     handler.clean()
     worker.do_anything((None, None), **{'lol': 'kek'})
     assert handler.last is not None
+    worker.set_stop_flag()
+    worker.stop()

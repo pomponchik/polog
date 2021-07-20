@@ -28,7 +28,6 @@ class ThreadPool:
             worker.set_stop_flag()
         for worker in self.workers:
             worker.stop()
-            print('stopped', worker)
 
     def wait_empty_queue(self):
         while True:

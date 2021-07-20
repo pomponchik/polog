@@ -23,3 +23,19 @@ def empty_class():
     class EmptyClass:
         pass
     return EmptyClass
+
+@pytest.fixture
+def settings_mock():
+    """
+    Подмена экземпляра класса настроек.
+    """
+    class SettingsMock:
+        def __init__(self):
+            self.points = {'started': True, 'pool_size': 2, 'delay_before_exit': 0.1, 'max_queue_size': 50, 'time_quant': 0.001, 'service_name': 'kek'}
+            self.handlers = {}
+            self.fields = {}
+        def __getitem__(self, key):
+            return self.points[key]
+        def __setitem__(self, key, value):
+            points[key] = value
+    return SettingsMock()

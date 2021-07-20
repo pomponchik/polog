@@ -105,5 +105,5 @@ class Engine(ReadOnlySingleton):
         """
         Разблокировка обертки движка.
         """
-        self.write = _new_write
+        self.write = self._new_write
         self.lock.release()
