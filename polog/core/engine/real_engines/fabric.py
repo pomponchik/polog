@@ -8,6 +8,6 @@ def real_engine_fabric(settings):
 
     Т. к. их несколько, выбор движка осуществляется исходя из актуальных настроек.
     """
-    if settings['pool_size'] == 0:
+    if settings.force_get('pool_size') == 0:
         return SingleThreadedRealEngine(settings)
     return MultiThreadedRealEngine(settings)

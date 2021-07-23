@@ -38,4 +38,6 @@ def settings_mock():
             return self.points[key]
         def __setitem__(self, key, value):
             points[key] = value
+        def force_get(self, key):
+            return self.points[key]
     return SettingsMock()

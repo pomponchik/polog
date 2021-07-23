@@ -32,6 +32,8 @@ class Engine(ReadOnlySingleton):
                 self.settings = SettingsStore()
                 self.blocked = False
                 self.inited = True
+                self.serial_number = 0
+                self.active = False
 
     def __second_init__(self):
         """
@@ -86,12 +88,15 @@ class Engine(ReadOnlySingleton):
             self.real_engine = self.settings['engine'](self.settings)
         except RuntimeError:
             self.real_engine = self.settings['engine'](self.settings)
+        self.increment_serial_number()
+        self.active = True
 
     def stop(self):
         """
         Остановка движка.
         """
         self.real_engine.stop()
+        self.active = False
 
     def block(self):
         """
@@ -107,3 +112,9 @@ class Engine(ReadOnlySingleton):
         """
         self.write = self._new_write
         self.lock.release()
+
+    def increment_serial_number(self):
+        """
+        Увеличение порядкового номера движка. Производится при каждой загрузке.
+        """
+        self.serial_number += 1

@@ -6,7 +6,7 @@ from queue import Queue
 class ThreadPool:
     def __init__(self, settings):
         self.settings = settings
-        self.queue = Queue(maxsize=self.settings['max_queue_size'])
+        self.queue = Queue(maxsize=self.settings.force_get('max_queue_size'))
         self.workers = self.create_workers()
 
     def put(self, function_input_data, **fields):
@@ -37,7 +37,7 @@ class ThreadPool:
 
     def create_workers(self):
         workers = []
-        for index in range(self.settings['pool_size']):
+        for index in range(self.settings.force_get('pool_size')):
             worker = Worker(self.queue, index, self.settings)
             workers.append(worker)
         if not workers:
