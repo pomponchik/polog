@@ -81,6 +81,7 @@ class SettingsStore(ReadOnlySingleton):
     points_are_informed = False
     handlers = {}
     extra_fields = {}
+    lock = Lock()
 
     def __init__(self, **kwargs):
         """
@@ -89,7 +90,7 @@ class SettingsStore(ReadOnlySingleton):
         К примеру, некоторые пункты настроек нельзя изменять без проверки на то, был ли уже записан первый лог. В свою очередь, событие записи первого лога изменяет пункт настроек 'started' на значение True. Прочие пункты настроек могут обращаться к данному и поднимать исключение, если их нельзя изменять после записи первого лога.
         Т. к. это синглтон, операция оповещения проделывается ровно один раз - за это отвечает флаг self.points_are_informed.
         """
-        with Lock():
+        with self.lock:
             if not self.points_are_informed:
                 for name, point in self.points.items():
                     point.set_store_object(self)
