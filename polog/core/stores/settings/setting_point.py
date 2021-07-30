@@ -7,7 +7,7 @@ class SettingPoint:
     В глобальном классе настроек имени каждой отдельной настройки соответствует экземпляр данного класса.
     Вся логика, связанная с проверкой возможности сохранить новое значение для конкретной настройки, находится здесь. Таким образом, в основном классе остается только функциональность агрегации.
     """
-    def __init__(self, default, change_once=False, change_only_before_start=False, prove=None, converter=None, no_check_first_time=False, action=None, conflicts=None, read_lock=False):
+    def __init__(self, default, change_once=False, change_only_before_start=False, prove=None, converter=None, no_check_first_time=False, action=None, conflicts=None, read_lock=False, shared_lock_with=()):
         """
         Значения параметров:
 
@@ -20,6 +20,7 @@ class SettingPoint:
         action (callable, 3 аргумента) - действие, которое необходимо произвести сразу после присвоения нового значения. Принимает 3 аргумента: старое значение настройки, новое значение и экземпляр класса-агрегатора, чтобы была возможность обратиться к смежным полям.
         conflicts (dict, в котором каждый ключ - строка с названием другого поля настроек, а каждое значение - callable на 3 аргумента) - набор функций, каждая из которых возвращает True или False, в зависимости от того, соответственно, есть конфликт с данным полем или нет. Каждая из функций в словаре принимает 3 аргумента: старое значение настройки, новое значение и текущее значение поля, конфликт с которым проверяется.
         read_lock (bool) - блокировка на чтение (т. е. не только на запись).
+        shared_lock_with (iterable со строками) - перечисление названий других полей настроек, с которыми объект блокировки должен быть общий.
         """
         self.prove = prove
         if not no_check_first_time and not self.prove_value(default):
@@ -30,10 +31,14 @@ class SettingPoint:
         self.no_check_first_time = no_check_first_time
         self.change_only_before_start = change_only_before_start
         self.changed = False
+        self.shared_lock_with = shared_lock_with
         self.lock = Lock()
         self.set_action(action)
         self.set_conflicts(conflicts)
         self.set_read_lock(read_lock)
+
+    def __str__(self):
+        return f'<SettingPoint object "{self.name}" with value {self.value}, #{id(self)}>'
 
     def set(self, value):
         """
@@ -44,8 +49,10 @@ class SettingPoint:
         Проверка 1: запрещено ли повторно назначать менять данную настройку, и, если да, менялась ли она уже ранее?
         Проверка 2: запрещено ли менять данную настройку после записи первого лога, и, если да, был ли первый лог уже записан?
         Проверка 3: используем функцию, переданную в конструктор, для проверки валидности переданного значения. Обычно там проверяются типы данных, но могут быть и иные проверки.
+        Проверка 4: есть ли у нового значения конфликты с какими-то другими полями настроек?
 
         Если в конструктор была передана функция-конвертер для значений, перед сохранением значение прогоняется через нее.
+        Если в конструктор была передана функция-действие (action), она выполняется после присвоения нового значения.
 
         Нюанс, связанный с многопоточностью: стоит учитывать, что блокировка потока используется только при сохранении нового значения настройки, а не при чтении значения (если только при инициализации объекта не был установлен режим защищенного чтения). Это значит, что пока один поток назначает новое значение, проводя все проверки, другой поток по-прежнему может считать старое значение.
         """
@@ -76,7 +83,7 @@ class SettingPoint:
     def unlocked_get(self):
         """
         Получение хранящегося значения.
-        
+
         В данном методе не используется блокировка потока, возможно состояние гонки.
         """
         return self.value
@@ -106,8 +113,36 @@ class SettingPoint:
         Здесь мы проверяем, есть ли такие конфликты, и если они есть - поднимаем ValueError.
         """
         for field_name, conflict_checker in self.conflicts.items():
-            if conflict_checker(old_value, new_value, self.store[field_name]):
+            if conflict_checker(old_value, new_value, self.store.force_get(field_name)):
                 raise ValueError(f'The new value "{new_value}" of the field "{self.name}" is incompatible with the current value "{self.store[field_name]}" of the field "{field_name}".')
+
+    def share_lock_object(self):
+        """
+        Передаем объект Lock другим полям настроек, перечисленным в self.shared_lock_with.
+
+        Это может быть полезно, когда несколько полей настроек взаимосвязаны.
+        """
+        for name in self.shared_lock_with:
+            if name == self.name:
+                raise KeyError(f'You are trying to mix the block of field "{name}" with itself.')
+            other_point = self.store.get_point(name)
+            other_point.set_lock_object(self.get_lock_object())
+
+    def get_lock_object(self):
+        """
+        Получить объект блокировки.
+
+        Метод используется при обмене блокировками у взаимосвязанных полей.
+        """
+        return self.lock
+
+    def set_lock_object(self, lock):
+        """
+        Задать новый объект блокировки.
+
+        Метод используется при обмене блокировками у взаимосвязанных полей.
+        """
+        self.lock = lock
 
     def set_read_lock(self, read_lock):
         """

@@ -25,7 +25,11 @@ class SettingsStore(ReadOnlySingleton):
                 'max_queue_size': lambda new_value, old_value, other_field_value: new_value == 0 and other_field_value != 0,
             },
             action=lambda old_value, new_value, store: reload_engine() if old_value != new_value else None,
-            read_lock=True
+            read_lock=True,
+            shared_lock_with=(
+                'max_queue_size',
+                'started',
+            )
         ),
         'max_queue_size': SettingPoint(
             0,
@@ -34,7 +38,21 @@ class SettingsStore(ReadOnlySingleton):
                 'pool_size': lambda new_value, old_value, other_field_value: new_value != 0 and other_field_value == 0,
             },
             action=lambda old_value, new_value, store: reload_engine() if old_value != new_value else None,
-            read_lock=True
+            read_lock=True,
+            shared_lock_with=(
+                'pool_size',
+                'started',
+            )
+        ),
+        'started': SettingPoint(
+            False,
+            prove=lambda x: isinstance(x, bool) and x == True,
+            no_check_first_time=True,
+            change_once=True,
+            shared_lock_with=(
+                'pool_size',
+                'max_queue_size',
+            )
         ),
         'original_exceptions': SettingPoint(
             False,
@@ -66,12 +84,6 @@ class SettingsStore(ReadOnlySingleton):
             0.01,
             prove=lambda x: (isinstance(x, int) or isinstance(x, float)) and x > 0
         ),
-        'started': SettingPoint(
-            False,
-            prove=lambda x: isinstance(x, bool) and x == True,
-            no_check_first_time=True,
-            change_once=True
-        ),
         'engine': SettingPoint(
             real_engine_fabric,
             prove=lambda x: inspect.isclass(x) or callable(x),
@@ -95,6 +107,8 @@ class SettingsStore(ReadOnlySingleton):
                 for name, point in self.points.items():
                     point.set_store_object(self)
                     point.set_name(name)
+                for name, point in self.points.items():
+                    point.share_lock_object()
                 self.points_are_informed = True
 
     def __getitem__(self, key):
@@ -105,11 +119,8 @@ class SettingsStore(ReadOnlySingleton):
         В случае запроса по любому другому ключу - поднимется KeyError.
         Считывание настроек является неблокирующей операцией (за исключением случаев, когда при инициализации пункта настроек был установлен режим read_lock == True).
         """
-        if key not in self.points:
-            raise KeyError(f'{key} - there is no settings point with this name.')
-        point = self.points[key]
-        value = point.get()
-        return value
+        point = self.get_point(key)
+        return point.get()
 
     def __setitem__(self, key, value):
         """
@@ -120,10 +131,14 @@ class SettingsStore(ReadOnlySingleton):
         Список допустимых названий пунктов настроек см. в SettingsStore.points. В случае использования любого другого ключа - поднимется KeyError.
         При установке нового значения пункта настроек, блокируется только данный пункт. Прочие пункты настроек в этот момент можно изменять из других потоков. Старая настройка доступна для считывания, пока устанавливается новое значение, то есть блокировка распространяется только на операции записи. Однако для отдельных пунктов настроек чтение может быть заблокировано на время, пока другой поток производит запись - см. пункты с аргументом read_lock == True.
         """
-        if key not in self.points:
-            raise KeyError(f'{key} - there is no settings point with this name.')
-        point = self.points[key]
+        point = self.get_point(key)
         point.set(value)
+
+    def __contains__(self, key):
+        """
+        Проверка того, что переданное название пункта настроек существует.
+        """
+        return key in self.points
 
     def force_get(self, key):
         """
@@ -132,8 +147,15 @@ class SettingsStore(ReadOnlySingleton):
 
         Использовать данный метод следует с большой осторожностью. Основной ожидаемый кейс использования - когда функции внутри функции, обозначенной для пункта настроек как action, используется считывание значения данного пункта. При обычном способе получения значения, если там установлен режим защищенного чтения, возникнет взаимоблокировка (deadlock), а данный метод позволяет ее избежать.
         """
+        point = self.get_point(key)
+        return point.unlocked_get()
+
+    def get_point(self, key):
+        """
+        Получаем объект поля по его названию.
+
+        Важно отличать объекты полей от их содержимого. Объект поля всегда относится к классу SettingPoint, а содержимое поле - те данные, которые помещены в объект и собственно используются в качестве текущего значения настройки.
+        """
         if key not in self.points:
             raise KeyError(f'{key} - there is no settings point with this name.')
-        point = self.points[key]
-        value = point.unlocked_get()
-        return value
+        return self.points[key]
