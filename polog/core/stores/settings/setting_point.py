@@ -69,7 +69,6 @@ class SettingPoint:
             self.prove_conflicts(old_value, value)
             self.value = value
             self.do_action(old_value, value)
-            # lock нужен вот поэтому.
             self.changed = True
 
     def get(self):
