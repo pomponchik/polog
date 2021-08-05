@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from polog.core.utils.is_handler import is_handler
+from polog.core.utils.signature_matcher import SignatureMatcher
 
 
 class BaseHandler:
@@ -15,8 +15,8 @@ class BaseHandler:
 
     _input_proves = {
         'only_errors': lambda x: isinstance(x, bool),
-        'filter': lambda x: x is None or is_handler(x),
-        'alt': lambda x: x is None or is_handler(x),
+        'filter': lambda x: x is None or SignatureMatcher.is_handler(x),
+        'alt': lambda x: x is None or SignatureMatcher.is_handler(x),
     }
 
     def __init__(self, only_errors=False, filter=None, alt=None):

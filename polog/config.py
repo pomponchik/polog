@@ -1,6 +1,6 @@
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
-from polog.core.utils.is_handler import is_handler
+from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
 
 
@@ -89,7 +89,7 @@ class config:
             raise ValueError(f'Handler {handler} is already registered under the name "{name}".')
         if not callable(handler):
             raise ValueError(f'Object od type "{type(handler).__name__}" can not be a handler.')
-        if not is_handler(handler):
+        if not SignatureMatcher.is_handler(handler):
             raise ValueError('This object cannot be a Polog handler, because the signatures do not match.')
         settings.handlers[name] = handler
 
@@ -145,7 +145,7 @@ class config:
         """
         settings = SettingsStore()
         for key, value in fields.items():
-            if not hasattr(value, 'get_data') or not is_handler(value.get_data):
+            if not hasattr(value, 'get_data') or not SignatureMatcher.is_handler(value.get_data):
                 raise ValueError('The signature of the field handler must be the same as that of other Polog handlers.')
             settings.extra_fields[key] = value
 

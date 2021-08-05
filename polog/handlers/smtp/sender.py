@@ -1,5 +1,5 @@
 from email.mime.text import MIMEText
-from polog.core.utils.is_handler import is_handler
+from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.handlers.abstract.base import BaseHandler
 from polog.handlers.smtp.smtp_dependency_wrapper import SMTPDependencyWrapper
 
@@ -17,8 +17,8 @@ class SMTP_sender(BaseHandler):
         'email_to': lambda x: isinstance(x, str),
         'port': lambda x: isinstance(x, int),
         'smtp_server': lambda x: isinstance(x, str),
-        'text_assembler': lambda x: x is None or is_handler(x),
-        'subject_assembler': lambda x: x is None or is_handler(x),
+        'text_assembler': lambda x: x is None or SignatureMatcher.is_handler(x),
+        'subject_assembler': lambda x: x is None or SignatureMatcher.is_handler(x),
         'is_html': lambda x: isinstance(x, bool),
     }
 

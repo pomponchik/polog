@@ -1,5 +1,5 @@
 from polog.handlers.abstract.base import BaseHandler
-from polog.core.utils.is_handler import is_handler
+from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.handlers.file.file_dependency_wrapper import FileDependencyWrapper
 from polog.handlers.file.base_formatter import BaseFormatter
 from polog.handlers.file.rotation.rotator import Rotator
@@ -16,7 +16,7 @@ class file_writer(BaseHandler):
     input_proves = {
         'forced_flush': lambda x: isinstance(x, bool),
         'separator': lambda x: isinstance(x, str),
-        'formatter': lambda x: x is None or is_handler(x),
+        'formatter': lambda x: x is None or SignatureMatcher.is_handler(x),
         'rotation': lambda x: x is None or isinstance(x, str),
     }
 
