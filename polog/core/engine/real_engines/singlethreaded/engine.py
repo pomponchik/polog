@@ -5,4 +5,5 @@ class SingleThreadedRealEngine(AbstractRealEngine):
     """
     Однопоточная синхронная реализация движка.
     """
-    pass
+    def stop(self):
+        pass

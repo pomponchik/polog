@@ -76,8 +76,13 @@ class Engine(ReadOnlySingleton):
         """
         if self.settings['started']:
             self.block()
-            self.stop()
-            self.load()
+            try:
+                # Исключения экранируются, поскольку нужно обеспечить разблокировку обертки движка в любом случае.
+                # Иначе существует риск "положить" поток взаимоблокировкой, не сняв ее после перезагрузки.
+                self.stop()
+                self.load()
+            except:
+                pass
             self.unlock()
 
     def load(self):

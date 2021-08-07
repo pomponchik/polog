@@ -110,3 +110,67 @@ def test_set_after_start():
     point.set_store_object(store)
     with pytest.raises(AfterStartSettingError):
         point.set('kek')
+
+def test_share_lock():
+    """
+    Проверяем, что объекты блокировок действительно шарятся.
+    """
+    class PseudoStore:
+        points = {'point_1': SettingPoint('lol'), 'point_2': SettingPoint('kek', shared_lock_with=('point_1', )), 'point_3': SettingPoint('cheburek')}
+        def __init__(self):
+            for name, point in self.points.items():
+                point.set_store_object(self)
+                point.set_name(name)
+            for name, point in self.points.items():
+                point.share_lock_object()
+        def __getitem__(self, key):
+            return self.get_point(key).get()
+        def get_point(self, key):
+            return self.points.get(key)
+
+    store = PseudoStore()
+
+    assert store.get_point('point_1').lock is store.get_point('point_2').lock
+    assert store.get_point('point_1').lock is not store.get_point('point_3').lock
+
+def test_conflicts():
+    """
+    Проверяем, что конфликты срабатывают как ожидалось.
+    """
+    class PseudoStore:
+        points = {
+            'point_1': SettingPoint('lol'),
+            'point_2': SettingPoint('kek', conflicts={
+                'point_1': lambda new_value, old_value, other_field_value: other_field_value == 'lol'
+            }),
+            'point_3': SettingPoint('cheburek', conflicts={
+                'point_1': lambda new_value, old_value, other_field_value: new_value == old_value + '_kek'
+            })
+        }
+        def __init__(self):
+            for name, point in self.points.items():
+                point.set_store_object(self)
+                point.set_name(name)
+            for name, point in self.points.items():
+                point.share_lock_object()
+        def __getitem__(self, key):
+            return self.get_point(key).get()
+        def __setitem__(self, key, value):
+            self.get_point(key).set(value)
+        def get_point(self, key):
+            return self.points.get(key)
+        def force_get(self, key):
+            return self[key]
+
+    store = PseudoStore()
+
+    with pytest.raises(ValueError):
+        store['point_2'] = 'lolkek'
+
+    store['point_1'] = 'lolkek'
+    store['point_2'] = 'lolkek'
+
+    with pytest.raises(ValueError):
+        store['point_3'] = 'cheburek_kek'
+
+    store['point_3'] = 'lolkek'

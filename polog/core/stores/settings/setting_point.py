@@ -112,8 +112,8 @@ class SettingPoint:
         Здесь мы проверяем, есть ли такие конфликты, и если они есть - поднимаем ValueError.
         """
         for field_name, conflict_checker in self.conflicts.items():
-            if conflict_checker(old_value, new_value, self.store.force_get(field_name)):
-                raise ValueError(f'The new value "{new_value}" of the field "{self.name}" is incompatible with the current value "{self.store[field_name]}" of the field "{field_name}".')
+            if conflict_checker(new_value, old_value, self.store.force_get(field_name)):
+                raise ValueError(f'The new value "{new_value}" of the field "{self.name}" is incompatible with the current value "{self.store.force_get(field_name)}" of the field "{field_name}".')
 
     def share_lock_object(self):
         """

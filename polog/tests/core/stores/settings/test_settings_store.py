@@ -58,3 +58,32 @@ def test_error_keys():
         value = store['lol']
     with pytest.raises(KeyError):
         store['lol'] = 'kek'
+
+def test_share_lock_specific():
+    """
+    Проверяем, что между полями, где локи должны быть пошарены, они пошарены.
+    """
+    store = SettingsStore()
+    assert store.get_point('pool_size').lock is store.get_point('max_queue_size').lock
+    assert store.get_point('pool_size').lock is store.get_point('started').lock
+
+def test_conflicts_specific():
+    """
+    Проверяем, что нельзя выставить ненулевой размер очереди, если у пула потоков размер 0.
+    А также, что нельзя выставить пулу потоков нулевой размер, если очередь ненулевая.
+    """
+    store = SettingsStore()
+    store['max_queue_size'] = 0
+    store['pool_size'] = 0
+    
+    with pytest.raises(ValueError):
+        store['max_queue_size'] = 1
+    store['pool_size'] = 2
+    store['max_queue_size'] = 1
+
+    with pytest.raises(ValueError):
+        store['pool_size'] = 0
+    store['max_queue_size'] = 0
+    store['pool_size'] = 0
+
+    store['pool_size'] = 4

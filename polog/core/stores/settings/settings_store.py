@@ -20,7 +20,7 @@ class SettingsStore(ReadOnlySingleton):
     points = {
         'pool_size': SettingPoint(
             2,
-            prove=lambda x: isinstance(x, int) and x > 0,
+            prove=lambda x: isinstance(x, int) and x >= 0,
             conflicts={
                 'max_queue_size': lambda new_value, old_value, other_field_value: new_value == 0 and other_field_value != 0,
             },
