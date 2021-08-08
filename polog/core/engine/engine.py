@@ -86,10 +86,7 @@ class Engine(ReadOnlySingleton):
         """
         Загрузка, то есть создание нового экземпляра, движка.
         """
-        try:
-            self.real_engine = self.settings['engine'](self.settings)
-        except RuntimeError:
-            self.real_engine = self.settings['engine'](self.settings)
+        self.real_engine = self.settings['engine'](self.settings)
         self.increment_serial_number()
         self.active = True
 
