@@ -1,6 +1,7 @@
 from threading import Lock
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
+from polog.core.utils.exception_escaping import exception_escaping
 
 
 class Engine(ReadOnlySingleton):
@@ -76,15 +77,11 @@ class Engine(ReadOnlySingleton):
         """
         if self.settings['started']:
             self.block()
-            try:
-                # Исключения экранируются, поскольку нужно обеспечить разблокировку обертки движка в любом случае.
-                # Иначе существует риск "положить" поток при следующей попытке захватить блокировку, если сейчас ее не снять.
-                self.stop()
-                self.load()
-            except:
-                pass
+            self.stop()
+            self.load()
             self.unlock()
 
+    @exception_escaping
     def load(self):
         """
         Загрузка, то есть создание нового экземпляра, движка.
@@ -96,6 +93,7 @@ class Engine(ReadOnlySingleton):
         self.increment_serial_number()
         self.active = True
 
+    @exception_escaping
     def stop(self):
         """
         Остановка движка.

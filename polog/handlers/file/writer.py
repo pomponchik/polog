@@ -3,6 +3,7 @@ from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.handlers.file.file_dependency_wrapper import FileDependencyWrapper
 from polog.handlers.file.base_formatter import BaseFormatter
 from polog.handlers.file.rotation.rotator import Rotator
+from polog.core.utils.exception_escaping import exception_escaping
 
 
 class file_writer(BaseHandler):
@@ -55,15 +56,13 @@ class file_writer(BaseHandler):
         if self.forced_flush:
             self.file.flush()
 
+    @exception_escaping
     def maybe_rotation(self):
         """
         Проверяем, нужна ли ротация логов при данном вызове.
         Если да - ротируем.
         """
-        try:
-            self.rotator.maybe_do()
-        except Exception as e:
-            pass
+        self.rotator.maybe_do()
 
     def get_formatter(self, maybe_formatter):
         """
