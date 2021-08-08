@@ -40,6 +40,4 @@ class ThreadPool:
         for index in range(self.settings.force_get('pool_size')):
             worker = Worker(self.queue, index, self.settings)
             workers.append(worker)
-        if not workers:
-            raise RuntimeError('Not a single worker has been created. The settings were probably changed during pool initialization.')
         return workers
