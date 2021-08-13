@@ -1,6 +1,5 @@
 import inspect
 import importlib
-import ujson as json
 from polog.core.stores.levels import Levels
 from polog.core.stores.settings.settings_store import SettingsStore
 
@@ -15,6 +14,7 @@ class BaseFormatterFieldsExtractors:
     # Словарь, где ключи - кортежи из названий модулей и функций.
     # См. метод search_function_name().
     FULL_FUNCTIONS_NAMES = {}
+    settings = SettingsStore()
 
     @staticmethod
     def time(**kwargs):
@@ -145,6 +145,7 @@ class BaseFormatterFieldsExtractors:
         Пример результата:
         'result: 1 (int), "hello" (str), <AnotherClass object> (AnotherClass)'
         """
+        json = cls.settings['json_module']
         if 'result' in kwargs:
             variables = kwargs.get('result')
             if isinstance(variables, str):
@@ -191,6 +192,7 @@ class BaseFormatterFieldsExtractors:
 
         Допускается отсутствие блоков 'args' или 'kwargs' в исходном JSON-документе.
         """
+        json = cls.settings['json_module']
         if json_text is None:
             return None
         if not json_text:
@@ -265,11 +267,12 @@ class BaseFormatterFieldsExtractors:
         if exception_type is not None and exception_message is not None:
             return f'exception: {exception_type}("{exception_message}")'
 
-    @staticmethod
-    def traceback(**kwargs):
+    @classmethod
+    def traceback(cls, **kwargs):
         """
         Преобразуем трейсбек, строки которого записаны в JSON-список, в человекочитаемый вид.
         """
+        json = cls.settings['json_module']
         traceback = kwargs.get('traceback')
         if traceback is not None:
             if not traceback:

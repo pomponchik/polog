@@ -1,3 +1,4 @@
+import json
 import inspect
 from threading import Lock
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
@@ -88,6 +89,10 @@ class SettingsStore(ReadOnlySingleton):
             real_engine_fabric,
             prove=lambda x: inspect.isclass(x) or callable(x),
             no_check_first_time=True
+        ),
+        'json_module': SettingPoint(
+            json,
+            prove=lambda x: inspect.ismodule(x) and hasattr(x, 'loads') and hasattr(x, 'dumps'),
         ),
     }
     points_are_informed = False

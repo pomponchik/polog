@@ -1,5 +1,7 @@
+import json
 import pytest
 from polog.core.stores.settings.settings_store import SettingsStore
+import ujson
 
 
 def test_set_and_get():
@@ -22,7 +24,6 @@ def test_set_and_get():
             'service_name': 'kek',
             'errors_level': 12,
             'delay_before_exit': 3,
-
         },
     ]
     store = SettingsStore()
@@ -42,6 +43,7 @@ def test_set_error_values():
         'service_name': [1.2, None],
         'errors_level': [1.2, None, -5],
         'delay_before_exit': ['kek', None, -1],
+        'json_module': ['kek', 1, lambda x: 'kek'],
     }
     store = SettingsStore()
     for key, local_values in all_values.items():
@@ -75,7 +77,7 @@ def test_conflicts_specific():
     store = SettingsStore()
     store['max_queue_size'] = 0
     store['pool_size'] = 0
-    
+
     with pytest.raises(ValueError):
         store['max_queue_size'] = 1
     store['pool_size'] = 2
@@ -87,3 +89,14 @@ def test_conflicts_specific():
     store['pool_size'] = 0
 
     store['pool_size'] = 4
+
+def test_set_json_module():
+    """
+    Пробуем зарегистрировать альтернативный модуль json.
+    """
+    store = SettingsStore()
+    assert store['json_module'] is json
+    store['json_module'] = ujson
+    assert store['json_module'] is ujson
+    store['json_module'] = json
+    assert store['json_module'] is json
