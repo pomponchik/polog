@@ -31,7 +31,7 @@ def settings_mock():
     """
     class SettingsMock:
         def __init__(self):
-            self.points = {'started': True, 'pool_size': 2, 'delay_before_exit': 0.1, 'max_queue_size': 50, 'time_quant': 0.001, 'service_name': 'kek'}
+            self.points = {'started': True, 'pool_size': 2, 'max_delay_before_exit': 0.001, 'max_queue_size': 50, 'time_quant': 0.001, 'service_name': 'kek', 'delay_on_exit_loop_iteration_in_quants': 10}
             self.handlers = {}
             self.fields = {}
         def __getitem__(self, key):

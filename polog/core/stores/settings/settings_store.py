@@ -77,9 +77,13 @@ class SettingsStore(ReadOnlySingleton):
             False,
             prove=lambda x: isinstance(x, bool)
         ),
-        'delay_before_exit': SettingPoint(
+        'max_delay_before_exit': SettingPoint(
             1.0,
             prove=lambda x: (isinstance(x, int) or isinstance(x, float)) and x > 0
+        ),
+        'delay_on_exit_loop_iteration_in_quants': SettingPoint(
+            10,
+            prove=lambda x: isinstance(x, int) and x > 0
         ),
         'time_quant': SettingPoint(
             0.01,

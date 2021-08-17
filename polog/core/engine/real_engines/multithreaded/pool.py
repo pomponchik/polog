@@ -30,10 +30,11 @@ class ThreadPool:
             worker.stop()
 
     def wait_empty_queue(self):
+        delay = self.settings['time_quant'] * self.settings['delay_on_exit_loop_iteration_in_quants']
         while True:
             if self.queue.empty():
                 break
-            time.sleep(self.settings['time_quant'])
+            time.sleep(delay)
 
     def create_workers(self):
         workers = []

@@ -15,7 +15,7 @@ def test_set_and_get():
             'level': 5,
             'service_name': 'lol',
             'errors_level': 7,
-            'delay_before_exit': 5,
+            'max_delay_before_exit': 5,
         },
         {
             'pool_size': 12,
@@ -23,7 +23,7 @@ def test_set_and_get():
             'level': 3,
             'service_name': 'kek',
             'errors_level': 12,
-            'delay_before_exit': 3,
+            'max_delay_before_exit': 3,
         },
     ]
     store = SettingsStore()
@@ -42,7 +42,7 @@ def test_set_error_values():
         'level': [1.2, None, -6],
         'service_name': [1.2, None],
         'errors_level': [1.2, None, -5],
-        'delay_before_exit': ['kek', None, -1],
+        'max_delay_before_exit': ['kek', None, -1],
         'json_module': ['kek', 1, lambda x: 'kek'],
     }
     store = SettingsStore()

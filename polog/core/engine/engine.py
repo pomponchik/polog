@@ -1,7 +1,10 @@
+import atexit
+import signal
 from threading import Lock
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 from polog.core.utils.exception_escaping import exception_escaping
+from polog.core.utils.time_limit import time_limit
 
 
 class Engine(ReadOnlySingleton):
@@ -45,6 +48,7 @@ class Engine(ReadOnlySingleton):
         """
         self.settings['started'] = True
         self.load()
+        self.atexit_register()
 
     def write(self, function_input_data, **fields):
         """
@@ -118,3 +122,11 @@ class Engine(ReadOnlySingleton):
         Увеличение порядкового номера движка. Производится при каждой загрузке.
         """
         self.serial_number += 1
+
+    def atexit_register(self):
+        @atexit.register
+        @exception_escaping
+        @time_limit(lambda: self.settings['max_delay_before_exit'])
+        def checker():
+            self.block()
+            self.stop()

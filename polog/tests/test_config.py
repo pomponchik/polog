@@ -10,10 +10,10 @@ def test_set_valid_key_delay_before_exit():
     Проверяем, что настройка с корректным ключом принимается и сохраняется в SettingsStore.
     """
     # delay_before_exit
-    config.set(delay_before_exit=1)
-    assert SettingsStore()['delay_before_exit'] == 1
-    config.set(delay_before_exit=2)
-    assert SettingsStore()['delay_before_exit'] == 2
+    config.set(max_delay_before_exit=1)
+    assert SettingsStore()['max_delay_before_exit'] == 1
+    config.set(max_delay_before_exit=2)
+    assert SettingsStore()['max_delay_before_exit'] == 2
     # service_name
     config.set(service_name='lol')
     assert SettingsStore()['service_name'] == 'lol'
@@ -59,7 +59,7 @@ def test_set_invalid_value():
     Проверяем, что значение настройки с неправильным типом данных использовать не получится и поднимется исключение.
     """
     with pytest.raises(ValueError):
-        config.set(delay_before_exit='lol')
+        config.set(max_delay_before_exit='lol')
 
 def test_levels_set_good_value():
     """
