@@ -1,3 +1,4 @@
+import os
 import pytest
 from polog import config
 from polog.handlers.memory.saver import memory_saver
@@ -41,3 +42,24 @@ def settings_mock():
         def force_get(self, key):
             return self.points[key]
     return SettingsMock()
+
+@pytest.fixture
+def delete_files():
+    def result(*files):
+        for file in files:
+            try:
+                os.remove(file)
+            except FileNotFoundError:
+                pass
+    return result
+
+@pytest.fixture
+def number_of_strings_in_the_file():
+    def result(path):
+        result = 0
+        with open(path, 'r') as file:
+            for line in file:
+                if line:
+                    result += 1
+        return result
+    return result

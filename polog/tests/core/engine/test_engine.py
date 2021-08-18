@@ -1,8 +1,10 @@
 import time
 from threading import active_count, Thread
+from multiprocessing import Process
 import pytest
 from polog.core.engine.engine import Engine
 from polog.core.stores.settings.settings_store import SettingsStore
+from polog import config, file_writer, log
 
 
 def test_singleton():
@@ -124,3 +126,43 @@ def test_reload():
     engine.reload()
 
     assert not (old_real_engine is engine.real_engine)
+
+def for_process(path_to_logs_file, path_to_numbers_file, number_of_iterations):
+    """
+    Функция, предназначенная для выполнения в другом потоке.
+    Через функцию log создается много логов, они все отправляются в многопоточный движок.
+    К моменту завершения процесса все логи еще не должны успеть обработаться. Для проверки этого факта в конце работы процеса записывается длина очереди (она не должна быть нулевой, это потом булет проверено в тесте; если она нулевая, это значило бы, что все логи таки успели обработаться в штатном порядке).
+    """
+    config.add_handlers(file_writer(path_to_logs_file))
+    config.set(pool_size=2)
+
+    for index in range(number_of_iterations):
+        log('kek')
+    
+    queue_size = Engine().real_engine.queue_size()
+    with open(path_to_numbers_file, 'w') as file:
+        file.write(str(queue_size))
+
+def test_finalize(number_of_strings_in_the_file, delete_files):
+    """
+    Проверяем, что при остановке интерпретатора записываются не успевшие записаться логи в многопоточном движке.
+    Для этого запускаем polog в другом процессе.
+    """
+    path_to_logs_file = 'polog/tests/data/other_process.log'
+    path_to_numbers_file = 'polog/tests/data/queue_size.log'
+    number_of_iterations = 10000
+
+    delete_files(path_to_logs_file, path_to_numbers_file)
+
+    process = Process(target=for_process, args=(path_to_logs_file, path_to_numbers_file, number_of_iterations))
+    process.start()
+    process.join()
+
+    with open(path_to_numbers_file, 'r') as file:
+        queue_size = int(file.read())
+
+    assert queue_size != 0
+
+    assert number_of_strings_in_the_file(path_to_logs_file) == number_of_iterations
+
+    delete_files(path_to_logs_file, path_to_numbers_file)
