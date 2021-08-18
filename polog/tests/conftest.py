@@ -45,6 +45,9 @@ def settings_mock():
 
 @pytest.fixture
 def delete_files():
+    """
+    Функция, удаляющая все файлы, пути к которым были переданы в качестве аргументов.
+    """
     def result(*files):
         for file in files:
             try:
@@ -55,6 +58,9 @@ def delete_files():
 
 @pytest.fixture
 def number_of_strings_in_the_file():
+    """
+    Функция, подсчитывающая не пустые строки в файле, путь к которому был передан в качестве аргумента.
+    """
     def result(path):
         result = 0
         with open(path, 'r') as file:
