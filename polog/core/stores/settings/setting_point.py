@@ -1,5 +1,7 @@
 from threading import Lock
 from polog.errors import DoubleSettingError, AfterStartSettingError
+from polog.core.utils.exception_escaping import exception_escaping
+from polog.core.utils.signature_matcher import SignatureMatcher
 
 
 class SettingPoint:
@@ -7,14 +9,14 @@ class SettingPoint:
     В глобальном классе настроек имени каждой отдельной настройки соответствует экземпляр данного класса.
     Вся логика, связанная с проверкой возможности сохранить новое значение для конкретной настройки, находится здесь. Таким образом, в основном классе остается только функциональность агрегации.
     """
-    def __init__(self, default, change_once=False, change_only_before_start=False, prove=None, converter=None, no_check_first_time=False, action=None, conflicts=None, read_lock=False, shared_lock_with=()):
+    def __init__(self, default, change_once=False, change_only_before_start=False, proves=None, converter=None, no_check_first_time=False, action=None, conflicts=None, read_lock=False, shared_lock_with=()):
         """
         Значения параметров:
 
         default (любой тип данных) - исходное значение параметра. В дальнейшем его возможно изменить методом self.set().
         change_once (bool) - запрет сохранять новое значение параметра более 1 раза. False (по умолчанию) - не запрещено.
         change_only_before_start (bool) - запрет на сохранение новых значений после записи первого лога.
-        prove (callable, 1 аргумент) - функция, в которую скармливается каждое новое сохраняемое значение, предназначенная для проверки его валидности. Она должна принимать один параметр, и для валидных значений возвращать True, для остальных - False. По умолчанию для дефолтного значения проверка тоже делается, но это можно отключить, см. параметр "no_check_first_time".
+        proves (dict, в котором каждый ключ - строка, а каждое значение - callable на 1 аргумент) - набор функций, в которые скармливается каждое новое сохраняемое значение, предназначенный для проверки его валидности. Каждая функция должна принимать один параметр, и для валидных значений возвращать True, для остальных - False. По умолчанию для дефолтного значения проверка тоже делается, но это можно отключить, см. параметр "no_check_first_time". Ключи используются для конструирования сообщений об ошибках и должны естественным (английским) языком описывать то ограничение, соблюдение которого проверяет данная функция.
         converter (callable, 1 аргумент) - функция, которая применяется к каждому сохраняемому значению непосредственно перед сохранением, если она была передана в конструктор, возвращает новое значение. Используется в случаях, когда пользователь может передавать значения в некотором произвольном формате, а внутри программы используется единый формат. Важно: проверка валидности значения осуществляется до применения данной функции, т. е. к вводу в произвольном формате.
         no_check_first_time (bool) - не проверять дефолтное значение. False (по умолчанию) - проверять.
         action (callable, 3 аргумента) - действие, которое необходимо произвести сразу после присвоения нового значения. Принимает 3 аргумента: старое значение настройки, новое значение и экземпляр класса-агрегатора, чтобы была возможность обратиться к смежным полям.
@@ -22,9 +24,9 @@ class SettingPoint:
         read_lock (bool) - блокировка на чтение (т. е. не только на запись).
         shared_lock_with (iterable со строками) - перечисление названий других полей настроек, с которыми объект блокировки должен быть общий.
         """
-        self.prove = prove
-        if not no_check_first_time and not self.prove_value(default):
-            raise ValueError('The default value did not pass the standard check.')
+        self.set_proves(proves)
+        if not no_check_first_time:
+            self.prove_value(default)
         self.value = default
         self.converter = converter
         self.change_once = change_once
@@ -48,11 +50,11 @@ class SettingPoint:
 
         Проверка 1: запрещено ли повторно назначать менять данную настройку, и, если да, менялась ли она уже ранее?
         Проверка 2: запрещено ли менять данную настройку после записи первого лога, и, если да, был ли первый лог уже записан?
-        Проверка 3: используем функцию, переданную в конструктор, для проверки валидности переданного значения. Обычно там проверяются типы данных, но могут быть и иные проверки.
+        Проверка 3: используем функции, переданную в конструктор, для проверки валидности переданного значения. Обычно там проверяются типы данных, но могут быть и иные проверки.
         Проверка 4: есть ли у нового значения конфликты с какими-то другими полями настроек?
 
         Если в конструктор была передана функция-конвертер для значений, перед сохранением значение прогоняется через нее.
-        Если в конструктор была передана функция-действие (action), она выполняется после присвоения нового значения.
+        Если в конструктор была передана функция-действие (action), она выполняется после присвоения нового значения. При этом возможные ошибки экранируются.
 
         Нюанс, связанный с многопоточностью: стоит учитывать, что блокировка потока используется только при сохранении нового значения настройки, а не при чтении значения (если только при инициализации объекта не был установлен режим защищенного чтения). Это значит, что пока один поток назначает новое значение, проводя все проверки, другой поток по-прежнему может считать старое значение.
         """
@@ -61,8 +63,7 @@ class SettingPoint:
                 raise DoubleSettingError("You have already configured this option before. You can't change this option twice.")
             if self.change_only_before_start and self.store['started']:
                 raise AfterStartSettingError('This item of settings can be changed only before the first log entry. The first record has already occurred.')
-            if not self.prove_value(value):
-                raise ValueError(f"You can't use the \"{value}\" object to change the settings in this case. Read the documentation.")
+            self.prove_value(value)
             if self.converter is not None:
                 value = self.converter(value)
             old_value = self.value
@@ -97,14 +98,12 @@ class SettingPoint:
         with self.lock:
             return self.value
 
+    @exception_escaping
     def do_action(self, old_value, new_value):
         """
         Выполняем функцию, переданную пользователем, после сохранения нового значения.
         """
-        try:
-            self.action(old_value, new_value, self.store)
-        except Exception:
-            pass
+        self.action(old_value, new_value, self.store)
 
     def prove_conflicts(self, old_value, new_value):
         """
@@ -197,10 +196,36 @@ class SettingPoint:
         with self.lock:
             self.name = name
 
+    def set_proves(self, proves):
+        """
+        Сохраняем словарь с проверками.
+
+        В словаре в качестве ключей должны быть описания ограничений на английском языке (которые будут использованы при конструировании текста исключений для пользователя), а в качестве значений - функции, принимающие по одному аргументу.
+        """
+        if proves is None:
+            self.proves = {}
+        elif isinstance(proves, dict):
+            matcher = SignatureMatcher('.')
+            for key, value in proves.items():
+                if not isinstance(key, str):
+                    raise ValueError(f'As keys in the dictionary, strings are expected with a description of the restrictions that need to be checked. You also passed as a key: {key}.')
+                if not matcher.match(value):
+                    raise ValueError('The signatures of the function for checking the validity of the values do not match the expected one.')
+            self.proves = proves
+        else:
+            raise ValueError('Proves should be presented in the form of a dictionary, where descriptions are used as keys, and functions are used as values.')
+
     def prove_value(self, value):
         """
         Проверка нового значения.
 
-        Пользователь передает для этого собственную функцию в конструкторе. Если он не передал свою функцию, проверка не проводится и данный метод всегда возвращает True.
+        Данный метод бросает исключение ValueError с подробным описанием, если значение не прошло проверки, либо ничего не делает, если прошло.
+        Проверки хранятся в словаре self.proves.
         """
-        return self.prove is None or self.prove(value)
+        for message, prove in self.proves.items():
+            if not prove(value):
+                if not hasattr(self, 'name'):
+                    full_message = f'You used an incorrect value "{value}": {message}'
+                else:
+                    full_message = f'You used an incorrect value {value} for the field "{self.name}": {message}'
+                raise ValueError(full_message)

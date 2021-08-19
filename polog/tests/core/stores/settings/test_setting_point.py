@@ -25,26 +25,38 @@ def test_set_new_value_with_prove():
     """
     Проверяем, что новое значение проверяется на валидность.
     """
-    point = SettingPoint(True, prove=lambda x: x == False, no_check_first_time=True)
+    point = SettingPoint(True, proves={'prove': lambda x: x == False}, no_check_first_time=True)
     point.set(False)
     assert point.get() == False
     with pytest.raises(ValueError):
         point.set(True)
+
+def test_error_text():
+    """
+    Проверяем, что сообщение об ошибке при передаче неправильного значения содержит фразу, которая была использована как ключ в словаре.
+    """
+    prove_description = 'lol kek cheburek'
+    point = SettingPoint(True, proves={prove_description: lambda x: x == False}, no_check_first_time=True)
+    try:
+        point.set(True)
+    except ValueError as e:
+        string_representation = str(e)
+        assert prove_description in string_representation
 
 def test_no_check_first_time():
     """
     Проверяем, что флаг "no_check_first_time" отменяет проверку дефолтного значения.
     """
     with pytest.raises(ValueError):
-        point = SettingPoint(False, prove=lambda x: x == True)
-    point = SettingPoint(False, prove=lambda x: x == True, no_check_first_time=True)
+        point = SettingPoint(False, proves={'prove': lambda x: x == True})
+    point = SettingPoint(False, proves={'prove': lambda x: x == True}, no_check_first_time=True)
 
 def test_converter():
     """
     Проверяем, что конвертер не трогает дефолтное значение, но новые значения конвертит.
     Также проверяем, что проверки проходятся до того, как срабатывает конвертер.
     """
-    point = SettingPoint('lol', converter=lambda x: 'kek', prove=lambda x: x != 'lolkek')
+    point = SettingPoint('lol', converter=lambda x: 'kek', proves={'prove': lambda x: x != 'lolkek'})
     assert point.get() == 'lol' # Проверка, что не подставилось значение из конвертера еще на этапе инициализации.
     with pytest.raises(ValueError):
         point.set('lolkek') # Проверяет, что проверка отрабатывает, хотя конвертер вывел бы значение из-под ее действия, если бы отработал до нее.

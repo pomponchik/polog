@@ -21,7 +21,10 @@ class SettingsStore(ReadOnlySingleton):
     points = {
         'pool_size': SettingPoint(
             2,
-            prove=lambda x: isinstance(x, int) and x >= 0,
+            proves={
+                'the value must be an integer': lambda x: isinstance(x, int),
+                'the value must be greater than zero': lambda x: x >= 0,
+            },
             conflicts={
                 'max_queue_size': lambda new_value, old_value, other_field_value: new_value == 0 and other_field_value != 0,
             },
@@ -30,11 +33,14 @@ class SettingsStore(ReadOnlySingleton):
             shared_lock_with=(
                 'max_queue_size',
                 'started',
-            )
+            ),
         ),
         'max_queue_size': SettingPoint(
             0,
-            prove=lambda x: isinstance(x, int) and x >= 0,
+            proves={
+                'the value must be an integer': lambda x: isinstance(x, int),
+                'the value must be greater than or equal to zero': lambda x: x >= 0,
+            },
             conflicts={
                 'pool_size': lambda new_value, old_value, other_field_value: new_value != 0 and other_field_value == 0,
             },
@@ -43,60 +49,91 @@ class SettingsStore(ReadOnlySingleton):
             shared_lock_with=(
                 'pool_size',
                 'started',
-            )
+            ),
         ),
         'started': SettingPoint(
             False,
-            prove=lambda x: isinstance(x, bool) and x == True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+                'the value can only be positive (True)': lambda x: x == True,
+            },
             no_check_first_time=True,
             change_once=True,
             shared_lock_with=(
                 'pool_size',
                 'max_queue_size',
-            )
+            ),
         ),
         'original_exceptions': SettingPoint(
             False,
-            prove=lambda x: isinstance(x, bool)
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
         ),
         'level': SettingPoint(
             1,
-            prove=lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str),
-            converter=Levels.get
+            proves={
+                'the value can be a string or an integer greater than or equal to zero': lambda x: (isinstance(x, int) and x >= 0) or isinstance(x, str),
+            },
+            converter=Levels.get,
         ),
         'errors_level': SettingPoint(
             2,
-            prove=lambda x: (isinstance(x, int) and x > 0) or isinstance(x, str),
-            converter=Levels.get
+            proves={
+                'the value can be a string or an integer greater than or equal to zero': lambda x: (isinstance(x, int) and x >= 0) or isinstance(x, str),
+            },
+            converter=Levels.get,
         ),
         'service_name': SettingPoint(
             'base',
-            prove=lambda x: isinstance(x, str) and x.isidentifier()
+            proves={
+                'the value can only be a string': lambda x: isinstance(x, str),
+                'the value must follow the rules for formatting identifiers in Python': lambda x: x.isidentifier(),
+            },
         ),
         'silent_internal_exceptions': SettingPoint(
             False,
-            prove=lambda x: isinstance(x, bool)
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
         ),
         'max_delay_before_exit': SettingPoint(
             1.0,
-            prove=lambda x: (isinstance(x, int) or isinstance(x, float)) and x > 0
+            proves={
+                'the value must be a number (int or float)': lambda x: isinstance(x, int) or isinstance(x, float),
+                'the value must be greater than zero': lambda x: x > 0,
+            },
         ),
         'delay_on_exit_loop_iteration_in_quants': SettingPoint(
             10,
-            prove=lambda x: isinstance(x, int) and x > 0
+            proves={
+                'the value must be an integer': lambda x: isinstance(x, int),
+                'the value must be greater than zero': lambda x: x > 0,
+            },
         ),
         'time_quant': SettingPoint(
             0.01,
-            prove=lambda x: (isinstance(x, int) or isinstance(x, float)) and x > 0
+            proves={
+                'the value must be a number (int or float)': lambda x: isinstance(x, int) or isinstance(x, float),
+                'the value must be greater than zero': lambda x: x > 0,
+            },
         ),
         'engine': SettingPoint(
             real_engine_fabric,
-            prove=lambda x: inspect.isclass(x) or callable(x),
-            no_check_first_time=True
+            proves={
+                'the value can be a class or a callable object': lambda x: inspect.isclass(x) or callable(x),
+            },
+            no_check_first_time=True,
         ),
         'json_module': SettingPoint(
             json,
-            prove=lambda x: inspect.ismodule(x) and hasattr(x, 'loads') and hasattr(x, 'dumps'),
+            proves={
+                'the value must be a module': lambda x: inspect.ismodule(x),
+                'the value must have the "loads" attribute': lambda x: hasattr(x, 'loads'),
+                'the value must have the "dumps" attribute': lambda x: hasattr(x, 'dumps'),
+                'the "loads" attribute of the value must be called': lambda x: callable(getattr(x, 'loads')),
+                'the "dumps" attribute of the value must be called': lambda x: callable(getattr(x, 'dumps')),
+            },
         ),
     }
     points_are_informed = False
