@@ -1,9 +1,10 @@
 from threading import RLock
+from polog.data_structures.trees.named_tree.walker import TreeWalker
 
 
 class NamedTree:
     """
-    Экземпляры данного класса представляют из себя деревья.
+    Экземпляры данного класса представляют из себя деревья. Каждая нода дерева - сама по себе независимое дерево.
 
     Каждая нода дерева имеет имя. Идентификация конкретной ноды в дереве происходит за счет композиции имен всех родительских нод + имени конкретной ноды, через некоторый разделитель (по умолчанию - ".").
 
@@ -28,6 +29,7 @@ class NamedTree:
 
         self.value = None
         self.childs = {}
+        self.walker = TreeWalker(self)
         self.lock = RLock()
 
     def __getitem__(self, key):
@@ -35,6 +37,44 @@ class NamedTree:
         if item is None:
             raise KeyError(f"'{key}'")
         return item
+
+    def __setitem__(self, key, value):
+        if not isinstance(key, str):
+            raise KeyError('The key in the tree can only be a string.')
+        if value is None:
+            raise ValueError("You can't save None in the tree.")
+        if not self.value_checker(value):
+            raise ValueError(f'The value of "{value}" did not pass verification.')
+        with self.lock:
+            keys = self.get_converted_keys(key)
+            node = self.search_or_create_node(keys)
+            node.value = value
+
+    def __len__(self):
+        with self.lock:
+            result = 0
+            for value in self.walker.bfs_values():
+                result += 1
+            return result
+
+    def __iter__(self):
+        with self.lock:
+            return self.walker.bfs_values()
+
+    def __contains__(self, key):
+        with self.lock:
+            keys = self.get_converted_keys(key)
+            node = search_node(keys)
+            if node is None:
+                return False
+            return True
+
+    def __delitem__(self, key):
+        with self.lock:
+            keys = self.get_converted_keys(key)
+
+    def __str__(self):
+        pass
 
     def get(self, key):
         with self.lock:
@@ -91,41 +131,6 @@ class NamedTree:
             result.reverse()
             return self.keys_separator.join(result)
 
-    def __setitem__(self, key, value):
-        if not isinstance(key, str):
-            raise KeyError('The key in the tree can only be a string.')
-        if value is None:
-            raise ValueError("You can't save None in the tree.")
-        if not self.value_checker(value):
-            raise ValueError(f'The value of "{value}" did not pass verification.')
-        with self.lock:
-            keys = self.get_converted_keys(key)
-            node = self.search_or_create_node(keys)
-            node.value = value
-
-
-    def __len__(self):
-        with self.lock:
-            pass
-
-    def __iter__(self):
-        with self.lock:
-            pass
-
-    def __contains__(self, key):
-        with self.lock:
-            keys = self.get_converted_keys(key)
-            node = search_node(keys)
-            if node is None:
-                return False
-            return True
-
-    def __delitem__(self, key):
-        with self.lock:
-            keys = self.get_converted_keys(key)
-
-    def __str__(self):
-        pass
 
     def get_converted_keys(self, key):
         if not isinstance(key, str):
