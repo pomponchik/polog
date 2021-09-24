@@ -5,6 +5,8 @@ class TreePrinter:
 
     def get_indented_representation(self):
         data = []
+        if not len(self.tree):
+            return f'<{type(self.tree).__name__} object>'
         for node in self.tree.walker.dfs():
             full_name = node.get_full_name()
             indent = full_name.count(self.tree.keys_separator) + 1 if full_name != self.tree.keys_separator else 0
