@@ -7,7 +7,7 @@ class TreeWalker:
 
     def bfs(self):
         """
-        Функция-генератор для обхода в ширину (BFS) по дереву.
+        Функция-генератор для обхода дерева в ширину (BFS).
 
         На каждой итерации возвращает ноду. Ноды не проверяются на пустоту, возвращаются "как есть".
         """
@@ -22,7 +22,7 @@ class TreeWalker:
 
     def bfs_values(self):
         """
-        Функция-генератор для обхода в ширину (BFS) по дереву.
+        Функция-генератор для обхода дерева в ширину (BFS).
 
         На каждой итерации возвращает значение, хранящееся в ноде. Пустые ноды игнорируются.
         """
@@ -31,9 +31,19 @@ class TreeWalker:
                 yield node.value
 
     def dfs(self):
-        yield from self.recursive_dfs(self.tree)
+        """
+        Функция-генератор для обхода дерева в глубину (DFS).
 
-    def recursive_dfs(self, node):
+        На каждой итерации возвращает ноду. Ноды не проверяются на пустоту, возвращаются "как есть".
+        """
+        yield from self._recursive_dfs(self.tree)
+
+    def _recursive_dfs(self, node):
+        """
+        Вспомогательный метод для реализации обхода в глубину.
+
+        Поскольку обход реализован через рекурсию, его глубина ограничена и при ее превышении поднимется RecursionError.
+        """
         yield node
         for child in node.childs.values():
-            yield from self.recursive_dfs(child)
+            yield from self._recursive_dfs(child)
