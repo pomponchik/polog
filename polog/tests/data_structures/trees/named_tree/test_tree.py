@@ -203,3 +203,52 @@ def test_re_set():
     assert tree['kek'] == 'cheburek'
     tree['kek'] = 'not cheburek'
     assert tree['kek'] == 'not cheburek'
+
+def test_search_node():
+    """
+    Проверяем, что поиск ноды по списку ключей работает.
+    """
+    tree = NamedTree()
+
+    assert tree.search_node(['kek']) is None
+
+    tree['kek'] = 'cheburek'
+    assert type(tree.search_node(['kek'])) is NamedTree
+    assert tree.search_node(['kek']).value == 'cheburek'
+
+    tree['kek.shmek'] = 'chebukek'
+    assert type(tree.search_node(['kek', 'shmek'])) is NamedTree
+    assert tree.search_node(['kek', 'shmek']).value == 'chebukek'
+
+def test_search_or_create_node():
+    """
+    Проверяем, что при отсутствии ноды по заданным ключам она создается, а при наличии - возвращается существующая.
+    """
+    tree = NamedTree()
+
+    node = tree.search_or_create_node(['kek', 'shmek'])
+    assert type(node) is NamedTree
+    assert node.value is None
+    assert node.name == 'shmek'
+
+    tree['cheburek.kek'] = 'perekek'
+    node = tree.search_or_create_node(['cheburek', 'kek'])
+    assert type(node) is NamedTree
+    assert node.value == 'perekek'
+    assert node.name == 'kek'
+
+def test_create_child():
+    """
+    Проверяем, что потомок ноды успешно создается, и все базовые свойства наследуются.
+    """
+    tree = NamedTree()
+
+    node = tree.create_child('kek')
+    assert tree.childs['kek'] is node
+    assert node.parent is tree
+    assert type(node) is NamedTree
+    assert node.value is None
+    assert node.keys_separator == tree.keys_separator
+    assert node.key_checker is tree.key_checker
+    assert node.value_checker is tree.value_checker
+    assert node.name == 'kek'
