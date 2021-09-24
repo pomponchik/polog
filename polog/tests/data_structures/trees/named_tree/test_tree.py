@@ -99,3 +99,50 @@ def test_del():
     del tree['shmek.shmek.shmek.kek']
     assert len(tree) == 0
     assert len(tree.childs) == 0
+
+def test_get_name_and_full_name():
+    """
+    Проверяем, что имя ноды и полное имя ноды выводятся корректно.
+
+    Имя ноды - это идентификатор одной ноды.
+    Полное имя ноды состоит из имен всех предков данной ноды + имени ноды.
+
+    В случае, если в отдельное дерево выделена ветка другого дерева, полное имя ноды будет простираться до корневой ноды исходного дерева.
+    """
+    tree = NamedTree()
+
+    assert tree.name is None
+
+    assert tree.get_full_name() == '.'
+    assert NamedTree(keys_separator='/').get_full_name() == '/'
+
+    tree['kek'] = 'cheburek'
+    node = tree.search_node(['kek'])
+    assert node.get_full_name() == 'kek'
+    assert node.name == 'kek'
+
+    tree['lol'] = 'kek'
+    tree['lol.kek'] = 'cheburek'
+    node = tree.search_node(['lol', 'kek'])
+    assert node.get_full_name() == 'lol.kek'
+    assert node.name == 'kek'
+
+    assert tree.name is None
+
+def test_get_empty_or_not():
+    """
+    Проверяем, что методы .get() и .__getitem__() ведут себя по-разному.
+
+    .get() при несуществующем ключе возвращает None.
+    .__getitem__() поднимает KeyError.
+    """
+    tree = NamedTree()
+
+    with pytest.raises(KeyError):
+        tree['kek']
+
+    assert tree.get('kek') is None
+
+    tree['kek'] = 'cheburek'
+    assert tree.get('kek') == 'cheburek'
+    assert tree['kek'] == 'cheburek'
