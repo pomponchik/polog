@@ -55,3 +55,47 @@ def test_len():
     assert len(tree) == 4
     empty_node['sas'] = 'shmas'
     assert len(tree) == 5
+
+def test_contains():
+    """
+    Проверяем, что оператор "in" работает.
+    """
+    tree = NamedTree()
+    assert 'kek' not in tree
+    tree['kek'] = 'lol'
+    assert 'kek' in tree
+    tree['kek.cheburek'] = 'lolkek'
+    assert 'kek.cheburek' in tree
+    assert 'shmek' not in tree
+
+def test_del():
+    """
+    Проверяем, что оператор "del" работает.
+    """
+    tree = NamedTree()
+
+    with pytest.raises(KeyError):
+        del tree['kek']
+
+    tree['kek'] = 'lol'
+    assert len(tree) == 1
+    with pytest.raises(KeyError):
+        del tree['cheburek']
+    del tree['kek']
+    assert len(tree) == 0
+
+    # Проверка, что "пустые" ноды вырезаются, когда они не ведут к ноде, содержащей значение.
+    child_1 = NamedTree()
+    child_2 = NamedTree()
+    child_3 = NamedTree()
+    tree.childs['shmek'] = child_1
+    child_1.parent = tree
+    child_1.childs['shmek'] = child_2
+    child_2.parent = child_1
+    child_2.childs['shmek'] = child_3
+    child_3.parent = child_2
+    child_3['kek'] = 'cheburek'
+    assert len(tree) == 1
+    del tree['shmek.shmek.shmek.kek']
+    assert len(tree) == 0
+    assert len(tree.childs) == 0

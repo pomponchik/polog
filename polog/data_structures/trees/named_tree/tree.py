@@ -64,17 +64,43 @@ class NamedTree:
     def __contains__(self, key):
         with self.lock:
             keys = self.get_converted_keys(key)
-            node = search_node(keys)
+            node = self.search_node(keys)
             if node is None:
                 return False
             return True
 
     def __delitem__(self, key):
+        if not isinstance(key, str):
+            raise KeyError('The key in the tree can only be a string.')
         with self.lock:
             keys = self.get_converted_keys(key)
+            node = self.search_node(keys)
+            if node is None:
+                raise KeyError(f'The key "{key}" is not registered.')
+            node.delete_value()
+            self.cut_empty_branch(node, break_on=self)
 
     def __str__(self):
         pass
+
+    @staticmethod
+    def cut_empty_branch(node, break_on=None):
+        while node is not None:
+            parent = node.parent
+            if parent is None:
+                break
+            childs_to_delete = []
+            for child_name, child in parent.childs.items():
+                if child is break_on:
+                    return
+                if not len(child):
+                    childs_to_delete.append(child_name)
+            for name in childs_to_delete:
+                del parent.childs[name]
+            node = parent
+
+    def delete_value(self):
+        self.value = None
 
     def get(self, key):
         with self.lock:
@@ -130,7 +156,6 @@ class NamedTree:
                 return default
             result.reverse()
             return self.keys_separator.join(result)
-
 
     def get_converted_keys(self, key):
         if not isinstance(key, str):
