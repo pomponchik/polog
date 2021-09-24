@@ -146,3 +146,60 @@ def test_get_empty_or_not():
     tree['kek'] = 'cheburek'
     assert tree.get('kek') == 'cheburek'
     assert tree['kek'] == 'cheburek'
+
+def test_delete_value():
+    """
+    Проверяем, что метод .delete_value() подменяет хранящееся в ноде значение на None.
+    """
+    tree = NamedTree()
+
+    tree.value = 'kek'
+    assert tree.value == 'kek'
+    tree.delete_value()
+    assert tree.value is None
+
+def test_set_none():
+    """
+    Проверяем, что сохранить в дерево None нельзя.
+    """
+    tree = NamedTree()
+
+    with pytest.raises(ValueError):
+        tree['kek'] = None
+
+def test_key_checker():
+    """
+    Проверяем, что работает дефолтная проверка ключей, а также что можно установить свою и она тоже будет работать.
+    """
+    tree = NamedTree()
+    with pytest.raises(KeyError):
+        tree[' kek'] = 'cheburek'
+
+    tree = NamedTree(key_checker=lambda key: key=='lol')
+    tree['lol'] = 'kek'
+    with pytest.raises(KeyError):
+        tree['not_lol'] = 'kek'
+
+def test_value_checker():
+    """
+    Можно установить запрет на сохранение определенных значений в дереве (помимо None). Проверяем, что он работает.
+    """
+    tree = NamedTree()
+    tree['kek'] = 'cheburek'
+
+    tree = NamedTree(value_checker=lambda x: x == 'cheburek')
+    tree['kek'] = 'cheburek'
+    with pytest.raises(ValueError):
+        tree['not_kek'] = 'not cheburek'
+
+def test_re_set():
+    """
+    Пробуем сохранить два разных значения по одному ключу.
+    Они должны перезаписываться.
+    """
+    tree = NamedTree()
+
+    tree['kek'] = 'cheburek'
+    assert tree['kek'] == 'cheburek'
+    tree['kek'] = 'not cheburek'
+    assert tree['kek'] == 'not cheburek'
