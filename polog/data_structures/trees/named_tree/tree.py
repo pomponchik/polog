@@ -149,6 +149,8 @@ class NamedTree:
     def __str__(self):
         """
         Получение строковой репрезентации дерева.
+
+        Потокобезопасно.
         """
         with self.lock:
             return self.printer.get_indented_representation()
