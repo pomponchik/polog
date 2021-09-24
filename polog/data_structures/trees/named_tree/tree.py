@@ -35,7 +35,7 @@ class NamedTree:
     def __getitem__(self, key):
         item = self.get(key)
         if item is None:
-            raise KeyError(f"'{key}'")
+            raise KeyError(f"{key}")
         return item
 
     def __setitem__(self, key, value):
