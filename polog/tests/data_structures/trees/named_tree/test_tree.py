@@ -252,3 +252,17 @@ def test_create_child():
     assert node.key_checker is tree.key_checker
     assert node.value_checker is tree.value_checker
     assert node.name == 'kek'
+
+def test_get_converted_keys():
+    """
+    Проверяем, что ключ сепарируется корректно.
+    """
+    tree = NamedTree()
+    assert tree.get_converted_keys('kek.cheburek') == ['kek', 'cheburek']
+
+    tree = NamedTree(keys_separator='/')
+    assert tree.get_converted_keys('kek/cheburek') == ['kek', 'cheburek']
+
+    tree = NamedTree(keys_separator='/')
+    with pytest.raises(KeyError):
+        tree.get_converted_keys('kek.cheburek')
