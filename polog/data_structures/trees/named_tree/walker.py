@@ -29,3 +29,11 @@ class TreeWalker:
         for node in self.bfs():
             if node.value is not None:
                 yield node.value
+
+    def dfs(self):
+        yield from self.recursive_dfs(self.tree)
+
+    def recursive_dfs(self, node):
+        yield node
+        for child in node.childs.values():
+            yield from self.recursive_dfs(child)

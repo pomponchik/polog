@@ -1,5 +1,6 @@
 from threading import RLock
 from polog.data_structures.trees.named_tree.walker import TreeWalker
+from polog.data_structures.trees.named_tree.printer import TreePrinter
 
 
 class NamedTree:
@@ -30,6 +31,7 @@ class NamedTree:
         self.value = None
         self.childs = {}
         self.walker = TreeWalker(self)
+        self.printer = TreePrinter(self)
         self.lock = RLock()
 
     def __getitem__(self, key):
@@ -81,7 +83,8 @@ class NamedTree:
             self.cut_empty_branch(node, break_on=self)
 
     def __str__(self):
-        pass
+        with self.lock:
+            return self.printer.get_indented_representation()
 
     @staticmethod
     def cut_empty_branch(node, break_on=None):
