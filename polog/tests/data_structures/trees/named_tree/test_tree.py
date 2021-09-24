@@ -266,3 +266,15 @@ def test_get_converted_keys():
     tree = NamedTree(keys_separator='/')
     with pytest.raises(KeyError):
         tree.get_converted_keys('kek.cheburek')
+
+def test_wrong_key():
+    """
+    Проверем, что не-строки нельзя использовать в качестве ключей.
+    """
+    tree = NamedTree()
+
+    with pytest.raises(KeyError):
+        node = tree[6]
+
+    with pytest.raises(KeyError):
+        node = tree.get(6)
