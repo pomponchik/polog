@@ -141,7 +141,7 @@ class NamedTree:
         with self.lock:
             keys = self.get_converted_keys(key)
             node = self.search_node(keys)
-            if node is None:
+            if node is None or node.value is None:
                 raise KeyError(f'The key "{key}" is not registered.')
             node.delete_value()
             self.cut_empty_branch(node, break_on=self)
