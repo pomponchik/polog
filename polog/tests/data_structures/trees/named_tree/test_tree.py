@@ -114,6 +114,7 @@ def test_get_name_and_full_name():
     assert tree.name is None
 
     assert tree.get_full_name() == '.'
+    assert tree.get_full_name(default='kek') == 'kek'
     assert NamedTree(keys_separator='/').get_full_name() == '/'
 
     tree['kek'] = 'cheburek'
