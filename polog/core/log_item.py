@@ -1,0 +1,2 @@
+class LogItem:
+    pass
