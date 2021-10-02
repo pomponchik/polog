@@ -1,6 +1,5 @@
 from threading import Lock, BoundedSemaphore
 from polog.handlers.abstract.base import BaseHandler
-from polog.handlers.memory.log_item import LogItem
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 
 
@@ -21,12 +20,11 @@ class memory_saver(ReadOnlySingleton, BaseHandler):
                 self.all = []
                 self.inited = True
 
-    def __call__(self, args, **kwargs):
+    def __call__(self, log):
         """
         При вызове экземпляра класса, обновляем информацию о последнем логе, и добавляем новый лог в список со всеми логами.
         """
         with Lock():
-            log = LogItem(args, **kwargs)
             with self.all_semaphore:
                 self.all.append(log)
                 self.last = log

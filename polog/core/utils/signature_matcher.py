@@ -88,5 +88,5 @@ class SignatureMatcher:
 
         handler(function_input, **fields)
         """
-        matcher = cls('.', '**')
+        matcher = cls('.')
         return matcher.match(function)

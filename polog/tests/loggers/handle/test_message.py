@@ -60,7 +60,7 @@ def test_affects(handler):
     function_without_flog()
     function_with_flog()
     time.sleep(0.0001)
-    assert handler.last['local_variables'] is None
+    assert handler.last.get('local_variables') is None
 
 def test_another_field(handler):
     """

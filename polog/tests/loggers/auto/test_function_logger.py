@@ -233,9 +233,9 @@ def test_extract_extra_fields_base():
     """
     Проверяем, что в базовом случае дополнительные поля извлекаются.
     """
-    def extractor_1(args, **kwargs):
+    def extractor_1(log):
         return 'hello'
-    def extractor_2(args, **kwargs):
+    def extractor_2(log):
         return 'world'
     class FalseSettingsStore:
         extra_fields = {'hello': field(extractor_1), 'world': field(extractor_2)}
@@ -248,9 +248,9 @@ def test_extract_extra_fields_other_type_with_converter():
     """
     Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, но используется конвертер.
     """
-    def extractor_1(args, **kwargs):
+    def extractor_1(log):
         return 1
-    def extractor_2(args, **kwargs):
+    def extractor_2(log):
         return 2
     class FalseSettingsStore:
         extra_fields = {'1': field(extractor_1, converter=lambda x: str(x) + ' converted'), '2': field(extractor_2, converter=lambda x: str(x) + ' converted')}

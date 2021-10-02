@@ -13,6 +13,7 @@ from polog.utils.json_vars import json_vars, json_one_variable
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
 from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError
 from polog.loggers.handle.message import message as _message
+from polog.core.log_item import LogItem
 
 
 class FunctionLogger:
@@ -140,8 +141,9 @@ class FunctionLogger:
                 _message._copy_context(args_dict)
                 if not (input_variables is None):
                     args_dict['input_variables'] = input_variables
-                self.extract_extra_fields((args, kwargs), args_dict)
-                self.engine.write((args, kwargs), **args_dict)
+                log = self.create_log_item(args, kwargs, args_dict)
+                self.extract_extra_fields(log, args_dict)
+                self.engine.write(log)
 
     def log_normal_info(self, result, finish, start, args_dict, level, *args, **kwargs):
         """
@@ -157,10 +159,11 @@ class FunctionLogger:
             input_variables = json_vars(*args, **kwargs)
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
-            self.extract_extra_fields((args, kwargs), args_dict)
-            self.engine.write((args, kwargs), **args_dict)
+            log = self.create_log_item(args, kwargs, args_dict)
+            self.extract_extra_fields(log, args_dict)
+            self.engine.write(log)
 
-    def extract_extra_fields(self, args, args_dict):
+    def extract_extra_fields(self, log, args_dict):
         """
         Здесь происходит извлечение данных для дополнительных полей.
         Если поле уже заполнено ранее, здесь оно не изменяется.
@@ -169,10 +172,16 @@ class FunctionLogger:
         for name, field in extra_fields.items():
             if name not in args_dict:
                 try:
-                    value = field.get_data(args, **args_dict)
+                    value = field.get_data(log)
                     args_dict[name] = value
                 except:
                     pass
+
+    def create_log_item(self, args, kwargs, data):
+        log = LogItem()
+        log.set_data(data)
+        log.set_function_input_data(args, kwargs)
+        return log
 
 
 flog = FunctionLogger()

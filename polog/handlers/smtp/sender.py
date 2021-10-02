@@ -64,56 +64,58 @@ class SMTP_sender(BaseHandler):
         """
         self.smtp_wrapper.send(message)
 
-    def get_content(self, args, **kwargs):
+    def get_content(self, log):
         """
         Наполнение письма контентом.
         """
-        text = self.get_text(args, **kwargs)
+        text = self.get_text(log)
         if self.is_html:
             message = MIMEText(text, "html")
         else:
             message = MIMEText(text)
-        message['Subject'] = self.get_subject(args, **kwargs)
+        message['Subject'] = self.get_subject(log)
         message['From'] = self.email_from
         message['To'] = self.email_to
         return message
 
-    def get_text(self, args, **kwargs):
+    def get_text(self, log):
         """
         Данный метод возвращает текст письма.
         Клиент может передать в конструктор класса собственную функцию, которая принимает в себя те же аргументы, что метод __call__() текущего класса, и возвращает строку. В этом случае результат выполнения данной функции будет использован в теле письма. Иначе текст письма будет сгенерирован по умолчанию.
         """
         if callable(self.text_assembler):
-            return self.text_assembler(args, **kwargs)
-        return self.get_standart_text(args, **kwargs)
+            return self.text_assembler(log)
+        return self.get_standart_text(log)
 
-    def get_standart_text(self, args, **kwargs):
+    def get_standart_text(self, log):
         """
         Метод, возвращающий текст письма по умолчанию.
         По умолчанию текст письма - это просто перечисление всех переданных в метод __call__() аргументов.
         """
-        elements = [f'{key} = {value}' for key, value in kwargs.items()]
+        elements = [f'{key} = {value}' for key, value in log.items()]
         text = '\n'.join(elements)
         if text:
             text = f'Message from the Polog:\n\n{text}'
             return text
         return 'Empty message from the Polog.'
 
-    def get_subject(self, args, **kwargs):
+    def get_subject(self, log):
         """
         Данный метод возвращает тему письма.
         По умолчанию берется стандартная тема, однако клиент может кастомизировать создание темы, передав в конструктор класса аргумент "subject_assembler". Это должна быть функция, принимающая те же аргументы, что и метод __call__() текущего класса, и возвращающая строку, которая собственно и будет использована в качестве темы письма.
         """
         if callable(self.subject_assembler):
-            return self.subject_assembler(args, **kwargs)
-        return self.get_standart_subject(args, **kwargs)
+            return self.subject_assembler(log)
+        return self.get_standart_subject(log)
 
-    def get_standart_subject(self, args, **kwargs):
+    def get_standart_subject(self, log):
         """
         Данный метод вызывается, когда клиент не установил альтернативных обработчиков для генерации темы письма.
-        Тема письма генерируется на основании аргумента "success", переданного в метод __call__().
+        Тема письма генерируется на основании значения по ключу "success" в объекте лога.
         """
-        success = kwargs.get('success')
+        success = log.get('success')
         if success:
             return 'Success message from the Polog'
+        elif success is None:
+            return 'Message from the Polog'
         return 'Error message from the Polog'

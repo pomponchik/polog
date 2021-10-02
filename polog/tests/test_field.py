@@ -3,8 +3,8 @@ import pytest
 from polog import config, flog, field
 
 
-def ip_extractor(function_input, **kwargs):
-    request = function_input[0][0]
+def ip_extractor(log):
+    request = log.function_input_data.args[0]
     ip = request.META.get('REMOTE_ADDR')
     return ip
 

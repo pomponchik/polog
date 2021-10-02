@@ -14,7 +14,7 @@ def test_do(handler):
     Проверяем, что хендлер вызывается.
     """
     handler.clean()
-    worker.do_anything((None, None), **{'lol': 'kek'})
+    worker.do_anything({'lol': 'kek'})
     assert handler.last is not None
     worker.set_stop_flag()
     worker.stop()

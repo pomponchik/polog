@@ -50,7 +50,7 @@ class Engine(ReadOnlySingleton):
         self.load()
         self.atexit_register()
 
-    def write(self, function_input_data, **fields):
+    def write(self, log):
         """
         Запись лога.
 
@@ -60,17 +60,17 @@ class Engine(ReadOnlySingleton):
             if not self.settings['started']:
                 self.__second_init__()
                 self.write = self._new_write
-        self._new_write(function_input_data, **fields)
+        self._new_write(log)
 
-    def _new_write(self, function_input_data, **fields):
+    def _new_write(self, log):
         """
         Данный метод фактически вызывается каждый раз при вызове метода self.write().
         """
-        self.real_engine.write(function_input_data, **fields)
+        self.real_engine.write(log)
 
-    def _blocked_write(self, function_input_data, **fields):
+    def _blocked_write(self, log):
         with self.lock:
-            self._new_write(function_input_data, **fields)
+            self._new_write(log)
 
     def reload(self):
         """

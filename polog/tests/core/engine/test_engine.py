@@ -19,7 +19,7 @@ def test_reload_threads_counting():
     """
     engine = Engine()
     store = SettingsStore()
-    engine.write(None, **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
 
     before = active_count()
     store['pool_size'] = store['pool_size'] + 2
@@ -35,14 +35,15 @@ def test_reload_missive_attack(handler):
     """
     engine = Engine()
     store = SettingsStore()
-    engine.write(None, **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
+    time.sleep(0.0001)
     handler.clean()
 
     number_of_items = 3000
 
     def go_attack():
         for x in range(number_of_items):
-            engine.write((None, None), **{'lol': 'kek'})
+            engine.write({'lol': 'kek'})
     thread = Thread(target=go_attack)
     thread.start()
 
@@ -60,7 +61,7 @@ def test_reload_serial_number():
     engine = Engine()
     store = SettingsStore()
     store['pool_size'] = 2
-    engine.write((None, None), **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
 
     number_before = engine.serial_number
     engine.reload()
@@ -75,7 +76,7 @@ def test_active_flag():
     engine = Engine()
     store = SettingsStore()
     store['pool_size'] = 2
-    engine.write((None, None), **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
 
     engine.stop()
     assert engine.active == False
@@ -102,7 +103,7 @@ def test_load():
     engine = Engine()
     store = SettingsStore()
     store['pool_size'] = 2
-    engine.write((None, None), **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
 
     engine.stop()
 
@@ -119,7 +120,7 @@ def test_reload():
     engine = Engine()
     store = SettingsStore()
     store['pool_size'] = 2
-    engine.write((None, None), **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
 
     old_real_engine = engine.real_engine
 
@@ -138,7 +139,7 @@ def for_process(path_to_logs_file, path_to_numbers_file, number_of_iterations):
 
     for index in range(number_of_iterations):
         log('kek')
-    
+
     queue_size = Engine().real_engine.queue_size()
     with open(path_to_numbers_file, 'w') as file:
         file.write(str(queue_size))

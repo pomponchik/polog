@@ -26,7 +26,7 @@ class Worker:
             try:
                 while True:
                     try:
-                        items = self.queue.get(timeout=self.settings['time_quant'])
+                        log = self.queue.get(timeout=self.settings['time_quant'])
                         break
                     except Empty:
                         if self.stopped:
@@ -35,7 +35,7 @@ class Worker:
                 if stopped_from_flag:
                     break
                 # items - это всегда кортеж из 2-х элементов.
-                self.do_anything(items[0], **(items[1]))
+                self.do_anything(log)
                 self.queue.task_done()
             except Exception as e:
                 self.queue.task_done()
@@ -67,7 +67,7 @@ class Worker:
         """
         self.thread.join()
 
-    def do_anything(self, args, **kwargs):
+    def do_anything(self, log):
         """
         Выполняем кастомные обработчики для записи логов.
 
@@ -75,6 +75,6 @@ class Worker:
         """
         for handler in self.settings.handlers.values():
             try:
-                handler(args, **kwargs, service_name=self.settings['service_name'])
+                handler(log)
             except Exception as e:
                 pass

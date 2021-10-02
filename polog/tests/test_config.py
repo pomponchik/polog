@@ -95,8 +95,8 @@ def test_add_handlers():
     Проверяем, что новый обработчик добавляется и работает.
     """
     lst = []
-    def new_handler(args, **fields):
-        lst.append(fields['level'])
+    def new_handler(log):
+        lst.append(log['level'])
     config.add_handlers(new_handler)
     log('lol')
     time.sleep(0.0001)
@@ -143,9 +143,9 @@ def test_get_handlers():
     """
     Проверяем, что config.get_handlers() работает с аргументами и без.
     """
-    def new_handler(args, **fields):
+    def new_handler(log):
         pass
-    def new_handler2(args, **fields):
+    def new_handler2(log):
         pass
     config.add_handlers(lolkekcheburek=new_handler)
     config.add_handlers(new_handler2)
@@ -160,9 +160,9 @@ def test_delete_handlers():
     Проверка удаления обработчиков.
     Должна работать как по имени, так и прямой передачей объекта.
     """
-    def new_handler(args, **fields):
+    def new_handler(log):
         pass
-    def new_handler2(args, **fields):
+    def new_handler2(log):
         pass
     config.add_handlers(lolkek123=new_handler)
     config.delete_handlers('lolkek123')
@@ -180,7 +180,7 @@ def test_add_field(handler):
     Проверяем, что кастомные поля добавляются и работают.
     """
     handler.clean()
-    def extractor(args, **kwargs):
+    def extractor(log):
         return 'lol'
     @flog
     def function():
@@ -196,7 +196,7 @@ def test_delete_field(handler):
     Проверяем, что кастомные поля удаляются.
     """
     handler.clean()
-    def extractor(args, **kwargs):
+    def extractor(log):
         return 'lol'
     @flog
     def function():
@@ -212,7 +212,7 @@ def test_double_name_set_handler():
     Запрещено дважды пытаться присвоить одно и то же имя одному или нескольким обработчикам.
     Проверяем, что в этом случае поднимается исключение.
     """
-    def local_handler(a, **b):
+    def local_handler(a):
         pass
     with pytest.raises(KeyError):
         config.add_handlers(ggg=local_handler)

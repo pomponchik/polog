@@ -44,7 +44,7 @@ def test_function_decorator_without_breacks(handler):
     @log
     def function(a, b):
         return a + b
-    assert function(1, 3) == 4
+    assert function(1, 43) == 44
     time.sleep(0.001)
     assert handler.last
 
@@ -57,7 +57,7 @@ def test_function_decorator_with_breacks(handler):
     @log()
     def function(a, b):
         return a + b
-    assert function(1, 3) == 4
+    assert function(1, 33) == 34
     time.sleep(0.0001)
     assert handler.last
 
@@ -70,7 +70,7 @@ def test_function_decorator_with_breacks_and_message(handler):
     @log(message='kek')
     def function(a, b):
         return a + b
-    assert function(1, 3) == 4
+    assert function(1, 23) == 24
     time.sleep(0.0001)
     assert handler.last
     assert handler.last['message'] == 'kek'
@@ -85,7 +85,7 @@ def test_function_decorator_with_breacks_and_message_and_dotlevel(handler):
     @log.test_function_decorator_with_breacks_and_message_and_dotlevel(message='kek')
     def function(a, b):
         return a + b
-    assert function(1, 3) == 4
+    assert function(1, 13) == 14
     time.sleep(0.0001)
     assert handler.last
     assert handler.last['message'] == 'kek'
@@ -116,7 +116,7 @@ def test_message(handler):
     def function(a, b):
         log.message('kek', level=5)
         return a + b
-    assert function(1, 3) == 4
+    assert function(1, 2) == 3
     time.sleep(0.0001)
     assert handler.last
     assert handler.last['message'] == 'kek'

@@ -8,25 +8,25 @@ class ConcreteHandler(BaseHandler):
     def do(self, content):
         log(content)
 
-    def get_content(self, args, **kwargs):
-        return str({**kwargs})
+    def get_content(self, log):
+        return str(log)
 
 class ErrorHandler(BaseHandler):
     def do(self, content):
         raise ValueError
 
-    def get_content(self, args, **kwargs):
-        return str({**kwargs})
+    def get_content(self, log):
+        return str(log)
 
 def test_filter_false(handler):
     """
     Проверяем, что фильтр, который всегда возвращает False, блокирует запись лога.
     """
     handler.clean()
-    def false_filter(args, **kwargs):
+    def false_filter(log):
         return False
     concrete = ConcreteHandler(filter=false_filter)
-    concrete((None, None), message='kek')
+    concrete(dict(lol='kek'))
     time.sleep(0.0001)
     assert handler.last is None
 
@@ -35,10 +35,10 @@ def test_filter_true(handler):
     Проверяем, что фильтр, который всегда возвращает True, не блокирует запись лога.
     """
     handler.clean()
-    def true_filter(args, **kwargs):
+    def true_filter(log):
         return True
     concrete = ConcreteHandler(filter=true_filter)
-    concrete((None, None), message='kek')
+    concrete(dict(message='kek'))
     time.sleep(0.0001)
     assert handler.last is not None
 
@@ -48,7 +48,7 @@ def test_only_errors_false_true(handler):
     """
     handler.clean()
     concrete = ConcreteHandler(only_errors=False)
-    concrete((None, None), message='kek', success=True)
+    concrete(dict(message='kek', success=True))
     time.sleep(0.0001)
     assert handler.last is not None
 
@@ -58,7 +58,7 @@ def test_only_errors_false_false(handler):
     """
     handler.clean()
     concrete = ConcreteHandler(only_errors=False)
-    concrete((None, None), message='kek', success=False)
+    concrete(dict(message='kek', success=False))
     time.sleep(0.0001)
     assert handler.last is not None
 
@@ -68,7 +68,7 @@ def test_only_errors_true_false(handler):
     """
     handler.clean()
     concrete = ConcreteHandler(only_errors=True)
-    concrete((None, None), message='kek', success=False)
+    concrete(dict(message='kek', success=False))
     time.sleep(0.0001)
     assert handler.last is not None
 
@@ -78,7 +78,7 @@ def test_only_errors_true_true(handler):
     """
     handler.clean()
     concrete = ConcreteHandler(only_errors=True)
-    concrete((None, None), message='kek', success=True)
+    concrete(dict(message='kek', success=True))
     time.sleep(0.0001)
     assert handler.last is None
 
@@ -87,10 +87,10 @@ def test_alt(handler):
     Проверяем, что функция alt запускается, когда в обработчике что-то пошло не так.
     """
     handler.clean()
-    def alt(args, **kwargs):
+    def alt(log_item):
         log('lol')
     concrete = ErrorHandler(alt=alt)
-    concrete((None, None), message='kek')
+    concrete(dict(message='kek'))
     time.sleep(0.0001)
     assert handler.last['message'] == 'lol'
 

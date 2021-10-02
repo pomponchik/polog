@@ -42,11 +42,11 @@ class file_writer(BaseHandler):
         # Сброс буфера вывода. Осуществляется по умолчанию, это можно настроить при инициализации обработчика.
         self.maybe_flush()
 
-    def get_content(self, args, **kwargs):
+    def get_content(self, log):
         """
         Стандартный метод для создания строки лога из исходных данных. Использует стандартный форматтер.
         """
-        return self.formatter(args, **kwargs)
+        return self.formatter(log)
 
     def maybe_flush(self):
         """
@@ -81,8 +81,8 @@ class file_writer(BaseHandler):
         """
         return rotator(rotation_rules, self.file)
 
-    def base_formatter_wrapper(self, args, **kwargs):
+    def base_formatter_wrapper(self, log):
         """
         Метод, где вызывается базовый форматтер.
         """
-        return self.base_formatter.get_formatted_string(args, **kwargs)
+        return self.base_formatter.get_formatted_string(log)

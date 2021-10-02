@@ -36,17 +36,17 @@ class BaseFormatter:
         self.FIELD_HANDLERS = self.get_base_field_handlers()
         self.ALIGN_NORMS = self.get_align_norms()
 
-    def get_formatted_string(self, args, **kwargs):
+    def get_formatted_string(self, log):
         """
         При первом вызове данного метода он будет переопределен методом _get_formatted_string().
         Здесь происходит вызов вторичной инициализации объекта, после чего происходит запись лога и метод становится не нужным.
         """
         self.__init_on_run__()
-        result = self._get_formatted_string(args, **kwargs)
+        result = self._get_formatted_string(log)
         self.get_formatted_string = self._get_formatted_string
         return result
 
-    def _get_formatted_string(self, args, **kwargs):
+    def _get_formatted_string(self, log):
         """
         Начиная со второго вызова метода get_formatted_string(), будет сразу вызван данный метод, т. к. он заменит собою get_formatted_string().
 
@@ -56,7 +56,7 @@ class BaseFormatter:
         2. Форматирование подстрок по ширине.
         3. Создание одной большой строки из нескольких "кусочков".
         """
-        data = self.get_dict(args, **kwargs)
+        data = self.get_dict(log)
         self.width_and_align(data)
         result = self.format(data)
         return result
@@ -98,37 +98,37 @@ class BaseFormatter:
         }
         return result
 
-    def get_dict(self, args, **kwargs):
+    def get_dict(self, log):
         """
         Из исходных данных формируем словарь, заполненный только нужными полями, в уже отформатированном виде.
         Потом останется этот словарь только "склеить" в одну строку.
         """
         result = {}
-        self.add_base_fields(result, args, **kwargs)
-        self.add_extra_fields(result, args, **kwargs)
+        self.add_base_fields(result, log)
+        self.add_extra_fields(result, log)
         return result
 
-    def add_base_fields(self, base, args, **kwargs):
+    def add_base_fields(self, base, log):
         """
         Базовые поля - это те, для которых прописаны специальные обработчики в self.FIELD_HANDLERS.
         Здесь мы вызываем все эти обработчики.
         """
         for field_name, extractor in self.FIELD_HANDLERS.items():
             try:
-                value = extractor(**kwargs)
+                value = extractor(log)
             except:
                 try:
-                    value = str(kwargs[field_name])
+                    value = str(log[field_name])
                 except:
                     value = None
             if value is not None:
                 base[field_name] = value
 
-    def add_extra_fields(self, base, args, **kwargs):
+    def add_extra_fields(self, base, log):
         """
         Добавляем в словарь с данными поля, отсутствующие в self.FIELD_HANDLERS.
         """
-        for field_name, value in kwargs.items():
+        for field_name, value in log.items():
             if field_name not in base:
                 if field_name not in self.FORBIDDEN_EXTRA_FIELDS:
                     if value is not None:

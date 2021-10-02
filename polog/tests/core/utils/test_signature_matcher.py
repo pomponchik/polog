@@ -14,22 +14,19 @@ def test_wrong_handlers():
     """
     def function_1():
         pass
-    def function_2(arg):
+    def function_2(**kwargs):
         pass
-    def function_3(**kwargs):
+    def function_3(*args, **kwargs):
         pass
-    def function_4(*args, **kwargs):
+    def function_4(a, b):
         pass
-    def function_5(a, b):
-        pass
-    def function_6(a, b, c):
+    def function_5(a, b, c):
         pass
     assert SignatureMatcher.is_handler(function_1) == False
     assert SignatureMatcher.is_handler(function_2) == False
     assert SignatureMatcher.is_handler(function_3) == False
     assert SignatureMatcher.is_handler(function_4) == False
     assert SignatureMatcher.is_handler(function_5) == False
-    assert SignatureMatcher.is_handler(function_6) == False
 
 def test_wrong_object():
     """
@@ -43,7 +40,7 @@ def test_not_function():
     Проверка, что вызываемый объект, не являющийся функцией, но имеющий нужную сигнатуру метода .__call__(), будет распознан как обработчик.
     """
     class PseudoFunction:
-        def __call__(self, args, **kwargs):
+        def __call__(self, log):
             pass
     assert SignatureMatcher.is_handler(PseudoFunction()) == True
 

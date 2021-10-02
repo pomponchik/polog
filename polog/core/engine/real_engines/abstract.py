@@ -13,7 +13,7 @@ class AbstractRealEngine:
     def __init__(self, settings):
         self.settings = settings
 
-    def write(self, function_input_data, **fields):
+    def write(self, log):
         """
         Запись лога.
 

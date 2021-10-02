@@ -17,41 +17,41 @@ class BaseFormatterFieldsExtractors:
     settings = SettingsStore()
 
     @staticmethod
-    def time(**kwargs):
+    def time(log):
         """
         Выводим дату и время в квадратных скобках.
         """
-        time = kwargs.get("time")
+        time = log.get("time")
         if time is None:
             return '[----time not specified----]'
         return f'[{time}]'
 
     @staticmethod
-    def level(**kwargs):
+    def level(log):
         """
         Выводим уровень лога. Если присвоено название - выводим его, иначе число.
 
         Важно: если одному уровню логирования присвоено несколько имен, выводится последнее из них.
         """
-        level = kwargs.get('level')
+        level = log.get('level')
         if level is None:
             return 'UNKNOWN'
         result = Levels.get_level_name(level)
         return result
 
     @staticmethod
-    def message(**kwargs):
+    def message(log):
         """
         Выводим пользовательский комментарий к логу в двойных кавычках.
         """
-        result = kwargs.get('message')
+        result = log.get('message')
         if result is None:
             return None
         result = f'"{result}"'
         return result
 
     @staticmethod
-    def success(**kwargs):
+    def success(log):
         """
         Выводим метку успешности операции.
 
@@ -59,7 +59,7 @@ class BaseFormatterFieldsExtractors:
         Последний вариант присваивается в том случае, если информации об успешности операции нет.
         Как правило, такое случается при ручном логировании.
         """
-        success = kwargs.get('success')
+        success = log.get('success')
         if success is None:
             return 'UNKNOWN'
         if success == True:
@@ -67,15 +67,15 @@ class BaseFormatterFieldsExtractors:
         return 'ERROR'
 
     @staticmethod
-    def auto(**kwargs):
+    def auto(log):
         """
         Метка, является ли запись автоматической, то есть сделана ли она через декоратор.
         """
-        result = 'AUTO' if kwargs.get('auto') else 'MANUAL'
+        result = 'AUTO' if log.get('auto') else 'MANUAL'
         return result
 
     @classmethod
-    def function(cls, **kwargs):
+    def function(cls, log):
         """
         В этом поле выводятся данные из 3-х полей: названия функции, названия модуля и названия сервиса.
 
@@ -90,8 +90,8 @@ class BaseFormatterFieldsExtractors:
         Ручные логи, где не указывалось место действия, будут отображены в усеченном виде:
         "where: service_name.?"
         """
-        function = kwargs.get('function')
-        module = kwargs.get('module')
+        function = log.get('function')
+        module = log.get('module')
         service = SettingsStore()['service_name']
         if (function is not None) and (module is not None):
             function = cls.search_function_name(function, module)
@@ -137,7 +137,7 @@ class BaseFormatterFieldsExtractors:
         return cls.FULL_FUNCTIONS_NAMES[key]
 
     @classmethod
-    def result(cls, **kwargs):
+    def result(cls, log):
         """
         Возвращается строка с возвращаемым значением функции в человекочитаемом виде.
         Ожидается, что исходное значение - строка с JSON-объектом, у которого 2 ключа: 'type' и 'value'.
@@ -146,8 +146,8 @@ class BaseFormatterFieldsExtractors:
         'result: 1 (int), "hello" (str), <AnotherClass object> (AnotherClass)'
         """
         json = cls.settings['json_module']
-        if 'result' in kwargs:
-            variables = kwargs.get('result')
+        if 'result' in log:
+            variables = log.get('result')
             if isinstance(variables, str):
                 try:
                     variables = json.loads(variables)
@@ -213,11 +213,11 @@ class BaseFormatterFieldsExtractors:
         return result
 
     @classmethod
-    def input_variables(cls, **kwargs):
+    def input_variables(cls, log):
         """
         Преобразуем в человекочитаемый вид строку JSON с аргументами функции.
         """
-        variables = kwargs.get('input_variables')
+        variables = log.get('input_variables')
         result = cls.json_variables_to_text(variables)
         if result is None:
             return result
@@ -225,13 +225,13 @@ class BaseFormatterFieldsExtractors:
         return result
 
     @classmethod
-    def local_variables(cls, **kwargs):
+    def local_variables(cls, log):
         """
         Преобразуем в человекочитаемый вид строку JSON с локальными переменными.
 
         Возможен пользовательский ввод! Соблюдение ожидаемого формата документа JSON гарантируется только в случае автоматических логов.
         """
-        variables = kwargs.get('local_variables')
+        variables = log.get('local_variables')
         if variables is None:
             return None
         try:
@@ -244,12 +244,12 @@ class BaseFormatterFieldsExtractors:
             return f'local variables: {variables}'
 
     @staticmethod
-    def time_of_work(**kwargs):
+    def time_of_work(log):
         """
         Время работы функции в формате строки, где оно указывается вещественным числом секунд с точностью до 8 знаков после запятой.
         Все ненужные ноли справа удаляются.
         """
-        var = kwargs.get('time_of_work')
+        var = log.get('time_of_work')
         if var is None:
             return None
         number = f'{var:.8f}'
@@ -258,22 +258,22 @@ class BaseFormatterFieldsExtractors:
         return result
 
     @staticmethod
-    def exception(**kwargs):
+    def exception(log):
         """
         В "сырых" данных название исключения и его сообщение хранятся в отдельных полях. Здесь мы их склеиваем.
         """
-        exception_type = kwargs.get('exception_type')
-        exception_message = kwargs.get('exception_message')
+        exception_type = log.get('exception_type')
+        exception_message = log.get('exception_message')
         if exception_type is not None and exception_message is not None:
             return f'exception: {exception_type}("{exception_message}")'
 
     @classmethod
-    def traceback(cls, **kwargs):
+    def traceback(cls, log):
         """
         Преобразуем трейсбек, строки которого записаны в JSON-список, в человекочитаемый вид.
         """
         json = cls.settings['json_module']
-        traceback = kwargs.get('traceback')
+        traceback = log.get('traceback')
         if traceback is not None:
             if not traceback:
                 return 'no traceback'

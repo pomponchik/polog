@@ -12,8 +12,8 @@ def test_write_and_size(settings_mock):
     time.sleep(0.0001)
     engine = MultiThreadedRealEngine(settings_mock)
     assert engine.queue_size() == 0
-    engine.write(None, **{'lol': 'kek'})
-    engine.write(None, **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
+    engine.write({'lol': 'kek'})
     assert engine.queue_size() == 2
     engine.stop()
 
@@ -42,7 +42,7 @@ def test_lost_items_on_stop(settings_mock, handler):
     number_of_items = 5000
 
     for index in range(number_of_items):
-        engine.write((None, None), **{'lol': 'kek'})
+        engine.write({'lol': 'kek'})
     engine.stop()
 
     assert len(handler.all) == number_of_items
@@ -52,8 +52,8 @@ def test_get_size(settings_mock):
     Проверяем, что счетчик числа элементов в очереди работает.
     """
     engine = MultiThreadedRealEngine(settings_mock)
-    engine.write((None, None), **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
     assert engine.queue_size() == 1
-    engine.write((None, None), **{'lol': 'kek'})
+    engine.write({'lol': 'kek'})
     assert engine.queue_size() == 2
     engine.stop()
