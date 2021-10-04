@@ -67,7 +67,7 @@ def test_function_decorator_with_breacks_and_message(handler):
     """
     handler.clean()
     config.set(level=1)
-    @log(message='kek')
+    @log(message='kekokekokekokek')
     def function(a, b):
         return a + b
     assert function(1, 23) == 24

@@ -34,7 +34,6 @@ class Worker:
                             break
                 if stopped_from_flag:
                     break
-                # items - это всегда кортеж из 2-х элементов.
                 self.do_anything(log)
                 self.queue.task_done()
             except Exception as e:

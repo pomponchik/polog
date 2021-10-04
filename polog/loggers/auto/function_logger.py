@@ -159,9 +159,12 @@ class FunctionLogger:
             input_variables = json_vars(*args, **kwargs)
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
+            if args_dict.get('message', 'kek') == 'kekokekokekokek':
+                print('kekokek')
             log = self.create_log_item(args, kwargs, args_dict)
             self.extract_extra_fields(log, args_dict)
             self.engine.write(log)
+            print(log)
 
     def extract_extra_fields(self, log, args_dict):
         """
