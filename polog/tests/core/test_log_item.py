@@ -1,4 +1,8 @@
+import time
+import datetime
+
 import pytest
+
 from polog.errors import RewritingLogError
 from polog.core.log_item import LogItem
 
@@ -162,3 +166,29 @@ def test_iteration_by_log():
         assert log[key] == data[key]
     assert count == 3
     assert keys == list(data.keys())
+
+def test_equal_logs():
+    """
+    Проверяем, что проверка логов на равенство работает.
+    """
+    # Очевидное.
+    assert LogItem() != 5
+    assert LogItem() != 'kek'
+    assert LogItem() != LogItem({'lol': 'kek'})
+    assert LogItem() != LogItem({'time': datetime.datetime.now()})
+
+    # Не очевидный момент. Сравнение производится по полю 'time', поэтому даже 2 полностью идентичных лога без данного поля не считаются равными.
+    assert LogItem({'lol': 'kek'}) != LogItem({'lol': 'kek'})
+
+    # Два лога с разными метками времени, не считаются равными.
+    log_1 = LogItem({'time': datetime.datetime.now()})
+    time.sleep(0.00001)
+    log_2 = LogItem({'time': datetime.datetime.now()})
+    assert log_1 != log_2
+
+    # Ситуация условного равенства двух логов, когда у них обоих одна и та же метка 'time'.
+    data = {'time': datetime.datetime.now()}
+    log_1 = LogItem(data)
+    log_2 = LogItem(data)
+    assert log_1 is not log_2
+    assert log_1 == log_2

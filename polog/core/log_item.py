@@ -76,7 +76,16 @@ class LogItem:
             return 0
 
     def __eq__(self, other):
-        pass
+        if isinstance(other, type(self)):
+            ts_1 = self.get('time')
+            ts_2 = other.get('time')
+
+            if ts_1 is None or ts_2 is None:
+                return None
+
+            if ts_1 == ts_2:
+                return True
+        raise False
 
     def __lt__(self, other):
         # Определяет поведение оператора меньше, <.
