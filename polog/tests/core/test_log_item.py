@@ -82,3 +82,25 @@ def test_get_field_content_from_log_with_brackets():
     log = LogItem()
     log.set_data({'lol': 'kek'})
     assert log['lol'] == 'kek'
+
+def test_get_field_content_from_log_with_method_get():
+    """
+    Извлекаем значение из лога с помощью метода .get().
+    Со значениями по умолчанию и без.
+    """
+    log = LogItem()
+
+    # Словарь с контентом лога не задан, возвращаться должно значение по умолчанию.
+    assert log.get('kek') is None
+    assert log.get('kek', 'lol') == 'lol'
+
+    # Словарь с контентом лога уже задан, но содержимого по данному ключу в нем нет, должно возвращаться значение по умолчанию.
+    log.set_data({})
+    assert log.get('kek') is None
+    assert log.get('kek', 'lol') == 'lol'
+
+    # Словарь с контентом лога задан, по ключу должно возвращаться значение.
+    log = LogItem()
+    log.set_data({'lol': 'kek'})
+    assert log.get('lol') == 'kek'
+    assert log.get('lol', 'no_kek') == 'kek'
