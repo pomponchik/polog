@@ -37,18 +37,28 @@ def test_log_to_string_representstion():
     Проверяем, что преобразование лога в строку работает корректно как в случае пустого лога, так и в случае заполненного.
     """
     log = LogItem()
+    log_id = id(log)
 
+    # Пустой лог.
     assert str(log) == '<log item #' + str(log_id) + ' (empty)>'
 
+    # Вывод с одним полем (строкой).
     log.set_data({'lol': 'kek'})
-    log_id = id(log)
     assert str(log) == '<log item #' + str(log_id) + ' with content: lol = "kek">'
 
+    # Проверка, что строковые репрезентации двух разных логов - разные (за счет id).
     log_2 = LogItem()
     log_2.set_data({'lol': 'kek'})
     assert str(log) != str(log_2)
 
+    # Вывод с несколькими полями. Строковые поля должны выводиться в двойных кавычках, остальные - как есть.
     log_3 = LogItem()
-    log_2.set_data({'cheburek': 'shmek', 'perekek': 5, 'perekekoperekek': True})
-    log_3_id
-    assert str(log) == '<log item #' + str(log_3_id) + ' with content: cheburek = "shmek", perekek = 5, perekekoperekek = True>'
+    log_3.set_data({'cheburek': 'shmek', 'perekek': 5, 'perekekoperekek': True})
+    log_3_id = id(log_3)
+    assert str(log_3) == '<log item #' + str(log_3_id) + ' with content: cheburek = "shmek", perekek = 5, perekekoperekek = True>'
+
+    # Проверяем, что, если контент лога задан в виде пустого словаря, он тоже отображается как пустой.
+    log_4 = LogItem()
+    log_4.set_data({})
+    log_4_id = id(log_4)
+    assert str(log_4) == '<log item #' + str(log_4_id) + ' (empty)>'

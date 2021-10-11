@@ -44,6 +44,8 @@ class LogItem:
         Преобразование данных лога в строковое представление.
         """
         content = []
+        if not hasattr(self, 'fields') or not self.fields:
+            return f'<log item #{id(self)} (empty)>'
         for field_name, value in self.fields.items():
             if isinstance(value, str):
                 value = f'"{value}"'
