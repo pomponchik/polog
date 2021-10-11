@@ -104,3 +104,61 @@ def test_get_field_content_from_log_with_method_get():
     log.set_data({'lol': 'kek'})
     assert log.get('lol') == 'kek'
     assert log.get('lol', 'no_kek') == 'kek'
+
+def test_operator_in():
+    """
+    Проверяем, что оператор in по отношению к логу работает корректно.
+    """
+    # Совсем пустой лог.
+    log = LogItem()
+    assert ('lol' in log) == False
+
+    # Лог, где нет указанного ключа.
+    log_2 = LogItem()
+    log_2.set_data({})
+    assert ('lol' in log_2) == False
+
+    # Лог, где есть указанный ключ.
+    log_3 = LogItem()
+    log_3.set_data({'lol': 'kek'})
+    assert ('lol' in log_3) == True
+
+def test_iteration_by_log():
+    """
+    Проверяем, что по объекту лога можно итерироваться как по словарю.
+    """
+    log = LogItem()
+
+    # Совсем пустой лог.
+    count = 0
+    for key in log:
+        count += 1
+    assert count == 0
+
+    # Лог, где нет ни одного поля.
+    log.set_data({})
+    count = 0
+    for key in log:
+        count += 1
+    assert count == 0
+
+    # Лог с 1 полем.
+    log = LogItem()
+    log.set_data({'lol': 'kek'})
+    count = 0
+    for key in log:
+        count += 1
+    assert count == 1
+
+    # Лог с 3 полями. Проверяем как количество итераций, так и корректность возвращаемых ключей при итерации.
+    log = LogItem()
+    data = {'lol': 'kek', 'cheburek': 'perekek', 'pek': 'shmek'}
+    log.set_data(data)
+    count = 0
+    keys = []
+    for key in log:
+        count += 1
+        keys.append(key)
+        assert log[key] == data[key]
+    assert count == 3
+    assert keys == list(data.keys())
