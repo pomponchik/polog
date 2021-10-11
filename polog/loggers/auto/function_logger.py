@@ -164,7 +164,7 @@ class FunctionLogger:
             log = self.create_log_item(args, kwargs, args_dict)
             self.extract_extra_fields(log, args_dict)
             self.engine.write(log)
-            print(log)
+            #print(log)
 
     def extract_extra_fields(self, log, args_dict):
         """

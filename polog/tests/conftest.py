@@ -12,7 +12,7 @@ def handler():
     new_handler = memory_saver()
     try:
         config.add_handlers(new_handler)
-    except ValueError:
+    except ValueError as e:
         pass
     return new_handler
 

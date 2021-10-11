@@ -46,7 +46,7 @@ def test_function_decorator_without_breacks(handler):
         return a + b
     assert function(1, 43) == 44
     time.sleep(0.001)
-    assert handler.last
+    assert handler.last is not None
 
 def test_function_decorator_with_breacks(handler):
     """
@@ -59,7 +59,7 @@ def test_function_decorator_with_breacks(handler):
         return a + b
     assert function(1, 33) == 34
     time.sleep(0.0001)
-    assert handler.last
+    assert handler.last is not None
 
 def test_function_decorator_with_breacks_and_message(handler):
     """
@@ -72,8 +72,8 @@ def test_function_decorator_with_breacks_and_message(handler):
         return a + b
     assert function(1, 23) == 24
     time.sleep(0.0001)
-    assert handler.last
-    assert handler.last['message'] == 'kek'
+    assert handler.last is not None
+    assert handler.last['message'] == 'kekokekokekokek'
 
 def test_function_decorator_with_breacks_and_message_and_dotlevel(handler):
     """
@@ -87,7 +87,7 @@ def test_function_decorator_with_breacks_and_message_and_dotlevel(handler):
         return a + b
     assert function(1, 13) == 14
     time.sleep(0.0001)
-    assert handler.last
+    assert handler.last is not None
     assert handler.last['message'] == 'kek'
     assert handler.last['level'] == 42
 
@@ -103,7 +103,7 @@ def test_function_decorator_without_breacks_and_message_and_dotlevel(handler):
         return a + b
     assert function(1, 3) == 4
     time.sleep(0.0001)
-    assert handler.last
+    assert handler.last is not None
     assert handler.last['level'] == 43
 
 def test_message(handler):
@@ -118,6 +118,6 @@ def test_message(handler):
         return a + b
     assert function(1, 2) == 3
     time.sleep(0.0001)
-    assert handler.last
+    assert handler.last is not None
     assert handler.last['message'] == 'kek'
     assert handler.last['level'] == 5
