@@ -1,4 +1,5 @@
 import pytest
+
 from polog.core.utils.exception_escaping import exception_escaping
 
 

@@ -1,6 +1,6 @@
 import atexit
-import signal
 from threading import Lock
+
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 from polog.core.utils.exception_escaping import exception_escaping

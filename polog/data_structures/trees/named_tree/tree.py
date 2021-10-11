@@ -1,4 +1,5 @@
 from threading import RLock
+
 from polog.data_structures.trees.named_tree.walker import TreeWalker
 from polog.data_structures.trees.named_tree.printer import TreePrinter
 

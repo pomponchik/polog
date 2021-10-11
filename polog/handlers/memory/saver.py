@@ -1,4 +1,5 @@
 from threading import Lock, BoundedSemaphore
+
 from polog.handlers.abstract.base import BaseHandler
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 

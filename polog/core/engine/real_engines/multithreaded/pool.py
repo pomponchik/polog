@@ -1,6 +1,7 @@
 import time
-from polog.core.engine.real_engines.multithreaded.worker import Worker
 from queue import Queue
+
+from polog.core.engine.real_engines.multithreaded.worker import Worker
 
 
 class ThreadPool:

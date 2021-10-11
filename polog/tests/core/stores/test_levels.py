@@ -1,4 +1,5 @@
 import pytest
+
 from polog.core.stores.levels import Levels
 
 

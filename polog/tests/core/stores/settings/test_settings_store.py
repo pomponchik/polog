@@ -1,7 +1,9 @@
 import json
+
 import pytest
-from polog.core.stores.settings.settings_store import SettingsStore
 import ujson
+
+from polog.core.stores.settings.settings_store import SettingsStore
 
 
 def test_set_and_get():

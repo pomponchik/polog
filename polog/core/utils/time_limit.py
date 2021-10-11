@@ -4,6 +4,7 @@ try:
     import thread
 except ImportError:
     import _thread as thread
+
 from polog.core.utils.signature_matcher import SignatureMatcher
 
 

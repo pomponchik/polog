@@ -1,4 +1,5 @@
 import datetime
+
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.loggers.handle.abstract import AbstractHandleLogger
 from polog.core.log_item import LogItem

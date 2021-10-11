@@ -1,5 +1,7 @@
-import pytest
 import json
+
+import pytest
+
 from polog.utils.json_vars import json_vars, get_item
 
 

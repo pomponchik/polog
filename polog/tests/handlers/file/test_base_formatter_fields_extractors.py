@@ -1,6 +1,8 @@
 import json
 import datetime
+
 import pytest
+
 from polog.handlers.file.base_formatter_fields_extractors import BaseFormatterFieldsExtractors as Extractors
 from polog.core.utils.get_traceback import get_traceback
 from polog import config, json_vars

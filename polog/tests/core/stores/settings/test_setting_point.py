@@ -1,4 +1,5 @@
 import pytest
+
 from polog.core.stores.settings.setting_point import SettingPoint
 from polog.errors import DoubleSettingError, AfterStartSettingError
 

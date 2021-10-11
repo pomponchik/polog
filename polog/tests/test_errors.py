@@ -1,4 +1,5 @@
 import pytest
+
 from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError, DoubleSettingError, AfterStartSettingError
 
 

@@ -1,4 +1,5 @@
 import pytest
+
 from polog.data_structures.trees.named_tree.tree import NamedTree
 
 

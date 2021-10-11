@@ -1,6 +1,7 @@
 import json
 import inspect
 from threading import Lock
+
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 from polog.core.utils.reload_engine import reload_engine
 from polog.core.stores.settings.setting_point import SettingPoint

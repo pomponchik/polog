@@ -1,7 +1,9 @@
 import json
 import datetime
 from inspect import Signature
+
 import pytest
+
 from polog import json_vars
 from polog.handlers.file.base_formatter import BaseFormatter
 from polog.core.utils.signature_matcher import SignatureMatcher

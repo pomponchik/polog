@@ -1,5 +1,7 @@
 import time
+
 import pytest
+
 from polog.handlers.abstract.base import BaseHandler
 from polog import handle_log as log, json_vars
 

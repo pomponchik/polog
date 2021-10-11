@@ -1,4 +1,5 @@
 from threading import Lock
+
 from polog.errors import DoubleSettingError, AfterStartSettingError
 from polog.core.utils.exception_escaping import exception_escaping
 from polog.core.utils.signature_matcher import SignatureMatcher

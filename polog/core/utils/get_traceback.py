@@ -1,7 +1,7 @@
 import sys
 import traceback
+
 from polog.core.stores.settings.settings_store import SettingsStore
-from polog.utils.json_vars import get_item
 from polog.utils.json_vars import json_vars
 
 

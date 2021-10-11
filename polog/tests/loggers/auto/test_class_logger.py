@@ -1,5 +1,7 @@
 import time
+
 import pytest
+
 from polog import clog, flog, config
 from polog.errors import IncorrectUseOfTheDecoratorError
 

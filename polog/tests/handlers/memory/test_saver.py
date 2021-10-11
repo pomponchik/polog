@@ -1,4 +1,5 @@
 import pytest
+
 from polog.handlers.memory.saver import memory_saver
 from polog.core.log_item import LogItem
 

@@ -1,5 +1,3 @@
-import time
-import atexit
 from queue import Empty
 from threading import Thread
 

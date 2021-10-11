@@ -1,5 +1,7 @@
 import time
+
 import pytest
+
 from polog.loggers.handle.abstract import AbstractHandleLogger
 from polog import config
 

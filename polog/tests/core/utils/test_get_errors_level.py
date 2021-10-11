@@ -1,4 +1,5 @@
 import pytest
+
 from polog.core.utils.get_errors_level import get_errors_level
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog import config

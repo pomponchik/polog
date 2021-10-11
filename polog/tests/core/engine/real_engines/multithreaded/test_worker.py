@@ -1,6 +1,8 @@
 import time
 from queue import Queue
+
 import pytest
+
 from polog.core.engine.real_engines.multithreaded.worker import Worker
 from polog.core.stores.settings.settings_store import SettingsStore
 

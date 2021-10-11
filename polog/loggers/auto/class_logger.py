@@ -1,4 +1,5 @@
 import inspect
+
 from polog.loggers.auto.function_logger import flog
 from polog.core.stores.registering_functions import RegisteringFunctions
 from polog.errors import IncorrectUseOfTheDecoratorError

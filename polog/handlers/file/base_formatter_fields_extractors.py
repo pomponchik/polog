@@ -1,5 +1,6 @@
 import inspect
 import importlib
+
 from polog.core.stores.levels import Levels
 from polog.core.stores.settings.settings_store import SettingsStore
 

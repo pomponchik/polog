@@ -1,5 +1,7 @@
 import time
+
 import pytest
+
 from polog import flog, message, field, config
 
 

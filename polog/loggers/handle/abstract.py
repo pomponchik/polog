@@ -1,4 +1,5 @@
 import functools
+
 from polog.core.stores.levels import Levels
 from polog.core.engine.engine import Engine
 from polog.core.stores.settings.settings_store import SettingsStore

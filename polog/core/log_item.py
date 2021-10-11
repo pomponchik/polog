@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from functools import total_ordering
+
 from polog.errors import RewritingLogError
 
 

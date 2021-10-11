@@ -1,5 +1,7 @@
 from sys import getrecursionlimit
+
 import pytest
+
 from polog.data_structures.trees.named_tree.printer import TreePrinter
 from polog.data_structures.trees.named_tree.tree import NamedTree
 
