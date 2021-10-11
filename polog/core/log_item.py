@@ -70,7 +70,10 @@ class LogItem:
             return False
 
     def __len__(self):
-        pass
+        try:
+            return len(self.fields)
+        except AttributeError:
+            return 0
 
     def __eq__(self, other):
         pass
