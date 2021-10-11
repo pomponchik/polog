@@ -62,3 +62,23 @@ def test_log_to_string_representstion():
     log_4.set_data({})
     log_4_id = id(log_4)
     assert str(log_4) == '<log item #' + str(log_4_id) + ' (empty)>'
+
+def test_get_field_content_from_log_with_brackets():
+    """
+    Извлекаем значение из лога с помощью квадратных скобок.
+    """
+    log = LogItem()
+
+    # Словарь с контентом лога не задан, при этом все равно должно быть KeyError.
+    with pytest.raises(KeyError):
+        log['kek']
+
+    # Словарь с контентом лога уже задан, но содержимого по данному ключу в нем нет, должно подниматься KeyError.
+    log.set_data({})
+    with pytest.raises(KeyError):
+        log['kek']
+
+    # Словарь с контентом лога задан, по ключу должно возвращаться значение.
+    log = LogItem()
+    log.set_data({'lol': 'kek'})
+    assert log['lol'] == 'kek'
