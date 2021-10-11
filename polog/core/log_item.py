@@ -19,9 +19,6 @@ class LogItem:
 
     __slots__ = ('_function_input_data', '_handlers', 'fields')
 
-    def __init__(self):
-        pass
-
     def __getitem__(self, key):
         """
         Возвращаем содержимое полей по ключу.
