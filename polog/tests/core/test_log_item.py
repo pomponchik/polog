@@ -171,24 +171,37 @@ def test_equal_logs():
     """
     Проверяем, что проверка логов на равенство работает.
     """
+    false_log_1 = LogItem()
+    false_log_1.set_data({'lol': 'kek'})
+    false_log_2 = LogItem()
+    false_log_2.set_data({'time': datetime.datetime.now()})
+    false_log_3 = LogItem()
+    false_log_3.set_data({'lol': 'kek'})
+    false_log_4 = LogItem()
+    false_log_4.set_data({'lol': 'kek'})
+
     # Очевидное.
     assert LogItem() != 5
     assert LogItem() != 'kek'
-    assert LogItem() != LogItem({'lol': 'kek'})
-    assert LogItem() != LogItem({'time': datetime.datetime.now()})
+    assert LogItem() != false_log_1
+    assert LogItem() != false_log_2
 
     # Не очевидный момент. Сравнение производится по полю 'time', поэтому даже 2 полностью идентичных лога без данного поля не считаются равными.
-    assert LogItem({'lol': 'kek'}) != LogItem({'lol': 'kek'})
+    assert false_log_3 != false_log_4
 
     # Два лога с разными метками времени, не считаются равными.
-    log_1 = LogItem({'time': datetime.datetime.now()})
+    log_1 = LogItem()
+    log_1.set_data({'time': datetime.datetime.now()})
     time.sleep(0.00001)
-    log_2 = LogItem({'time': datetime.datetime.now()})
+    log_2 = LogItem()
+    log_2.set_data({'time': datetime.datetime.now()})
     assert log_1 != log_2
 
     # Ситуация условного равенства двух логов, когда у них обоих одна и та же метка 'time'.
     data = {'time': datetime.datetime.now()}
-    log_1 = LogItem(data)
-    log_2 = LogItem(data)
+    log_1 = LogItem()
+    log_2 = LogItem()
+    log_1.set_data(data)
+    log_2.set_data(data)
     assert log_1 is not log_2
     assert log_1 == log_2

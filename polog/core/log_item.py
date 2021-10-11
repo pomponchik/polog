@@ -85,7 +85,7 @@ class LogItem:
 
             if ts_1 == ts_2:
                 return True
-        raise False
+        return False
 
     def __lt__(self, other):
         # Определяет поведение оператора меньше, <.
