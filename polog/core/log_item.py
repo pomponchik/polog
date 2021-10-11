@@ -23,7 +23,10 @@ class LogItem:
         """
         Возвращаем содержимое полей по ключу.
         """
-        return self.fields[key]
+        try:
+            return self.fields[key]
+        except AttributeError:
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         """
