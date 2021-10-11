@@ -81,15 +81,31 @@ class LogItem:
             ts_2 = other.get('time')
 
             if ts_1 is None or ts_2 is None:
-                return None
+                return False
 
             if ts_1 == ts_2:
                 return True
         return False
 
     def __lt__(self, other):
-        # Определяет поведение оператора меньше, <.
-        pass
+        """
+        Определяем поведение при использовании оператора '<' ("меньше").
+
+        За счет декоратора @total_ordering поведение данного метода используется при определении поведения и прочих методов сравнения, кроме проверки на равенство.
+
+        В отличие от метода .__eq__(), при сравнении с объектами других типов поднимется TypeError.
+        """
+        if isinstance(other, type(self)):
+            ts_1 = self.get('time')
+            ts_2 = other.get('time')
+
+            if ts_1 is None:
+                raise TypeError(f'The "time" field is not defined for object \'{ts_1}\'. It is necessary for comparison.')
+            elif ts_2 is None:
+                raise TypeError(f'The "time" field is not defined for object \'{ts_2}\'. It is necessary for comparison.')
+
+            return ts_1 < ts_2
+        raise TypeError(f"'<' not supported between instances of '{type(self)}' and '{type(other)}'")
 
     def items(self):
         try:

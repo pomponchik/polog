@@ -1,5 +1,7 @@
 import os
+
 import pytest
+
 from polog import config
 from polog.handlers.memory.saver import memory_saver
 
