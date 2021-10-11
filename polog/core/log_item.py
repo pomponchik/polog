@@ -110,7 +110,10 @@ class LogItem:
         self._function_input_data = value
 
     def get(self, key, *default):
-        return self.fields.get(key, *default)
+        try:
+            return self.fields.get(key, *default)
+        except AttributeError:
+            return {}.get(key, *default)
 
     def set_data(self, data):
         self.fields = data
