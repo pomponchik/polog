@@ -4,7 +4,7 @@ import datetime
 import pytest
 
 from polog.errors import RewritingLogError
-from polog.core.log_item import LogItem
+from polog.core.log_item import LogItem, FunctionInputData
 
 
 def test_init_empty_log():
@@ -257,3 +257,60 @@ def test_other_comparisons():
     assert str(exception_info.value) == "'<=' not supported between instances of 'LogItem' and 'int'"
     with pytest.raises(TypeError):
         empty_log_1 <= empty_log_2
+
+
+def test_get_items():
+    """
+    Проверяем работу метода .items(). Должно работать по аналогии со словарем.
+    """
+    log = LogItem()
+
+    assert log.items() == ()
+
+    log.set_data({'lol': 'kek'})
+
+    assert tuple(log.items()) == (('lol', 'kek'), )
+
+
+def test_get_keys():
+    """
+    Проверяем работу метода .keys(). Должно работать по аналогии со словарем.
+    """
+    log = LogItem()
+
+    assert log.keys() == ()
+
+    log.set_data({'lol': 'kek'})
+
+    assert tuple(log.keys()) == ('lol', )
+
+
+def test_get_values():
+    """
+    Проверяем работу метода .keys(). Должно работать по аналогии со словарем.
+    """
+    log = LogItem()
+
+    assert log.values() == ()
+
+    log.set_data({'lol': 'kek'})
+
+    assert tuple(log.values()) == ('kek', )
+    
+
+def test_function_input_data_set_and_get():
+    """
+    Проверяем, что атрибут .function_input_data заполняется корректно.
+    """
+    log = LogItem()
+
+    assert isinstance(log.function_input_data, FunctionInputData)
+    assert log.function_input_data.args is None
+    assert log.function_input_data.kwargs is None
+
+    args = ('lol', 'kek')
+    kwargs = {'lol': 'kek', 'cheburek': 'perekekoperekek'}
+    log.set_function_input_data(args, kwargs)
+
+    assert log.function_input_data.args == args
+    assert log.function_input_data.kwargs == kwargs
