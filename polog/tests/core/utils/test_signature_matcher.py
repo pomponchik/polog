@@ -31,10 +31,16 @@ def test_wrong_handlers():
 
 def test_wrong_object():
     """
-    Пробуем скормить не вызываемый объект. Он не должен распознаваться как обработчик.
+    Пробуем скормить не вызываемый объект. Он не должен распознаваться как обработчик, при этом по умолчанию должно подниматься исключение.
     """
     with pytest.raises(ValueError):
         SignatureMatcher.is_handler('lol')
+
+def test_wrong_object_not_raise():
+    """
+    Пробуем скормить не вызываемый объект с флагом raise_exception=False. Должно вернуться False.
+    """
+    assert SignatureMatcher.is_handler('lol', raise_exception=False) == False
 
 def test_not_function():
     """

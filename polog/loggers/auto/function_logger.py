@@ -2,6 +2,7 @@ import time
 import inspect
 import datetime
 from functools import wraps
+from collections.abc import Iterable
 
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.handlers import global_handlers
@@ -12,8 +13,9 @@ from polog.core.utils.not_none_to_dict import not_none_to_dict
 from polog.core.utils.get_errors_level import get_errors_level
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.utils.json_vars import json_vars, json_one_variable
+from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
-from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError
+from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError, HandlerNotFoundError
 from polog.loggers.handle.message import message as _message
 from polog.core.log_item import LogItem
 
@@ -188,9 +190,22 @@ class FunctionLogger:
         return log
 
     def get_handlers(self, handlers):
-        if handlers is not None:
-            return handlers
-        return global_handlers
+        if handlers is None:
+            return global_handlers
+        if not isinstance(handlers, Iterable):
+            raise ValueError(f'A collection of handlers is expected. You passed "{handlers}".')
+        result = []
+        for maybe_handler in handlers:
+            if isinstance(maybe_handler, str):
+                try:
+                    result.append(global_handlers[maybe_handler])
+                except KeyError as e:
+                    raise HandlerNotFoundError(f'The handler named "{maybe_handler}" has not been registered before.') from e
+            elif SignatureMatcher.is_handler(maybe_handler, raise_exception=False):
+                result.append(maybe_handler)
+            else:
+                raise HandlerNotFoundError(f'As a handler, you can pass the handler itself or its name from the global handler tree. You passed "{maybe_handler}".')
+        return result
 
 
 flog = FunctionLogger()

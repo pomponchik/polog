@@ -80,7 +80,7 @@ class SignatureMatcher:
         return result
 
     @classmethod
-    def is_handler(cls, function):
+    def is_handler(cls, function, raise_exception=True):
         """
         Проверка сигнатуры функции на предмет того, может она быть обработчиком Polog или нет.
 
@@ -89,4 +89,9 @@ class SignatureMatcher:
         handler(function_input, **fields)
         """
         matcher = cls('.')
-        return matcher.match(function)
+        try:
+            return matcher.match(function)
+        except ValueError as e:
+            if not raise_exception:
+                return False
+            raise
