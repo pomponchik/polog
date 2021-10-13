@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from functools import total_ordering
 
 from polog.errors import RewritingLogError
 
@@ -10,7 +9,6 @@ class FunctionInputData:
     kwargs: dict = None
 
 
-@total_ordering
 class LogItem:
     """
     Каждый экземпляр класса соответствует единичному зафиксированному событию (т. е. логу).
@@ -77,25 +75,55 @@ class LogItem:
             return 0
 
     def __eq__(self, other):
+        """
+        Поведение при использовании оператора '==' ("равно").
+        """
+        return self.compare(other, lambda a, b: a == b)
+
+    def __ne__(self, other):
+        """
+        Поведение при использовании оператора '!=' ("не равно").
+        """
+        return self.compare(other, lambda a, b: a != b, if_not=True)
+
+    def __lt__(self, other):
+        """
+        Поведение при использовании оператора '<' ("меньше").
+        """
+        return self.compare_or_raise(other, lambda a, b: a < b, '<')
+
+    def __gt__(self, other):
+        """
+        Поведение при использовании оператора '>' ("больше").
+        """
+        return self.compare_or_raise(other, lambda a, b: a > b, '>')
+
+    def __le__(self, other):
+        """
+        Поведение при использовании оператора '<=' ("меньше или равно").
+        """
+        return self.compare_or_raise(other, lambda a, b: a <= b, '<=')
+
+    def __ge__(self, other):
+        """
+        Поведение при использовании оператора '>=' ("больше или равно").
+        """
+        return self.compare_or_raise(other, lambda a, b: a >= b, '>=')
+
+    def compare(self, other, operation, if_not=False):
         if isinstance(other, type(self)):
             ts_1 = self.get('time')
             ts_2 = other.get('time')
 
             if ts_1 is None or ts_2 is None:
-                return False
+                return if_not
 
-            if ts_1 == ts_2:
-                return True
-        return False
+            print(ts_1, ts_2)
+            print(operation(ts_1, ts_2))
+            return operation(ts_1, ts_2)
+        return if_not
 
-    def __lt__(self, other):
-        """
-        Определяем поведение при использовании оператора '<' ("меньше").
-
-        За счет декоратора @total_ordering поведение данного метода используется при определении поведения и прочих методов сравнения, кроме проверки на равенство.
-
-        В отличие от метода .__eq__(), при сравнении с объектами других типов поднимется TypeError.
-        """
+    def compare_or_raise(self, other, operation, compare_symbol):
         if isinstance(other, type(self)):
             ts_1 = self.get('time')
             ts_2 = other.get('time')
@@ -105,8 +133,8 @@ class LogItem:
             elif ts_2 is None:
                 raise TypeError(f'The "time" field is not defined for object \'{ts_2}\'. It is necessary for comparison.')
 
-            return ts_1 < ts_2
-        raise TypeError(f"'<' not supported between instances of '{type(self)}' and '{type(other)}'")
+            return operation(ts_1, ts_2)
+        raise TypeError(f"'{compare_symbol}' not supported between instances of '{type(self).__name__}' and '{type(other).__name__}'")
 
     def items(self):
         try:

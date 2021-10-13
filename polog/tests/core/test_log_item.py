@@ -13,6 +13,7 @@ def test_init_empty_log():
     """
     log = LogItem()
 
+
 def test_set_field_to_log_error():
     """
     Проверяем, что при попытке изменить содержимое поля лога через синтаксис словаря поднимается специальное исключение (RewritingLogError).
@@ -20,6 +21,7 @@ def test_set_field_to_log_error():
     log = LogItem()
     with pytest.raises(RewritingLogError):
         log['kek'] = 'lol'
+
 
 def test_delete_field_from_log_error():
     """
@@ -35,6 +37,7 @@ def test_delete_field_from_log_error():
     # Когда ключ есть.
     with pytest.raises(RewritingLogError):
         del log['lol']
+
 
 def test_log_to_string_representstion():
     """
@@ -67,6 +70,7 @@ def test_log_to_string_representstion():
     log_4_id = id(log_4)
     assert str(log_4) == '<log item #' + str(log_4_id) + ' (empty)>'
 
+
 def test_get_field_content_from_log_with_brackets():
     """
     Извлекаем значение из лога с помощью квадратных скобок.
@@ -86,6 +90,7 @@ def test_get_field_content_from_log_with_brackets():
     log = LogItem()
     log.set_data({'lol': 'kek'})
     assert log['lol'] == 'kek'
+
 
 def test_get_field_content_from_log_with_method_get():
     """
@@ -109,6 +114,7 @@ def test_get_field_content_from_log_with_method_get():
     assert log.get('lol') == 'kek'
     assert log.get('lol', 'no_kek') == 'kek'
 
+
 def test_operator_in():
     """
     Проверяем, что оператор in по отношению к логу работает корректно.
@@ -126,6 +132,7 @@ def test_operator_in():
     log_3 = LogItem()
     log_3.set_data({'lol': 'kek'})
     assert ('lol' in log_3) == True
+
 
 def test_iteration_by_log():
     """
@@ -167,6 +174,7 @@ def test_iteration_by_log():
     assert count == 3
     assert keys == list(data.keys())
 
+
 def test_equal_logs():
     """
     Проверяем, что проверка логов на равенство работает.
@@ -205,3 +213,47 @@ def test_equal_logs():
     log_2.set_data(data)
     assert log_1 is not log_2
     assert log_1 == log_2
+
+
+def test_other_comparisons():
+    """
+    Проверяем работу прочих операторов сравнения.
+    """
+    log_1 = LogItem()
+    log_1.set_data({'time': datetime.datetime.now()})
+
+    time.sleep(0.00001)
+
+    log_2 = LogItem()
+    log_2.set_data({'time': datetime.datetime.now()})
+
+    empty_log_1 = LogItem()
+    empty_log_2 = LogItem()
+
+    assert log_2 > log_1
+    with pytest.raises(TypeError) as exception_info:
+        log_1 > 5
+    assert str(exception_info.value) == "'>' not supported between instances of 'LogItem' and 'int'"
+    with pytest.raises(TypeError):
+        empty_log_1 > empty_log_2
+
+    assert log_2 >= log_1
+    with pytest.raises(TypeError) as exception_info:
+        log_1 >= 5
+    assert str(exception_info.value) == "'>=' not supported between instances of 'LogItem' and 'int'"
+    with pytest.raises(TypeError):
+        empty_log_1 >= empty_log_2
+
+    assert log_1 < log_2
+    with pytest.raises(TypeError) as exception_info:
+        log_1 < 5
+    assert str(exception_info.value) == "'<' not supported between instances of 'LogItem' and 'int'"
+    with pytest.raises(TypeError):
+        empty_log_1 < empty_log_2
+
+    assert log_1 <= log_2
+    with pytest.raises(TypeError) as exception_info:
+        log_1 <= 5
+    assert str(exception_info.value) == "'<=' not supported between instances of 'LogItem' and 'int'"
+    with pytest.raises(TypeError):
+        empty_log_1 <= empty_log_2
