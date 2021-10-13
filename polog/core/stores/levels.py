@@ -1,7 +1,7 @@
 class Levels:
     """
     Класс для хранения соответствий между именами уровней логирования и их числовыми значениями.
-    
+
     Изначально имена уровням логирования не заданы. Чтобы задать их в соответствии со схемой из стандартной библиотеки (см. https://docs.python.org/3.8/library/logging.html#logging-levels), используйте Config.standart_levels().
     """
     # Названия уровней - ключи, числа - значения.
@@ -12,6 +12,9 @@ class Levels:
 
     @classmethod
     def set(cls, name, value):
+        """
+        Устанавливаем уровню логирования имя.
+        """
         if not isinstance(name, str):
             raise KeyError('The key for the logging level can only be a string.')
         if not isinstance(value, int):
