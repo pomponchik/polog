@@ -118,8 +118,6 @@ class LogItem:
             if ts_1 is None or ts_2 is None:
                 return if_not
 
-            print(ts_1, ts_2)
-            print(operation(ts_1, ts_2))
             return operation(ts_1, ts_2)
         return if_not
 
