@@ -10,7 +10,7 @@ class SingleThreadedRealEngine(AbstractRealEngine):
         """
         Передаем данные о событии в обработчики.
         """
-        for handler in self.settings.handlers.values():
+        for handler in log.get_handlers():
             self.call_handler(handler, log)
 
     @exception_escaping

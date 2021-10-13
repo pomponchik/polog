@@ -70,7 +70,7 @@ class Worker:
 
         Если один из них поднимет исключение, гасим его и продолжаем выполнять оставшиеся обработчики.
         """
-        for handler in self.settings.handlers.values():
+        for handler in log.get_handlers():
             try:
                 handler(log)
             except Exception as e:

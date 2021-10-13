@@ -4,6 +4,7 @@ import datetime
 from functools import wraps
 
 from polog.core.stores.settings.settings_store import SettingsStore
+from polog.core.stores.handlers import global_handlers
 from polog.core.engine.engine import Engine
 from polog.core.stores.levels import Levels
 from polog.core.stores.registering_functions import RegisteringFunctions
@@ -26,13 +27,14 @@ class FunctionLogger:
         self.settings = settings
         self.engine = Engine()
 
-    def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False):
+    def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False, handlers=None):
         """
         Фабрика декораторов логирования для функций. Можно вызывать как со скобками, так и без.
         """
         def error_logger(func):
             # Если функция уже ранее была задекорирована, мы декорируем ее саму, а не ее в уже задекорированном виде.
             func, before_change_func = RegisteringFunctions().get_original(func), func
+            local_handlers = self.get_handlers(handlers)
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 """
@@ -46,10 +48,10 @@ class FunctionLogger:
                     result = await func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, *args, **kwargs)
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, *args, **kwargs)
                     self.reraise_exception(e)
                 finish = time.time()
-                self.log_normal_info(result, finish, start, args_dict, level, *args, **kwargs)
+                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, *args, **kwargs)
                 return result
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -64,10 +66,10 @@ class FunctionLogger:
                     result = func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, *args, **kwargs)
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, *args, **kwargs)
                     self.reraise_exception(e)
                 finish = time.time()
-                self.log_normal_info(result, finish, start, args_dict, level, *args, **kwargs)
+                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, *args, **kwargs)
                 return result
             if inspect.iscoroutinefunction(func):
                 result = async_wrapper
@@ -123,7 +125,7 @@ class FunctionLogger:
             raise exc
         raise LoggedError(str(exc)) from exc
 
-    def log_exception_info(self, exc, finish, start, args_dict, errors_level, *args, **kwargs):
+    def log_exception_info(self, exc, finish, start, args_dict, errors_level, handlers, *args, **kwargs):
         """
         Здесь происходит заполнение автоматически извлекаемых полей в случае исключения.
         В т. ч. извлекается вся информация об исключении - название, сообщение и т. д.
@@ -142,11 +144,11 @@ class FunctionLogger:
                 _message._copy_context(args_dict)
                 if not (input_variables is None):
                     args_dict['input_variables'] = input_variables
-                log = self.create_log_item(args, kwargs, args_dict)
+                log = self.create_log_item(args, kwargs, args_dict, handlers)
                 self.extract_extra_fields(log, args_dict)
                 self.engine.write(log)
 
-    def log_normal_info(self, result, finish, start, args_dict, level, *args, **kwargs):
+    def log_normal_info(self, result, finish, start, args_dict, level, handlers, *args, **kwargs):
         """
         Заполнение автоматических полей в случае, когда исключения не было.
         """
@@ -160,7 +162,7 @@ class FunctionLogger:
             input_variables = json_vars(*args, **kwargs)
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
-            log = self.create_log_item(args, kwargs, args_dict)
+            log = self.create_log_item(args, kwargs, args_dict, handlers)
             self.extract_extra_fields(log, args_dict)
             self.engine.write(log)
 
@@ -178,11 +180,17 @@ class FunctionLogger:
                 except:
                     pass
 
-    def create_log_item(self, args, kwargs, data):
+    def create_log_item(self, args, kwargs, data, handlers):
         log = LogItem()
         log.set_data(data)
         log.set_function_input_data(args, kwargs)
+        log.set_handlers(handlers)
         return log
+
+    def get_handlers(self, handlers):
+        if handlers is not None:
+            return handlers
+        return global_handlers
 
 
 flog = FunctionLogger()

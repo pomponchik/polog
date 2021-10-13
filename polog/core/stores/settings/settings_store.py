@@ -138,7 +138,6 @@ class SettingsStore(ReadOnlySingleton):
         ),
     }
     points_are_informed = False
-    handlers = {}
     extra_fields = {}
     lock = Lock()
 
