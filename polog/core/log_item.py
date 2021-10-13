@@ -190,4 +190,10 @@ class LogItem:
         self.function_input_data = FunctionInputData(args=args, kwargs=kwargs)
 
     def set_handlers(self, handlers):
-        pass
+        self._handlers = handlers
+
+    def get_handlers(self):
+        try:
+            return self._handlers
+        except AttributeError:
+            return ()

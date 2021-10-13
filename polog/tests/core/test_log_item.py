@@ -296,7 +296,7 @@ def test_get_values():
     log.set_data({'lol': 'kek'})
 
     assert tuple(log.values()) == ('kek', )
-    
+
 
 def test_function_input_data_set_and_get():
     """
@@ -314,3 +314,18 @@ def test_function_input_data_set_and_get():
 
     assert log.function_input_data.args == args
     assert log.function_input_data.kwargs == kwargs
+
+def test_handlers_set_and_get():
+    """
+    Обработчики хранятся прямо в объекте лога.
+    Проверяем, что они в нем сохраняются, и из него извлекаются.
+    """
+    log = LogItem()
+
+    assert log.get_handlers() == ()
+
+    # Имитируем коллекцию обработчиков данным списком.
+    lst = [1, 2, 3, 4, 5]
+    log.set_handlers(lst)
+
+    assert log.get_handlers() == lst
