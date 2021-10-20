@@ -45,7 +45,7 @@ class config:
             Levels.set(key, value)
 
     @staticmethod
-    def standart_levels():
+    def standard_levels():
         """
         Установка уровней логирования в соответствии со стандартной схемой (кроме уровня NOTSET):
         https://docs.python.org/3.8/library/logging.html#logging-levels

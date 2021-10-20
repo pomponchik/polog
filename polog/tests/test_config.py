@@ -81,11 +81,11 @@ def test_levels_set_wrong_value():
     with pytest.raises(TypeError):
         config.levels(lol=1.5)
 
-def test_standart_levels():
+def test_standard_levels():
     """
     Проверяем, что уровни логирования из стандартной схемы устанавливаются.
     """
-    config.standart_levels()
+    config.standard_levels()
     assert Levels.get('DEBUG') == 10
     assert Levels.get('INFO') == 20
     assert Levels.get('WARNING') == 30
