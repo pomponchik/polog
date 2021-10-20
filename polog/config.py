@@ -53,6 +53,7 @@ class config:
         levels = {'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}
         for key, value in levels.items():
             Levels.set(key, value)
+            Levels.set(key.lower(), value)
 
     @classmethod
     def add_handlers(cls, *args, **kwargs):

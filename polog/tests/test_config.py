@@ -91,6 +91,11 @@ def test_standart_levels():
     assert Levels.get('WARNING') == 30
     assert Levels.get('ERROR') == 40
     assert Levels.get('CRITICAL') == 50
+    assert Levels.get('debug') == 10
+    assert Levels.get('info') == 20
+    assert Levels.get('warning') == 30
+    assert Levels.get('error') == 40
+    assert Levels.get('critical') == 50
 
 def test_add_handlers():
     """
