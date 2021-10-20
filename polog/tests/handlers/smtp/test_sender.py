@@ -35,7 +35,7 @@ def test_send_error():
     """
     Проверка, что при исключении тоже что-то приходит в обработчик.
     """
-    config.add_handlers(sender)
+    config.add_handlers(test_send_error=sender)
 
     log('hello', exception=ValueError())
     time.sleep(0.0001)

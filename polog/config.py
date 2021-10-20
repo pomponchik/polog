@@ -118,20 +118,16 @@ class config:
         Если обработчик будет найден по имени или по id, он будет удален. В противном случае - поднимется исключение.
         Возможно удаление нескольких обработчиков, перечисленных через запятую.
         """
-        ids_to_names = {id(handler): name for name, handler in SettingsStore().handlers.items()}
         for maybe_name in names:
             if isinstance(maybe_name, str):
-                try:
-                    SettingsStore().handlers.pop(maybe_name)
-                except KeyError:
-                    raise KeyError(f'Object {maybe_name} was not registered as a handler.')
+                del global_handlers[maybe_name]
             else:
-                object_id = id(maybe_name)
-                if object_id in ids_to_names:
-                    handler_name = ids_to_names[object_id]
-                    SettingsStore().handlers.pop(handler_name)
-                else:
-                    raise ValueError(f'Object {maybe_name} was not registered as a handler.')
+                handler = maybe_name
+                other_handlers = {id(node.value): node.name for node in global_handlers.childs.values()}
+                if id(handler) not in other_handlers:
+                    raise ValueError(f'Object "{handler}" was not found among the global name scope handlers.')
+                handler_name = other_handlers[id(handler)]
+                del global_handlers[handler_name]
 
     @staticmethod
     def add_fields(**fields):
