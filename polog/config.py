@@ -69,8 +69,14 @@ class config:
         Один и тот же объект обработчика нельзя зарегистрировать дважды. Также нельзя использовать для двух обработчиков одно имя. В обоих случаях будет поднято исключение.
         """
         for handler in args:
-            handler_name = next(cls.pony_names_generator).replace(' ', '_')
-            cls.set_handler(handler_name, handler)
+            if isinstance(handler, dict):
+                for name, value in handler.items():
+                    if not isinstance(name, str):
+                        raise ValueError('Only strings can be used as the handler name.')
+                    cls.set_handler(name, handler)
+            else:
+                handler_name = next(cls.pony_names_generator).replace(' ', '_')
+                cls.set_handler(handler_name, handler)
         for handler_name, handler in kwargs.items():
             cls.set_handler(handler_name, handler)
 
@@ -79,15 +85,6 @@ class config:
         """
         Сохраняем обработчик под каким-то именем.
         """
-        settings = SettingsStore()
-        #old_handlers_ids = {id(x) for x in global_handlers}
-        #old_ids_and_names = {id(y): x for x, y in settings.handlers.items()}
-        #old_handlers_names = {x for x in settings.handlers.keys()}
-        #if name in old_handlers_names:
-        #    raise KeyError(f'A handler named "{name}" is already registered.')
-        #if id(handler) in old_handlers_ids:
-        #    name = [x for x, y in settings.handlers.items() if id(y) == id(handler)][0]
-        #    raise ValueError(f'Handler {handler} is already registered under the name "{name}".')
         global_handlers[name] = handler
 
     @staticmethod
