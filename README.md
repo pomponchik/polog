@@ -776,7 +776,9 @@ config.delete_handlers(handler)
 
 ```python
 config.add_handlers(
-  'lol.kek': handler,
+  {
+    'lol.kek': handler,
+  }
 )
 ```
 
@@ -790,7 +792,9 @@ config.add_handlers(
 
 ```python
 config.add_handlers(
-  'lol.kek.cheburek': handler_2,
+  {
+    'lol.kek.cheburek': handler_2,
+  }
 )
 ```
 
