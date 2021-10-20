@@ -198,7 +198,7 @@ def test_log_exception_info():
     try:
         raise ValueError('lol')
     except Exception as e:
-        flog.log_exception_info(e, 1.0, 0.5, data, 7)
+        flog.log_exception_info(e, 1.0, 0.5, data, 7, [])
     assert data['exception_type'] == 'ValueError'
     assert data['exception_message'] == 'lol'
     assert data['time_of_work'] == 0.5
@@ -217,7 +217,7 @@ def test_log_normal_info():
     Проверяем, что базовая информация извлекается.
     """
     data = {}
-    flog.log_normal_info('kek', 1.0, 0.5, data, 7)
+    flog.log_normal_info('kek', 1.0, 0.5, data, 7, [])
     assert data.get('exception_type') is None
     assert data.get('exception_message') is None
     assert data['time_of_work'] == 0.5
