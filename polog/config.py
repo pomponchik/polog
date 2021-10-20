@@ -76,6 +76,8 @@ class config:
                         raise ValueError('Only strings can be used as the handler name.')
                     cls.set_handler(name, handler)
             else:
+                if id(handler) in {id(node.value) for node in global_handlers.childs.values()}:
+                    raise ValueError('An attempt to store the same handler object in a global namespace.')
                 handler_name = next(cls.pony_names_generator).replace(' ', '_')
                 cls.set_handler(handler_name, handler)
         for handler_name, handler in kwargs.items():
@@ -86,6 +88,8 @@ class config:
         """
         Сохраняем обработчик под каким-то именем.
         """
+        if name in global_handlers:
+            raise NameError(f'Attempt to override a handler named {name}.')
         global_handlers[name] = handler
 
     @staticmethod
