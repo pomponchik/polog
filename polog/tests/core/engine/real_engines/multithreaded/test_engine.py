@@ -5,6 +5,7 @@ import pytest
 
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.engine.real_engines.multithreaded.engine import MultiThreadedRealEngine
+from polog.core.log_item import LogItem
 
 
 def test_write_and_size(settings_mock):
@@ -40,11 +41,14 @@ def test_lost_items_on_stop(settings_mock, handler):
     handler.clean()
     settings_mock.handlers['lol'] = handler
     engine = MultiThreadedRealEngine(settings_mock)
+    log = LogItem()
+    log.set_handlers([handler])
+    log.set_data({'lol': 'kek'})
 
     number_of_items = 5000
 
     for index in range(number_of_items):
-        engine.write({'lol': 'kek'})
+        engine.write(log)
     engine.stop()
 
     assert len(handler.all) == number_of_items

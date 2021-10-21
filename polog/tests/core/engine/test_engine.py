@@ -7,6 +7,7 @@ import pytest
 from polog.core.engine.engine import Engine
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog import config, file_writer, log
+from polog.core.log_item import LogItem
 
 
 def test_singleton():
@@ -30,14 +31,18 @@ def test_reload_threads_counting():
 
     assert after == before + 2
 
-def test_reload_missive_attack(handler):
+def test_reload_massive_attack(handler):
     """
     Пробуем перезагрузить движок в тот момент, пока другой поток пишет логи.
     За счет блокировок ни одно событие не должно потеряться.
     """
+    log = LogItem()
+    log.set_handlers([handler])
+    log.set_data({'lol': 'kek'})
+
     engine = Engine()
     store = SettingsStore()
-    engine.write({'lol': 'kek'})
+    engine.write(log)
     time.sleep(0.0001)
     handler.clean()
 
@@ -45,7 +50,7 @@ def test_reload_missive_attack(handler):
 
     def go_attack():
         for x in range(number_of_items):
-            engine.write({'lol': 'kek'})
+            engine.write(log)
     thread = Thread(target=go_attack)
     thread.start()
 

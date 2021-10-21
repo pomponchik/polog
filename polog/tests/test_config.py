@@ -221,7 +221,7 @@ def test_double_name_set_handler():
     """
     def local_handler(a):
         pass
-    with pytest.raises(KeyError):
+    with pytest.raises(NameError):
         config.add_handlers(ggg=local_handler)
         config.add_handlers(ggg=local_handler)
 
