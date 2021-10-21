@@ -269,6 +269,13 @@ def test_get_converted_keys():
     with pytest.raises(KeyError):
         tree.get_converted_keys('kek.cheburek')
 
+def test_get_converted_keys_of_root():
+    """
+    В случае с ключом в виде символа-разделителя, должен возвращаться список с ним же.
+    """
+    tree = NamedTree(keys_separator='.')
+    assert tree.get_converted_keys('.') == ['.']
+
 def test_wrong_key():
     """
     Проверем, что не-строки нельзя использовать в качестве ключей.
@@ -280,3 +287,43 @@ def test_wrong_key():
 
     with pytest.raises(KeyError):
         node = tree.get(6)
+
+def test_put_node_to_root():
+    """
+    Пробуем поместить новую ноду корень текущего дерева. Поскольку это невозможно, метод .put_node() просто вернет ее в качестве нового дерева.
+    """
+    tree = NamedTree()
+    node_to_put = NamedTree()
+
+    assert tree.put_node('.', node_to_put) is node_to_put
+
+def test_put_node():
+    """
+    Пробуем вставить ноду в дерево.
+    """
+    path = 'lol.kek'
+    tree = NamedTree()
+    node_to_put = NamedTree()
+
+    assert tree.put_node(path, node_to_put) is tree
+    assert tree.search_node(tree.get_converted_keys(path)) is node_to_put
+
+def test_put_node_replace():
+    """
+    Пробуем вставить ноду в дерево, заместив другую ноду. Проверяем, что замена происходит.
+    """
+    path = 'lol.kek'
+    tree = NamedTree()
+    node_to_put = NamedTree()
+
+    tree.put_node(path, NamedTree())
+    assert tree.put_node(path, node_to_put) is tree
+    assert tree.search_node(tree.get_converted_keys(path)) is node_to_put
+
+def test_get_root_of_tree():
+    """
+    Проверяем, что при запросе корневой ноды дерево возвращает само себя.
+    """
+    tree = NamedTree()
+
+    assert tree is tree.search_node(['.'])

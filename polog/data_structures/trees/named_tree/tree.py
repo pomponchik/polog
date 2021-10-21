@@ -86,6 +86,7 @@ class NamedTree:
             raise ValueError("You can't save None in the tree.")
         if not self.value_checker(value):
             raise ValueError(f'The value of "{value}" did not pass verification.')
+
         with self.lock:
             keys = self.get_converted_keys(key)
             node = self.search_or_create_node(keys)
@@ -139,6 +140,7 @@ class NamedTree:
         """
         if not isinstance(key, str):
             raise KeyError('The key in the tree can only be a string.')
+
         with self.lock:
             keys = self.get_converted_keys(key)
             node = self.search_node(keys)
@@ -211,6 +213,10 @@ class NamedTree:
         """
         if not keys:
             return None
+
+        if len(keys) == 1 and keys[0] == self.keys_separator:
+            return self
+
         node = self
         for key in keys:
             next_node = node.childs.get(key)
@@ -226,6 +232,9 @@ class NamedTree:
 
         Не потокобезопасно, подразумевается вызов из защищенных локом методов.
         """
+        if len(keys) == 1 and keys[0] == self.keys_separator:
+            return self
+        
         node = self
         for key in keys:
             next_node = node.childs.get(key)
@@ -253,6 +262,7 @@ class NamedTree:
         """
         if not isinstance(name, str):
             raise KeyError('The key in the tree can only be a string.')
+
         with self.lock:
             if name in self.childs:
                 raise ValueError(f'Node {self.get_full_name(default="<current>")} already has a child with name "{name}". You can\'t create another child with the same name without killing the old one.')
@@ -297,8 +307,42 @@ class NamedTree:
         """
         if not isinstance(key, str):
             raise KeyError('The key in the tree can only be a string.')
+
+        if key == self.keys_separator:
+            return [key]
         keys = key.split(self.keys_separator)
         for key in keys:
             if not self.key_checker(key):
                 raise KeyError(f"You can't use \"{key}\" as the node name.")
         return keys
+
+    def put_node(self, key, new_node):
+        """
+        Вставляем ноду, переданную извне, в текущее дерево.
+
+        Если в текущем дереве уже есть нода по тому же адресу, она и все ее потомки "перетираются" новой нодой.
+
+        Важно: необходимо всегда заменять исходное дерево тем, что было возвращено из данного метода.
+        Это необходимо, поскольку, если новая нода вставляется в корень дерева, она должна перетереть корень, а это возможно сделать только извне.
+
+        Также важно учитывать, что вставка новых нод в дерево является опасной с точки зрения образования циклов операцией.
+        Необходимо следить, чтобы вставляемая нода не принадлежала тому же дереву еще до вставки. Непосредственно при вставке такая проверка не делается.
+
+        Потокобезопасно.
+        """
+        keys = self.get_converted_keys(key)
+
+        with self.lock:
+            node = self
+            for index, key in enumerate(keys):
+                if index == len(keys) - 1:
+                    if node is self:
+                        return new_node
+                    node.childs[key] = new_node
+                    return self
+                else:
+                    next_node = node.childs.get(key)
+                    if next_node is None:
+                        next_node = node.create_child(key)
+                    node = next_node
+            return node
