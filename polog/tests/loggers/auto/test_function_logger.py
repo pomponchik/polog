@@ -8,6 +8,7 @@ from polog.loggers.auto.function_logger import FunctionLogger
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.data_structures.trees.named_tree.tree import NamedTree
 from polog.utils.json_vars import json_one_variable
+from polog.core.log_item import LogItem
 
 
 def test_empty(handler):
@@ -350,3 +351,20 @@ def test_local_handlers_wrong_handlers(handlers):
         @flog(handlers=handlers)
         def function(a, b):
             return a + b
+
+def test_create_log_item_in_flog():
+    """
+    Проверяем, что лог создается и наполняется переданными данными.
+    """
+    args = (1, 2, 3)
+    kwargs = {'cheburek': 'cheburekocheburek'}
+    data = {'lol': 'kek'}
+    handlers = NamedTree()
+
+    log = flog.create_log_item(args, kwargs, data, handlers)
+
+    assert isinstance(log, LogItem)
+    assert log['lol'] == 'kek'
+    assert log.get_handlers() is handlers
+    assert log.function_input_data.args is args
+    assert log.function_input_data.kwargs is kwargs
