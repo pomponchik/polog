@@ -3,6 +3,7 @@ from polog.core.stores.levels import Levels
 from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
 from polog.core.stores.handlers import global_handlers
+from polog.data_structures.trees.named_tree.projector import TreeProjector
 
 
 class config:
@@ -102,14 +103,11 @@ class config:
         Если ранее не был зарегистрирован обработчик с указанным именем, в возвращаемом словаре вместо него будет None.
         """
         if not names:
-            return {**(global_handlers)}
-        result = {}
-        for name in names:
-            if not isinstance(name, str):
-                raise KeyError('The handler name must be a string.')
-            handler = SettingsStore().handlers.get(name)
-            result[name] = handler
-        return result
+            return global_handlers
+
+        projector = TreeProjector(global_handlers)
+        local_scope_tree = projector.on(names)
+        return local_scope_tree
 
     @staticmethod
     def delete_handlers(*names):

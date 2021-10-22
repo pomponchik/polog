@@ -145,7 +145,6 @@ def test_add_similar_handlers():
         config.add_handlers(abc=new_handler3)
         config.add_handlers(abcd=new_handler3)
 
-
 def test_get_handlers():
     """
     Проверяем, что config.get_handlers() работает с аргументами и без.
