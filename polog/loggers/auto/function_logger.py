@@ -18,6 +18,8 @@ from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceb
 from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError, HandlerNotFoundError
 from polog.loggers.handle.message import message as _message
 from polog.core.log_item import LogItem
+from polog.data_structures.trees.named_tree.projector import TreeProjector
+from polog.core.utils.pony_names_generator import PonyNamesGenerator
 
 
 class FunctionLogger:
@@ -25,9 +27,10 @@ class FunctionLogger:
     Экземпляры данного класса - декораторы, включающие автоматическое логирование для функций.
     """
 
-    def __init__(self, settings=SettingsStore()):
+    def __init__(self, settings=SettingsStore(), handlers=global_handlers):
         self.settings = settings
         self.engine = Engine()
+        self.global_handlers = handlers
 
     def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False, handlers=None):
         """
@@ -183,6 +186,11 @@ class FunctionLogger:
                     pass
 
     def create_log_item(self, args, kwargs, data, handlers):
+        """
+        Здесь порождается объект лога.
+
+        К моменту вызова данного метода все данные для лога уже должны быть собраны. После конструирования объекта лога здесь, его изменение в других местах уже не предполагается.
+        """
         log = LogItem()
         log.set_data(data)
         log.set_function_input_data(args, kwargs)
@@ -190,22 +198,49 @@ class FunctionLogger:
         return log
 
     def get_handlers(self, handlers):
+        """
+        Создание локального пространства имен для конкретного декоратора.
+
+        Метод в любом случае (если в него не передали что-то невиданное) должен вернуть дерево (экземпляр NamedTree).
+        Если пользователь не передал своих обработчиков вообще, импользуется глобальное дерево с обработчиками.
+        Если пользователь передал коллекцию обработчиков, на базе этой коллекции конструируется новое дерево.
+
+        В коллекции обработчиков, переданной пользователем, может быть 2 вида объектов:
+        1. Сами обработчики.
+        2. Пути к обработчикам в глобальном пространстве имен.
+
+        Сначала обрабатываются пути к обработчикам. Создается новое дерево, и ноды из дерева, содержащего глобальное пространство имен обработчиков, переносятся в него по тем же путям. Таким образом обеспечивается полная преемственность соответствующих веток дерева с глобальным пространством имен - даже если там появятся новые ноды в тех же ветках, что были скопированы, они будут добавлены и в производные деревья тоже.
+        Затем в новое дерево добавляются "отдельно стоящие" обработчики. Для каждого из них придумывается новое имя в локальном пространстве имен, которое ранее еще не было занято. При этом нужно учитывать, что, если уже после срабатывания кода данного метода в глобальном пространстве имен вдруг появится элемент под тем же именем, в локальное пространство он уже не попадет, т.к. был здесь "перезаписан".
+        """
         if handlers is None:
-            return global_handlers
-        if not isinstance(handlers, Iterable):
-            raise ValueError(f'A collection of handlers is expected. You passed "{handlers}".')
-        result = []
+            return self.global_handlers
+        if not isinstance(handlers, list) and not isinstance(handlers, tuple):
+            raise ValueError(f'A collection of handlers is expected. You passed "{handlers}". The collection can only be a tuple or a list.')
+
+        is_handlers = []
+        is_paths = []
+
         for maybe_handler in handlers:
             if isinstance(maybe_handler, str):
-                try:
-                    result.append(global_handlers[maybe_handler])
-                except KeyError as e:
-                    raise HandlerNotFoundError(f'The handler named "{maybe_handler}" has not been registered before.') from e
+                is_paths.append(maybe_handler)
             elif SignatureMatcher.is_handler(maybe_handler, raise_exception=False):
-                result.append(maybe_handler)
+                is_handlers.append(maybe_handler)
             else:
                 raise HandlerNotFoundError(f'As a handler, you can pass the handler itself or its name from the global handler tree. You passed "{maybe_handler}".')
-        return result
+
+        projector = TreeProjector(self.global_handlers)
+
+        local_scope_tree = projector.on(is_paths)
+
+        names_generator = PonyNamesGenerator().get_next_pony()
+        for handler in is_handlers:
+            while True:
+                new_name = next(names_generator).replace(' ', '_')
+                if new_name not in local_scope_tree:
+                    break
+            local_scope_tree[new_name] = handler
+
+        return local_scope_tree
 
 
 flog = FunctionLogger()

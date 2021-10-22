@@ -327,3 +327,25 @@ def test_get_root_of_tree():
     tree = NamedTree()
 
     assert tree is tree.search_node(['.'])
+
+def test_put_node_one_level():
+    """
+    Пробуем вставить новую ноду первого уровня вложенности.
+    """
+    tree = NamedTree()
+    tree['lol'] = 1
+    tree['lol.kek'] = 1
+    tree['lol.kek.cheburek'] = 1
+
+    tree2 = NamedTree()
+    tree2['lol'] = 1
+    tree2['lol.kek'] = 1
+    tree2['lol.kek.cheburek'] = 1
+
+    tree.put_node('kek', tree2)
+
+    assert len(tree) == 6
+
+    assert 'kek' in tree
+    assert 'lol' in tree
+    assert 'kek.lol' in tree

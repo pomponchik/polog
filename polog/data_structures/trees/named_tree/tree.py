@@ -234,7 +234,7 @@ class NamedTree:
         """
         if len(keys) == 1 and keys[0] == self.keys_separator:
             return self
-        
+
         node = self
         for key in keys:
             next_node = node.childs.get(key)
@@ -330,14 +330,15 @@ class NamedTree:
 
         Потокобезопасно.
         """
+        if key == self.keys_separator:
+            return new_node
+        
         keys = self.get_converted_keys(key)
 
         with self.lock:
             node = self
             for index, key in enumerate(keys):
                 if index == len(keys) - 1:
-                    if node is self:
-                        return new_node
                     node.childs[key] = new_node
                     return self
                 else:

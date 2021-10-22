@@ -38,3 +38,14 @@ def test_project_tree_of_root():
     projector = TreeProjector(tree)
     new_tree = projector.on(['.'], not_to_root=False)
     assert new_tree['lol'] == tree['lol']
+
+def test_not_tree_passed_to_projector_init():
+    """
+    Пробуем передать в конструктор не дерево, а что-то еще.
+    """
+    with pytest.raises(ValueError):
+        projector = TreeProjector(1)
+    with pytest.raises(ValueError):
+        projector = TreeProjector('kek')
+    with pytest.raises(ValueError):
+        projector = TreeProjector([1, 2, 3])

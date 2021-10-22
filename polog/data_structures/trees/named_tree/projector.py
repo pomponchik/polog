@@ -7,9 +7,11 @@ class TreeProjector:
 
     Проекция осуществляется не дерева целиком, а отдельных его "веток".
 
-    Важно: операции вставки в получившееся по итогу дерево могут аффектить также и исходное дерево.
+    Важно: операции вставки в получившееся по итогу дерево могут аффектить также и исходное дерево. Ноды не копируются, а перемещаются из дерева в дерево.
     """
     def __init__(self, other_tree):
+        if not isinstance(other_tree, NamedTree):
+            raise ValueError('An instance of the NamedTree was expected to be passed as an argument.')
         self.tree = other_tree
 
     def on(self, paths, not_to_root=True):
