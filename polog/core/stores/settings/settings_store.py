@@ -24,7 +24,7 @@ class SettingsStore(ReadOnlySingleton):
             2,
             proves={
                 'the value must be an integer': lambda x: isinstance(x, int),
-                'the value must be greater than zero': lambda x: x >= 0,
+                'the value must be greater than or equal to zero': lambda x: x >= 0,
             },
             conflicts={
                 'max_queue_size': lambda new_value, old_value, other_field_value: new_value == 0 and other_field_value != 0,

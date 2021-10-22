@@ -226,7 +226,7 @@ class SettingPoint:
         for message, prove in self.proves.items():
             if not prove(value):
                 if not hasattr(self, 'name'):
-                    full_message = f'You used an incorrect value "{value}": {message}'
+                    full_message = f'You used an incorrect value "{value}": {message}.'
                 else:
-                    full_message = f'You used an incorrect value {value} for the field "{self.name}": {message}'
+                    full_message = f'You used an incorrect value "{value}" for the field "{self.name}": {message}.'
                 raise ValueError(full_message)
