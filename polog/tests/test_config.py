@@ -5,6 +5,7 @@ import pytest
 from polog import config, handle_log as log, field, flog
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
+from polog.data_structures.trees.named_tree.tree import NamedTree
 
 
 def test_set_valid_key_delay_before_exit():
@@ -155,11 +156,18 @@ def test_get_handlers():
         pass
     config.add_handlers(lolkekcheburek=new_handler)
     config.add_handlers(new_handler2)
+
     assert 'lolkekcheburek' in config.get_handlers()
     assert config.get_handlers()['lolkekcheburek'] is new_handler
     assert config.get_handlers('lolkekcheburek')['lolkekcheburek'] is new_handler
     assert len(config.get_handlers('lolkekcheburek')) == 1
     assert len(config.get_handlers()) > 1
+
+    assert isinstance(config.get_handlers(), NamedTree)
+    assert isinstance(config.get_handlers('lolkekcheburek'), NamedTree)
+
+    with pytest.raises(KeyError):
+        config.get_handlers(1)
 
 def test_delete_handlers():
     """
@@ -170,12 +178,15 @@ def test_delete_handlers():
         pass
     def new_handler2(log):
         pass
+    
     config.add_handlers(lolkek123=new_handler)
     config.delete_handlers('lolkek123')
     assert config.get_handlers().get('lolkek123') is None
+
     config.add_handlers(lolkek123=new_handler)
     config.delete_handlers(new_handler)
     assert config.get_handlers().get('lolkek123') is None
+
     config.add_handlers(lolkek123=new_handler, lolkek345=new_handler2)
     config.delete_handlers('lolkek123', new_handler2)
     assert config.get_handlers().get('lolkek123') is None
