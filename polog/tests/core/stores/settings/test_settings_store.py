@@ -102,3 +102,28 @@ def test_set_json_module():
     assert store['json_module'] is ujson
     store['json_module'] = json
     assert store['json_module'] is json
+
+@pytest.mark.parametrize("field_name", [
+    'pool_size',
+    'level',
+    'errors_level',
+    'max_queue_size',
+    'started',
+    'original_exceptions',
+    'service_name',
+    'silent_internal_exceptions',
+    'max_delay_before_exit',
+    'delay_on_exit_loop_iteration_in_quants',
+    'time_quant',
+    'engine',
+    'json_module',
+])
+def test_operator_in(field_name):
+    """
+    Проверяем, что оператор in работает корректно.
+    Он должен возвращать bool-значение, в зависимости от существования данного пункта настроек.
+    """
+    store = SettingsStore()
+
+    assert field_name in store
+    assert 'kek' not in store
