@@ -153,3 +153,14 @@ def test_extract_function_data_wrong_function_object():
     log._extract_function_data(data)
     assert isinstance(data['function'], str)
     assert 'module' not in data['function']
+
+def test_filter_logs_by_level(handler):
+    """
+    Проверяем, что лог уровнем ниже установленного не записывается.
+    """
+    handler.clean()
+    config.set(level=5)
+
+    log('kek', level=1)
+    time.sleep(0.0001)
+    assert handler.last is None
