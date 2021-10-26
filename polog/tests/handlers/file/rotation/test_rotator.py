@@ -42,7 +42,7 @@ def test_base_behavior_rotation_file_size(size_limit, message, iterations, expec
     for iteration in range(iterations):
         log(message)
 
-    rotator = Rotator(f'{size_limit} >> {archive_path}', FileDependencyWrapper(path))
+    rotator = Rotator(f'{size_limit} >> {archive_path}', FileDependencyWrapper([path]))
     rotator.maybe_do()
 
     if expected:

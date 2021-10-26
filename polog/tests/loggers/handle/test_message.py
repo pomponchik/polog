@@ -9,12 +9,16 @@ def test_basic(handler):
     """
     Проверяем, что дефолтное сообщение подменяется новым.
     """
+    config.set(level=1)
+    handler.clean()
+
     @flog(message='base text')
     def normal_function():
         message('new text', level=5)
         return True
-    handler.clean()
+
     normal_function()
+    
     time.sleep(0.0001)
     assert handler.last['message'] == 'new text'
 
@@ -22,6 +26,7 @@ def test_basic_exception(handler):
     """
     Проверяем работу с исключениями.
     """
+    config.set(level=1)
     @flog(message='base text')
     def error_function():
         try:
@@ -57,14 +62,19 @@ def test_affects(handler):
     """
     Пробуем зааффектить одним вызовом message() другой.
     """
+    config.set(level=1)
     handler.clean()
+
     def function_without_flog():
         message('lol', local_variables='kek')
+
     @flog
     def function_with_flog():
         message('lolkek')
+
     function_without_flog()
     function_with_flog()
+
     time.sleep(0.0001)
     assert handler.last.get('local_variables') is None
 
@@ -72,13 +82,17 @@ def test_another_field(handler):
     """
     Проверяем, что работает прописывание собственных значений для пользовательских полей.
     """
+    config.set(level=1)
     handler.clean()
+
     def extractor(log_item):
         pass
     config.add_fields(lolkek=field(extractor))
-    @flog
+
+    @flog(message='lolkek')
     def function():
         message('lolkek', lolkek='lolkek')
+
     function()
     time.sleep(0.0001)
     assert handler.last['lolkek'] == 'lolkek'

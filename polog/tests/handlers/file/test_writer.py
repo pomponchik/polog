@@ -54,11 +54,13 @@ def test_error_if_two_parameters():
     with pytest.raises(ValueError):
         file_writer('a', 'b')
 
-def test_parameter_is_not_string_and_not_file_object():
+def test_parameter_is_not_string_and_not_file_object(delete_files):
     """
     Проверяем, что валидным неименованным параметром принимаются только файловые объекты и строки, при других вариантах - поднимаются исключения.
     """
     file_writer(io.StringIO())
-    file_writer('kek')
+    path = 'polog/tests/data/data.log'
+    file_writer(path)
     with pytest.raises(ValueError):
         file_writer(777)
+    delete_files(path)
