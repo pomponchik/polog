@@ -99,9 +99,10 @@ def test_another_field(handler):
     Проверяем, что регистрируются пользовательские поля.
     """
     handler.clean()
-    def extractor(a, **b):
+    def extractor(log_item):
         pass
     config.add_fields(lolkek=field(extractor))
+
     log('kek', lolkek='lol')
     time.sleep(0.0001)
     assert handler.last['lolkek'] == 'lol'

@@ -78,3 +78,26 @@ def test_basic_converter(handler):
 
     time.sleep(0.0001)
     assert handler.last['ip_converted'] == 'converted_123.456.789.010'
+
+def test_not_correct_extractor_signature():
+    """
+    Пробуем передать в качестве экстрактора функцию, чья сигнатура не соответствует ожидаемой.
+    """
+    def not_extractor(a, b, c):
+        pass
+
+    with pytest.raises(ValueError):
+        config.add_fields(data=field(not_extractor))
+
+def test_not_correct_converter_signature():
+    """
+    Пробуем передать в качестве конвертера функцию, чья сигнатура не соответствует ожидаемой.
+    """
+    def extractor(log_item):
+        pass
+
+    def not_converter(a, b, c):
+        pass
+
+    with pytest.raises(ValueError):
+        config.add_fields(data=field(extractor, converter=not_converter))

@@ -1,3 +1,6 @@
+from polog.core.utils.signature_matcher import SignatureMatcher
+
+
 class field:
     """
     Класс, представляющий кастомное поле лога.
@@ -54,6 +57,8 @@ class field:
         """
         if not callable(extractor):
             raise ValueError('Extractor must be called.')
+        if not SignatureMatcher.is_handler(extractor):
+            raise ValueError('The signature of the function passed as a extractor does not match the expected one. It should be the same as the standard handler.')
         return extractor
 
     def get_converter(self, maybe_converter):
@@ -65,6 +70,8 @@ class field:
         if maybe_converter is None:
             return self.standart_converter
         if callable(maybe_converter):
+            if not SignatureMatcher.is_handler(maybe_converter):
+                raise ValueError('The signature of the function passed as a converter does not match the expected one. It should be the same as the standard handler.')
             return maybe_converter
         raise ValueError('Converter must be called.')
 

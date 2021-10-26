@@ -268,9 +268,9 @@ def test_extract_extra_fields_other_type_without_converter():
     """
     Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, и конвертер не используется.
     """
-    def extractor_1(args, **kwargs):
+    def extractor_1(log_item):
         return 1
-    def extractor_2(args, **kwargs):
+    def extractor_2(log_item):
         return 2
     class FalseSettingsStore:
         extra_fields = {'1': field(extractor_1), '2': field(extractor_2)}
