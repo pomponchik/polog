@@ -92,7 +92,7 @@ def dirname_for_test(delete_files):
     """
     Получаем имя файла в тестовой директории и удаляем за собой файл.
     """
-    path = f'polog/tests/data/test_dir_{uuid.uuid1().hex}'
+    path = f'polog/tests/data/test_dir'
     shutil.rmtree(path, ignore_errors=True)
     os.mkdir(path)
     yield path

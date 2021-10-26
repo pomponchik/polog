@@ -94,7 +94,7 @@ def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test
 
     expected_number_of_logs = number_of_logs_per_thread * number_of_threads
 
-    time.sleep(1)
+    time.sleep(1.5)
 
     files = [filename_for_test]
 
