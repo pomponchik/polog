@@ -21,6 +21,7 @@ class Rotator:
         self.source_rules = self.extract_rules_string_from_source(source_string)
         self.to = self.where_to_rotate(source_string)
         self.rules = self.generate_rules(self.source_rules)
+        self.lock = Lock()
 
     def maybe_do(self):
         """
@@ -28,7 +29,7 @@ class Rotator:
         """
         # Лок для защиты от состояния гонки, т. к. необходимость ротации могут одновременно проверять несколько потоков.
         # Если не защитить, ротация может дублироваться из разных потоков.
-        with Lock():
+        with self.lock:
             if self.to_do_or_not_to_do():
                 self.do()
 
