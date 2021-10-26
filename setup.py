@@ -7,10 +7,10 @@ requirements = []
 
 setup(
     name="polog",
-    version="0.0.11",
+    version="0.0.12",
     author="Evgeniy Blinov",
     author_email="zheni-b@yandex.ru",
-    description="Удобный асинхронный логгер",
+    description="Логирование должно быть красивым",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/pomponchik/polog",
