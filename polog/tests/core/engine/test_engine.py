@@ -151,7 +151,7 @@ def for_process(path_to_logs_file, path_to_numbers_file, number_of_iterations):
     with open(path_to_numbers_file, 'w') as file:
         file.write(str(queue_size))
 
-def test_finalize(number_of_strings_in_the_file, delete_files):
+def test_finalize(number_of_strings_in_the_files, delete_files):
     """
     Проверяем, что при остановке интерпретатора записываются не успевшие записаться логи в многопоточном движке.
     Для этого запускаем polog в другом процессе.
@@ -171,6 +171,6 @@ def test_finalize(number_of_strings_in_the_file, delete_files):
 
     assert queue_size != 0
 
-    assert number_of_strings_in_the_file(path_to_logs_file) == number_of_iterations
+    assert number_of_strings_in_the_files(path_to_logs_file) == number_of_iterations
 
     delete_files(path_to_logs_file, path_to_numbers_file)

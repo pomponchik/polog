@@ -50,7 +50,6 @@ class Rotator:
         В качестве нового имени файла используем название файла корневого скрипта, с измененным на .log расширением и суффиксом, отображающим текущую дату и время.
         """
         self.file.move_file(os.path.join(self.to, self.new_filename()))
-        self.file.reopen()
 
     def generate_rules(self, source_rules):
         """

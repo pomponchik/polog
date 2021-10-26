@@ -1,6 +1,9 @@
 import io
+import os
 import sys
 import time
+from threading import Thread, get_ident
+from polog.core.engine.engine import Engine
 
 import pytest
 
@@ -8,7 +11,7 @@ from polog import log, config
 from polog.handlers.file.writer import file_writer
 
 
-def test_base_writer(number_of_strings_in_the_file, delete_files):
+def test_base_writer(number_of_strings_in_the_files, delete_files):
     """
     Базовый сценарий - запись логов в файл.
 
@@ -23,7 +26,7 @@ def test_base_writer(number_of_strings_in_the_file, delete_files):
     for iteration in range(iterations):
         log('kek')
 
-    assert number_of_strings_in_the_file(path) == iterations
+    assert number_of_strings_in_the_files(path) == iterations
 
     config.delete_handlers(handler)
     delete_files(path)
@@ -64,3 +67,40 @@ def test_parameter_is_not_string_and_not_file_object(delete_files):
     with pytest.raises(ValueError):
         file_writer(777)
     delete_files(path)
+
+def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test, dirname_for_test):
+    """
+    Запускаем много логов в нескольких потоках и проверяем, что они все успевают записаться в файл, и при этом в ничего не было потеряно при ротациях.
+    """
+    number_of_logs_per_thread = 2000
+    number_of_threads = 20
+
+    config.set(pool_size=20, level=1)
+
+    handler = file_writer(filename_for_test, rotation=f'3 kb >> {dirname_for_test}')
+    config.add_handlers(handler)
+
+    def create_a_lot_of_logs(number_of_logs):
+        thread_name = get_ident()
+        for index in range(number_of_logs):
+            message = f'{thread_name} {index}'
+            log(message)
+
+    threads = [Thread(target=create_a_lot_of_logs, args=(number_of_logs_per_thread,)) for x in range(number_of_threads)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    expected_number_of_logs = number_of_logs_per_thread * number_of_threads
+
+    time.sleep(1)
+
+    files = [filename_for_test]
+
+    for filename in os.listdir(dirname_for_test):
+        files.append(os.path.join(dirname_for_test, filename))
+
+    assert number_of_strings_in_the_files(*files) == expected_number_of_logs
+
+    config.delete_handlers(handler)
