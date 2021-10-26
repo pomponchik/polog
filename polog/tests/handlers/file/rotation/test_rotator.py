@@ -61,3 +61,10 @@ def test_base_behavior_rotation_file_size(size_limit, message, iterations, expec
 
     config.delete_handlers(handler)
     delete_files(*to_delete)
+
+def test_wrong_rule_to_rotation():
+    """
+    Проверяем, что для неформатных правил ротации поднимается ValueError.
+    """
+    with pytest.raises(ValueError):
+        rotator = Rotator(f'lol >> kek', FileDependencyWrapper(()))
