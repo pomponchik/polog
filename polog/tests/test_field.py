@@ -12,9 +12,9 @@ def ip_extractor(log):
 
 config.add_fields(ip=field(ip_extractor))
 
-
 class Request:
     META = {'REMOTE_ADDR': '123.456.789.010'}
+
 
 def test_django_example(handler):
     """
@@ -26,7 +26,9 @@ def test_django_example(handler):
         html = 'text'
         return html
     request = Request()
+
     django_handler_example(request)
+
     time.sleep(0.0001)
     assert handler.last['ip'] == '123.456.789.010'
 
@@ -60,3 +62,19 @@ def test_not_called_converter():
     """
     with pytest.raises(ValueError):
         field(ip_extractor, converter='kek')
+
+def test_basic_converter(handler):
+    """
+    Указываем конвертер значений и проверяем, что он работает.
+    """
+    @flog
+    def django_handler_example(request):
+        html = 'text'
+        return html
+    request = Request()
+    config.add_fields(ip_converted=field(ip_extractor, converter=lambda value: 'converted_' + value))
+
+    django_handler_example(request)
+
+    time.sleep(0.0001)
+    assert handler.last['ip_converted'] == 'converted_123.456.789.010'

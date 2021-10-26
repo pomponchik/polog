@@ -6,7 +6,9 @@ from polog import flog, message, field, config
 
 
 def test_basic(handler):
-    """Проверяем, что дефолтное сообщение подменяется новым."""
+    """
+    Проверяем, что дефолтное сообщение подменяется новым.
+    """
     @flog(message='base text')
     def normal_function():
         message('new text', level=5)
@@ -17,7 +19,9 @@ def test_basic(handler):
     assert handler.last['message'] == 'new text'
 
 def test_basic_exception(handler):
-    """Проверяем работу с исключениями."""
+    """
+    Проверяем работу с исключениями.
+    """
     @flog(message='base text')
     def error_function():
         try:
@@ -69,7 +73,7 @@ def test_another_field(handler):
     Проверяем, что работает прописывание собственных значений для пользовательских полей.
     """
     handler.clean()
-    def extractor(a, **b):
+    def extractor(log_item):
         pass
     config.add_fields(lolkek=field(extractor))
     @flog
