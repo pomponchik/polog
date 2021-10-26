@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import pathlib
 
@@ -25,9 +26,12 @@ class FileDependencyWrapper:
             'write',
             'close',
         )
+        attributes = dir(file)
         for method_name in mandatory_methods:
-            attributes = dir(file)
-            if not (method_name in attributes and callable(attributes[method_name])):
+            if not method_name in attributes:
+                return False
+            attribute = getattr(file, method_name)
+            if not callable(attribute):
                 return False
         return True
 
@@ -36,6 +40,11 @@ class FileDependencyWrapper:
         Пользователь подает на вход имя файла (вернее, путь к нему) или непосредственно файловый объект.
         Здесь нам нужно понять, что именно он подал, и вернуть в любом случае файловый объект. То есть, если он дал название файла - открыть файл и вернуть файловый объект.
         """
+        if not maybe_filename:
+            return sys.stdout, None
+        if len(maybe_filename) > 1:
+            raise ValueError('You can specify only one file name for one file handler.')
+        maybe_filename = maybe_filename[0]
         if not self.is_file_object(maybe_filename):
             if not isinstance(maybe_filename, str):
                 raise ValueError('A file object or string with the file name is expected.')

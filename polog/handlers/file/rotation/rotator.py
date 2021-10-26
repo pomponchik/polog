@@ -16,6 +16,8 @@ class Rotator:
     """
 
     def __init__(self, source_string, file, parser=Parser):
+        if source_string and file.filename is None:
+            raise ValueError('Rotation is not possible when logs are not output to a file.')
         self.file = file
         self.parser = parser(self.file)
         self.source_rules = self.extract_rules_string_from_source(source_string)
