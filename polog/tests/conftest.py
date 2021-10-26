@@ -56,6 +56,8 @@ def delete_files():
                 os.remove(file)
             except FileNotFoundError:
                 pass
+            except PermissionError:
+                os.rmdir(file)
     return result
 
 @pytest.fixture

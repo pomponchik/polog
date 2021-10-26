@@ -118,11 +118,9 @@ class Rotator:
     def new_filename(self):
         """
         Создаем новое имя файла при ротации.
-        Оно основано на имени базового скрипта (со сменой расширения на .log) и текущем времени / дате.
+        Оно основано на текущем времени / дате.
         """
-        base_filename = os.path.basename(__file__)
-        base_filename = base_filename.split('.')[0]
         stamp = str(datetime.datetime.now())
         stamp = stamp.replace(' ', '_')
-        result = f'{base_filename}_{stamp}.logs'
+        result = f'{stamp}.logs'
         return result
