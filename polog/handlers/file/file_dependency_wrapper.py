@@ -2,8 +2,8 @@ import os
 import sys
 import shutil
 import pathlib
-import fcntl
-from threading import Lock
+
+from polog.handlers.file.file_lock import FileLock
 
 
 class FileDependencyWrapper:
@@ -11,7 +11,7 @@ class FileDependencyWrapper:
     Обертка для системных функций по работе с файлами.
     """
 
-    def __init__(self, file):
+    def __init__(self, file, lock_type):
         """
         На вход подается путь к файлу, файловый объект, либо ничего.
 
@@ -22,7 +22,7 @@ class FileDependencyWrapper:
         file - список с аргументами от пользователя. Он валиден, если пуст, либо содержит 1 элемент - файловый объект или строку с путем к файлу.
         """
         self.file, self.filename = self.get_file_object(file)
-        self.lock = Lock()
+        self.lock = FileLock(self.filename, lock_type)
 
     def is_file_object(self, file):
         """
@@ -118,35 +118,12 @@ class FileDependencyWrapper:
         2. Блокировка на уровне потока. Нужна, поскольку с одним обработчиком (читай - одним и тем же файловым объектом) могут параллельно работать воркеры из нескольких потоков.
         """
         with self.lock:
-            self.lock_file()
             try:
                 shutil.move(self.filename, path_to_copy)
             except FileNotFoundError:
                 self.make_dirs_for_path(path_to_copy)
                 shutil.move(self.filename, path_to_copy)
             self.reopen()
-            self.unlock_file()
-
-    def lock_file(self):
-        """
-        Блокировка файла (см. https://en.wikipedia.org/wiki/File_locking).
-
-        Необходима в момент какой-то чувствительной работы над файлом, когда важно, чтобы в нее не вмешивались другие процессы / потоки.
-        Опирается на соответствующий API операционной системы, поэтому может работать не везде.
-        """
-        try:
-            fcntl.flock(self.file.fileno(), fcntl.LOCK_EX)
-        except OSError:
-            pass
-
-    def unlock_file(self):
-        """
-        Разблокировка файла, см. описание к self.lock_file().
-        """
-        try:
-            fcntl.flock(self.file.fileno(), fcntl.LOCK_UN)
-        except OSError:
-            pass
 
     def make_dirs_for_path(self, path):
         """

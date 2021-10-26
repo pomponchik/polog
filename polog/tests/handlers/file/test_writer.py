@@ -122,7 +122,7 @@ def test_multiprocessing_concurrent_write(number_of_strings_in_the_files, filena
     """
     number_of_logs_per_process = 2000
     number_of_processes = 20
-    timeout = 5
+    timeout = 1.5
 
     processes = [Process(target=create_logs_for_process, args=(index, number_of_logs_per_process, filename_for_test, dirname_for_test, timeout)) for index in range(number_of_processes)]
     for process in processes:
