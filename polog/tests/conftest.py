@@ -96,4 +96,4 @@ def dirname_for_test(delete_files):
     shutil.rmtree(path, ignore_errors=True)
     os.mkdir(path)
     yield path
-    shutil.rmtree(path, ignore_errors=True)
+    #shutil.rmtree(path, ignore_errors=True)

@@ -1,6 +1,7 @@
 import os
 import datetime
 from threading import Lock
+from multiprocessing import current_process
 
 from polog.handlers.file.rotation.parser import Parser
 
@@ -121,7 +122,8 @@ class Rotator:
         Создаем новое имя файла при ротации.
         Оно основано на текущем времени / дате.
         """
-        stamp = str(datetime.datetime.now())
-        stamp = stamp.replace(' ', '_')
-        result = f'{stamp}.logs'
+        stamp = str(datetime.datetime.now()).replace(' ', '_')
+        process_id = current_process().pid
+
+        result = f'{stamp}_{process_id}.logs'
         return result
