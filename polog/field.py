@@ -1,3 +1,6 @@
+from polog.core.utils.signature_matcher import SignatureMatcher
+
+
 class field:
     """
     Класс, представляющий кастомное поле лога.
@@ -12,7 +15,7 @@ class field:
     """
     def __init__(self, extractor, converter=None):
         """
-        extractor - функция, принимающая аргументы, аналогичные любым обрабтчикам Polog, и возвращающая некий объект, представляющий контент поля.
+        extractor - функция, принимающая лог в качестве аргумента, и возвращающая некий объект, представляющий контент поля.
         converter - функция, преобразующая извлеченный контент в строковый формат. Принимает на вход объект, возвращенный функцией extractor и возвращает строку.
 
         Конвертер отделен от экстрактора, поскольку в некоторых случаях нам не нужно тратить ресурсы на преобразование форматов. Скажем, если приоритет данного лога ниже установленного в данный момент уровня логирования.
@@ -22,22 +25,22 @@ class field:
         self.extractor = self.get_extractor(extractor)
         self.converter = self.get_converter(converter)
 
-    def get_data(self, args, **kwargs):
+    def get_data(self, log):
         """
         Берем сырые данные, извлекаем из них некое значение с помощью экстрактора и скармливаем его конвертеру, результат возвращаем.
         """
-        item = self.extract(args, **kwargs)
+        item = self.extract(log)
         converted_item = self.convert(item)
         return converted_item
 
-    def extract(self, args, **kwargs):
+    def extract(self, log):
         """
-        Принимаем на вход стандартные аргументы обработчика и возвращаем некий объект.
+        Принимаем на вход лог и возвращаем некий объект.
         Обычно - строку; если это не строка, то нужно зарегистрировать еще функцию converter для преобразования в строку. См. комментарий к методу .__init__().
 
         По факту данный метод является прокси и вызывает другой метод, ранее зарегистрированный в качестве экстрактора.
         """
-        return self.extractor(args, **kwargs)
+        return self.extractor(log)
 
     def convert(self, value):
         """
@@ -54,6 +57,8 @@ class field:
         """
         if not callable(extractor):
             raise ValueError('Extractor must be called.')
+        if not SignatureMatcher.is_handler(extractor):
+            raise ValueError('The signature of the function passed as a extractor does not match the expected one. It should be the same as the standard handler.')
         return extractor
 
     def get_converter(self, maybe_converter):
@@ -65,6 +70,8 @@ class field:
         if maybe_converter is None:
             return self.standart_converter
         if callable(maybe_converter):
+            if not SignatureMatcher.is_handler(maybe_converter):
+                raise ValueError('The signature of the function passed as a converter does not match the expected one. It should be the same as the standard handler.')
             return maybe_converter
         raise ValueError('Converter must be called.')
 

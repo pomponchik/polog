@@ -1,4 +1,5 @@
 import pytest
+
 from polog.core.utils.not_none_to_dict import not_none_to_dict
 
 

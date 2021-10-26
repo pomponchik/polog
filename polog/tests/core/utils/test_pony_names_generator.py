@@ -1,4 +1,5 @@
 import pytest
+
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
 
 

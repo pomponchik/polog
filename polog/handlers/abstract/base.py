@@ -1,5 +1,6 @@
 from abc import abstractmethod
-from polog.core.utils.is_handler import is_handler
+
+from polog.core.utils.signature_matcher import SignatureMatcher
 
 
 class BaseHandler:
@@ -15,8 +16,8 @@ class BaseHandler:
 
     _input_proves = {
         'only_errors': lambda x: isinstance(x, bool),
-        'filter': lambda x: x is None or is_handler(x),
-        'alt': lambda x: x is None or is_handler(x),
+        'filter': lambda x: x is None or SignatureMatcher.is_handler(x),
+        'alt': lambda x: x is None or SignatureMatcher.is_handler(x),
     }
 
     def __init__(self, only_errors=False, filter=None, alt=None):
@@ -29,20 +30,20 @@ class BaseHandler:
         self.only_errors = only_errors
         self.alt = alt
 
-    def __call__(self, args, **kwargs):
+    def __call__(self, log):
         """
         Благодаря этой функции объект класса является вызываемым.
         В случае неудачи при записи лога, выполняется функция alt, если она была указана при инициализации объекта.
         """
-        if not self.to_do_or_not_to_do(args, **kwargs):
-            return self.run_alt(args, **kwargs)
+        if not self.to_do_or_not_to_do(log):
+            return self.run_alt(log)
         try:
-            content = self.get_content(args, **kwargs)
+            content = self.get_content(log)
             self.do(content)
         except Exception as e:
-            self.run_alt(args, **kwargs)
+            self.run_alt(log)
 
-    def to_do_or_not_to_do(self, args, **kwargs):
+    def to_do_or_not_to_do(self, log):
         """
         Здесь принимается решение, записывать лог или нет.
         По умолчанию это будет сделано в любом случае.
@@ -51,23 +52,23 @@ class BaseHandler:
         """
         if type(self.only_errors) is bool:
             if self.only_errors == True:
-                success = kwargs.get('success')
+                success = log.get('success')
                 if success:
                     return False
         if callable(self.filter):
-            result = self.filter(args, **kwargs)
+            result = self.filter(log)
             if type(result) is bool:
                 return result
         return True
 
-    def run_alt(self, args, **kwargs):
+    def run_alt(self, log):
         """
         Если по какой-то причине записать лог не удалось, запускается данный метод.
         По умолчанию он не делает ничего, однако, если в конструктор класса была передана функция в качестве параметра alt, она будет вызвана со всеми аргументами, которые изначально были переданы в __call__().
         К примеру, в качестве параметра alt можно передать другой обработчик.
         """
         if callable(self.alt):
-            return self.alt(args, **kwargs)
+            return self.alt(log)
 
     @abstractmethod
     def do(self, content):
@@ -80,7 +81,7 @@ class BaseHandler:
         pass # pragma: no cover
 
     @abstractmethod
-    def get_content(self, args, **kwargs):
+    def get_content(self, log):
         """
         Метод, который возвращает объект, с которым что-то будет делать self.do().
         В большинстве реализаций обработчиков это будет специфически отформатированная строка.

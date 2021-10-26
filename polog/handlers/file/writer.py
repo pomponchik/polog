@@ -1,8 +1,9 @@
 from polog.handlers.abstract.base import BaseHandler
-from polog.core.utils.is_handler import is_handler
+from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.handlers.file.file_dependency_wrapper import FileDependencyWrapper
 from polog.handlers.file.base_formatter import BaseFormatter
 from polog.handlers.file.rotation.rotator import Rotator
+from polog.core.utils.exception_escaping import exception_escaping
 
 
 class file_writer(BaseHandler):
@@ -16,14 +17,14 @@ class file_writer(BaseHandler):
     input_proves = {
         'forced_flush': lambda x: isinstance(x, bool),
         'separator': lambda x: isinstance(x, str),
-        'formatter': lambda x: x is None or is_handler(x),
+        'formatter': lambda x: x is None or SignatureMatcher.is_handler(x),
         'rotation': lambda x: x is None or isinstance(x, str),
     }
 
-    def __init__(self, file, formatter=None, rotation=None, forced_flush=True, separator='\n', only_errors=False, filter=None, alt=None, file_wrapper=FileDependencyWrapper, base_formatter=BaseFormatter, rotator=Rotator):
+    def __init__(self, *file, formatter=None, rotation=None, forced_flush=True, separator='\n', only_errors=False, filter=None, alt=None, file_wrapper=FileDependencyWrapper, base_formatter=BaseFormatter, rotator=Rotator):
         super().__init__(only_errors=only_errors, filter=filter, alt=alt)
         self.do_input_proves(forced_flush=forced_flush, separator=separator, formatter=formatter, rotation=rotation)
-        self.file = file_wrapper(file)
+        self.file = file_wrapper([x for x in file])
         self.forced_flush = forced_flush
         self.base_formatter = base_formatter(separator)
         self.formatter = self.get_formatter(formatter)
@@ -41,11 +42,11 @@ class file_writer(BaseHandler):
         # Сброс буфера вывода. Осуществляется по умолчанию, это можно настроить при инициализации обработчика.
         self.maybe_flush()
 
-    def get_content(self, args, **kwargs):
+    def get_content(self, log):
         """
         Стандартный метод для создания строки лога из исходных данных. Использует стандартный форматтер.
         """
-        return self.formatter.get_formatted_string(args, **kwargs)
+        return self.formatter(log)
 
     def maybe_flush(self):
         """
@@ -55,15 +56,13 @@ class file_writer(BaseHandler):
         if self.forced_flush:
             self.file.flush()
 
+    @exception_escaping
     def maybe_rotation(self):
         """
         Проверяем, нужна ли ротация логов при данном вызове.
         Если да - ротируем.
         """
-        try:
-            self.rotator.maybe_do()
-        except Exception as e:
-            pass
+        self.rotator.maybe_do()
 
     def get_formatter(self, maybe_formatter):
         """
@@ -82,8 +81,8 @@ class file_writer(BaseHandler):
         """
         return rotator(rotation_rules, self.file)
 
-    def base_formatter_wrapper(self, args, **kwargs):
+    def base_formatter_wrapper(self, log):
         """
         Метод, где вызывается базовый форматтер.
         """
-        return self.base_formatter.get_formatted_string(args, **kwargs)
+        return self.base_formatter.get_formatted_string(log)

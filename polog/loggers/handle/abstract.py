@@ -1,6 +1,8 @@
 import functools
-from polog.core.levels import Levels
-from polog.core.settings_store import SettingsStore
+
+from polog.core.stores.levels import Levels
+from polog.core.engine.engine import Engine
+from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.not_none_to_dict import not_none_to_dict
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
@@ -53,6 +55,7 @@ class AbstractHandleLogger:
 
     def __init__(self, settings=SettingsStore()):
         self._settings = settings
+        self._engine = Engine()
 
     def __getattribute__(self, name):
         """
@@ -199,7 +202,7 @@ class AbstractHandleLogger:
             if change_success:
                 fields['success'] = False
             if change_level and not ('level' in fields):
-                fields['level'] = self._settings.errors_level
+                fields['level'] = self._settings['errors_level']
 
     @staticmethod
     def _maybe_raise(exception, message):
@@ -213,5 +216,5 @@ class AbstractHandleLogger:
         exception - класс исключения, которое может быть поднято.
         message - сообщение, с которым исключение exception может быть поднято.
         """
-        if not SettingsStore().silent_internal_exceptions:
+        if not SettingsStore()['silent_internal_exceptions']:
             raise exception(message)

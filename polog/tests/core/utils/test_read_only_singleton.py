@@ -1,5 +1,7 @@
 from threading import Thread
+
 import pytest
+
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
 
 

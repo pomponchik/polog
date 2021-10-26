@@ -1,6 +1,7 @@
 .idea
 virt
 venv
+.venv
 env
 .DS_Store
 tests*.py

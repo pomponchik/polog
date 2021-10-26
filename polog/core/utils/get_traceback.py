@@ -1,14 +1,17 @@
 import sys
 import traceback
-import ujson as json
-from polog.utils.json_vars import get_item
+
+from polog.core.stores.settings.settings_store import SettingsStore
 from polog.utils.json_vars import json_vars
 
+
+store = SettingsStore()
 
 def get_traceback():
     """
     Получаем последний фрейм трейсбека в виде списка строк и сразу сериализуем этот список в json.
     """
+    json = store['json_module']
     trace = sys.exc_info()[2]
     trace_list = traceback.format_tb(trace)
     trace_json = json.dumps(trace_list)

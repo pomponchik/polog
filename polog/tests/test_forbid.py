@@ -1,5 +1,7 @@
 import time
+
 import pytest
+
 from polog import flog, logging_is_forbidden
 
 

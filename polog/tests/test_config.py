@@ -1,8 +1,11 @@
 import time
+
 import pytest
+
 from polog import config, handle_log as log, field, flog
-from polog.core.settings_store import SettingsStore
-from polog.core.levels import Levels
+from polog.core.stores.settings.settings_store import SettingsStore
+from polog.core.stores.levels import Levels
+from polog.data_structures.trees.named_tree.tree import NamedTree
 
 
 def test_set_valid_key_delay_before_exit():
@@ -10,56 +13,56 @@ def test_set_valid_key_delay_before_exit():
     Проверяем, что настройка с корректным ключом принимается и сохраняется в SettingsStore.
     """
     # delay_before_exit
-    config.set(delay_before_exit=1)
-    assert SettingsStore().delay_before_exit == 1
-    config.set(delay_before_exit=2)
-    assert SettingsStore().delay_before_exit == 2
+    config.set(max_delay_before_exit=1)
+    assert SettingsStore()['max_delay_before_exit'] == 1
+    config.set(max_delay_before_exit=2)
+    assert SettingsStore()['max_delay_before_exit'] == 2
     # service_name
     config.set(service_name='lol')
-    assert SettingsStore().service_name == 'lol'
+    assert SettingsStore()['service_name'] == 'lol'
     config.set(service_name='kek')
-    assert SettingsStore().service_name == 'kek'
+    assert SettingsStore()['service_name'] == 'kek'
     # level
     config.set(level=1)
-    assert SettingsStore().level == 1
+    assert SettingsStore()['level'] == 1
     config.set(level=2)
-    assert SettingsStore().level == 2
+    assert SettingsStore()['level'] == 2
     config.set(level=1)
     # errors_level
     config.set(errors_level=1)
-    assert SettingsStore().errors_level == 1
+    assert SettingsStore()['errors_level'] == 1
     config.set(errors_level=2)
-    assert SettingsStore().errors_level == 2
+    assert SettingsStore()['errors_level'] == 2
     # original_exceptions
     config.set(original_exceptions=True)
-    assert SettingsStore().original_exceptions == True
+    assert SettingsStore()['original_exceptions'] == True
     config.set(original_exceptions=False)
-    assert SettingsStore().original_exceptions == False
+    assert SettingsStore()['original_exceptions'] == False
     config.set(original_exceptions=True)
     # pool_size
     config.set(pool_size=1)
-    assert SettingsStore().pool_size == 1
+    assert SettingsStore()['pool_size'] == 1
     config.set(pool_size=2)
-    assert SettingsStore().pool_size == 2
+    assert SettingsStore()['pool_size'] == 2
     # silent_internal_exceptions
     config.set(silent_internal_exceptions=True)
-    assert SettingsStore().silent_internal_exceptions == True
+    assert SettingsStore()['silent_internal_exceptions'] == True
     config.set(silent_internal_exceptions=False)
-    assert SettingsStore().silent_internal_exceptions == False
+    assert SettingsStore()['silent_internal_exceptions'] == False
 
 def test_set_invalid_key():
     """
-    Проверяем, что неправильный ключ настройки использовать не получется и поднимется исключение.
+    Проверяем, что неправильный ключ настройки использовать не получится и поднимется исключение.
     """
     with pytest.raises(KeyError):
         config.set(invalid_key='lol')
 
 def test_set_invalid_value():
     """
-    Проверяем, что значение настройки с неправильным типом данных использовать не получется и поднимется исключение.
+    Проверяем, что значение настройки с неправильным типом данных использовать не получится и поднимется исключение.
     """
     with pytest.raises(ValueError):
-        config.set(delay_before_exit='lol')
+        config.set(max_delay_before_exit='lol')
 
 def test_levels_set_good_value():
     """
@@ -79,24 +82,29 @@ def test_levels_set_wrong_value():
     with pytest.raises(TypeError):
         config.levels(lol=1.5)
 
-def test_standart_levels():
+def test_standard_levels():
     """
     Проверяем, что уровни логирования из стандартной схемы устанавливаются.
     """
-    config.standart_levels()
+    config.standard_levels()
     assert Levels.get('DEBUG') == 10
     assert Levels.get('INFO') == 20
     assert Levels.get('WARNING') == 30
     assert Levels.get('ERROR') == 40
     assert Levels.get('CRITICAL') == 50
+    assert Levels.get('debug') == 10
+    assert Levels.get('info') == 20
+    assert Levels.get('warning') == 30
+    assert Levels.get('error') == 40
+    assert Levels.get('critical') == 50
 
 def test_add_handlers():
     """
     Проверяем, что новый обработчик добавляется и работает.
     """
     lst = []
-    def new_handler(args, **fields):
-        lst.append(fields['level'])
+    def new_handler(log):
+        lst.append(log['level'])
     config.add_handlers(new_handler)
     log('lol')
     time.sleep(0.0001)
@@ -138,38 +146,47 @@ def test_add_similar_handlers():
         config.add_handlers(abc=new_handler3)
         config.add_handlers(abcd=new_handler3)
 
-
 def test_get_handlers():
     """
     Проверяем, что config.get_handlers() работает с аргументами и без.
     """
-    def new_handler(args, **fields):
+    def new_handler(log):
         pass
-    def new_handler2(args, **fields):
+    def new_handler2(log):
         pass
     config.add_handlers(lolkekcheburek=new_handler)
     config.add_handlers(new_handler2)
+
     assert 'lolkekcheburek' in config.get_handlers()
     assert config.get_handlers()['lolkekcheburek'] is new_handler
     assert config.get_handlers('lolkekcheburek')['lolkekcheburek'] is new_handler
     assert len(config.get_handlers('lolkekcheburek')) == 1
     assert len(config.get_handlers()) > 1
 
+    assert isinstance(config.get_handlers(), NamedTree)
+    assert isinstance(config.get_handlers('lolkekcheburek'), NamedTree)
+
+    with pytest.raises(KeyError):
+        config.get_handlers(1)
+
 def test_delete_handlers():
     """
     Проверка удаления обработчиков.
     Должна работать как по имени, так и прямой передачей объекта.
     """
-    def new_handler(args, **fields):
+    def new_handler(log):
         pass
-    def new_handler2(args, **fields):
+    def new_handler2(log):
         pass
+    
     config.add_handlers(lolkek123=new_handler)
     config.delete_handlers('lolkek123')
     assert config.get_handlers().get('lolkek123') is None
+
     config.add_handlers(lolkek123=new_handler)
     config.delete_handlers(new_handler)
     assert config.get_handlers().get('lolkek123') is None
+
     config.add_handlers(lolkek123=new_handler, lolkek345=new_handler2)
     config.delete_handlers('lolkek123', new_handler2)
     assert config.get_handlers().get('lolkek123') is None
@@ -180,7 +197,7 @@ def test_add_field(handler):
     Проверяем, что кастомные поля добавляются и работают.
     """
     handler.clean()
-    def extractor(args, **kwargs):
+    def extractor(log):
         return 'lol'
     @flog
     def function():
@@ -196,7 +213,7 @@ def test_delete_field(handler):
     Проверяем, что кастомные поля удаляются.
     """
     handler.clean()
-    def extractor(args, **kwargs):
+    def extractor(log):
         return 'lol'
     @flog
     def function():
@@ -212,9 +229,9 @@ def test_double_name_set_handler():
     Запрещено дважды пытаться присвоить одно и то же имя одному или нескольким обработчикам.
     Проверяем, что в этом случае поднимается исключение.
     """
-    def local_handler(a, **b):
+    def local_handler(a):
         pass
-    with pytest.raises(KeyError):
+    with pytest.raises(NameError):
         config.add_handlers(ggg=local_handler)
         config.add_handlers(ggg=local_handler)
 

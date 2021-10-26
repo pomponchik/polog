@@ -1,10 +1,12 @@
-import re
 import json
 import datetime
 from inspect import Signature
+
 import pytest
-from polog import json_vars, config
+
+from polog import json_vars
 from polog.handlers.file.base_formatter import BaseFormatter
+from polog.core.utils.signature_matcher import SignatureMatcher
 
 
 def test_first_step_of_initialization():
@@ -29,13 +31,13 @@ def test_second_step_of_initialization():
     formatter = BaseFormatter('\n')
     assert not hasattr(formatter, 'FIELD_HANDLERS')
     assert not hasattr(formatter, 'ALIGN_NORMS')
-    formatter.get_formatted_string((1, 2), **{'lol': 'lol', 'kek': 'kek'})
+    formatter.get_formatted_string({'lol': 'lol', 'kek': 'kek'})
     assert hasattr(formatter, 'FIELD_HANDLERS')
     assert hasattr(formatter, 'ALIGN_NORMS')
     # Проверка, что второй шаг инициализации делается ровно один раз.
     # То есть что созданные атрибуты не переопределяются на каждом вызове метода .get_formatted_string().
     first_id = id(formatter.FIELD_HANDLERS)
-    formatter.get_formatted_string((1, 2), **{'lol': 'lol', 'kek': 'kek'})
+    formatter.get_formatted_string({'lol': 'lol', 'kek': 'kek'})
     assert first_id == id(formatter.FIELD_HANDLERS)
     # Проверяем, что новые атрибуты создались у экземпляра, а не у класса.
     # Для этого создаем новый экземпляр и проверяем, что их там снова нет.
@@ -67,10 +69,7 @@ def test_get_base_field_handlers_parameters():
         assert name in handlers
         handler = handlers[name]
         assert callable(handler)
-        signature = Signature.from_callable(handler)
-        parameters = list(signature.parameters.values())
-        assert len(parameters) == 1
-        assert parameters[0].kind == parameters[0].VAR_KEYWORD
+        assert SignatureMatcher.is_handler(handler)
 
 def test_get_base_field_handlers_calls():
     """
@@ -103,11 +102,11 @@ def test_get_base_field_handlers_calls():
             for item in data_items:
                 test_data = {name: item}
                 if item is None:
-                    assert handler(**test_data) is None or isinstance(handler(**test_data), str)
+                    assert handler(test_data) is None or isinstance(handler(test_data), str)
                 else:
-                    assert isinstance(handler(**test_data), str)
+                    assert isinstance(handler(test_data), str)
         elif isinstance(data_items, dict):
-            assert isinstance(handler(**data_items), str)
+            assert isinstance(handler(data_items), str)
 
 def test_format():
     """
@@ -124,7 +123,7 @@ def test_width_and_align():
     Также проверяем, что поля, для которых специальных норм нет, не затрагиваются.
     """
     formatter = BaseFormatter('\n')
-    formatter.get_formatted_string((1, 2), **{'lol': 'lol', 'kek': 'kek'})
+    formatter.get_formatted_string({'lol': 'lol', 'kek': 'kek'})
     norms = formatter.ALIGN_NORMS
     data = {
         'level': '_',

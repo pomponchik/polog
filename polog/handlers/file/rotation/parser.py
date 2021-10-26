@@ -16,11 +16,8 @@ class Parser:
         result = []
         splitted_rules = self.split_source(rules)
         for source in splitted_rules:
-            try:
-                rule = self.elector.choose(source)
-                result.append(rule)
-            except Exception as e:
-                raise e
+            rule = self.elector.choose(source)
+            result.append(rule)
         return result
 
     def split_source(self, source):

@@ -1,6 +1,8 @@
 import time
 import json
+
 import pytest
+
 from polog import handle_log as log, json_vars, field, config
 
 
@@ -97,9 +99,10 @@ def test_another_field(handler):
     Проверяем, что регистрируются пользовательские поля.
     """
     handler.clean()
-    def extractor(a, **b):
+    def extractor(log_item):
         pass
     config.add_fields(lolkek=field(extractor))
+
     log('kek', lolkek='lol')
     time.sleep(0.0001)
     assert handler.last['lolkek'] == 'lol'
@@ -151,3 +154,14 @@ def test_extract_function_data_wrong_function_object():
     log._extract_function_data(data)
     assert isinstance(data['function'], str)
     assert 'module' not in data['function']
+
+def test_filter_logs_by_level(handler):
+    """
+    Проверяем, что лог уровнем ниже установленного не записывается.
+    """
+    handler.clean()
+    config.set(level=5)
+
+    log('kek', level=1)
+    time.sleep(0.0001)
+    assert handler.last is None

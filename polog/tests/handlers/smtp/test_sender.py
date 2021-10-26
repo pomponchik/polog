@@ -1,5 +1,7 @@
 import time
+
 import pytest
+
 from polog.handlers.smtp.sender import SMTP_sender
 from polog import handle_log as log, config
 
@@ -14,26 +16,33 @@ class DependencyWrapper:
         lst.append(message)
 
 sender = SMTP_sender('fff', 'fff', 'fff', 'fff', smtp_wrapper=DependencyWrapper)
-config.add_handlers(sender)
 
 
 def test_send_normal():
     """
     Проверяем, что что-то проходит через обработчик в DependencyWrapper.
     """
+    config.add_handlers(sender)
+
     log('hello')
     time.sleep(0.0001)
     assert lst[0]
     lst.pop()
 
+    config.delete_handlers(sender)
+
 def test_send_error():
     """
     Проверка, что при исключении тоже что-то приходит в обработчик.
     """
+    config.add_handlers(test_send_error=sender)
+
     log('hello', exception=ValueError())
     time.sleep(0.0001)
     assert lst[0]
     lst.pop()
+
+    config.delete_handlers(sender)
 
 def test_repr():
     """

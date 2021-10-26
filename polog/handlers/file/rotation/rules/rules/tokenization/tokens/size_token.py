@@ -41,7 +41,8 @@ class SizeToken(AbstractToken):
             return self.short_sizes[self.source]
         elif self.source in self.full_sizes:
             return self.full_sizes[self.source]
-        return self.full_sizes[f'{self.source}s']
+        if self.source.endswith('s'):
+            return self.full_sizes[self.source[:-1]]
 
     @classmethod
     def get_all_keys(cls):

@@ -1,21 +1,14 @@
 import pytest
-from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError
+
+from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError, DoubleSettingError, AfterStartSettingError, RewritingLogError
 
 
-def test_errors_logged():
-    """
-    Проверяем, что исключение поднимается.
-    """
-    try:
-        raise LoggedError
-    except LoggedError:
-        pass
+errors = [LoggedError, IncorrectUseOfTheDecoratorError, DoubleSettingError, AfterStartSettingError, RewritingLogError]
 
-def test_errors_incorrect_use():
+def test_multiraise():
     """
-    Проверяем, что исключение поднимается.
+    Проверяем, что исключения поднимаются.
     """
-    try:
-        raise IncorrectUseOfTheDecoratorError
-    except IncorrectUseOfTheDecoratorError:
-        pass
+    for error in errors:
+        with pytest.raises(error):
+            raise error

@@ -1,6 +1,7 @@
 import os
 import datetime
 from threading import Lock
+
 from polog.handlers.file.rotation.parser import Parser
 
 
@@ -15,11 +16,14 @@ class Rotator:
     """
 
     def __init__(self, source_string, file, parser=Parser):
+        if source_string and file.filename is None:
+            raise ValueError('Rotation is not possible when logs are not output to a file.')
         self.file = file
         self.parser = parser(self.file)
         self.source_rules = self.extract_rules_string_from_source(source_string)
         self.to = self.where_to_rotate(source_string)
         self.rules = self.generate_rules(self.source_rules)
+        self.lock = Lock()
 
     def maybe_do(self):
         """
@@ -27,7 +31,7 @@ class Rotator:
         """
         # Лок для защиты от состояния гонки, т. к. необходимость ротации могут одновременно проверять несколько потоков.
         # Если не защитить, ротация может дублироваться из разных потоков.
-        with Lock():
+        with self.lock:
             if self.to_do_or_not_to_do():
                 self.do()
 
@@ -116,11 +120,9 @@ class Rotator:
     def new_filename(self):
         """
         Создаем новое имя файла при ротации.
-        Оно основано на имени базового скрипта (со сменой расширения на .log) и текущем времени / дате.
+        Оно основано на текущем времени / дате.
         """
-        base_filename = os.path.basename(__file__)
-        base_filename = base_filename.split('.')[0]
         stamp = str(datetime.datetime.now())
         stamp = stamp.replace(' ', '_')
-        result = f'{base_filename}_{stamp}.logs'
+        result = f'{stamp}.logs'
         return result
