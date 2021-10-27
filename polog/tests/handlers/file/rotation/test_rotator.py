@@ -51,4 +51,4 @@ def test_wrong_rule_to_rotation():
     Проверяем, что для неформатных правил ротации поднимается ValueError.
     """
     with pytest.raises(ValueError):
-        rotator = Rotator(f'lol >> kek', FileDependencyWrapper(()))
+        rotator = Rotator(f'lol >> kek', FileDependencyWrapper((), lock_type='thread+file'))
