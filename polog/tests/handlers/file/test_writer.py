@@ -10,7 +10,7 @@ import pytest
 from polog import log, config
 from polog.handlers.file.writer import file_writer
 
-TIMEOUT = 2
+TIMEOUT = 3
 
 
 def test_base_writer(number_of_strings_in_the_files, delete_files):
