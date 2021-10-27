@@ -3,7 +3,7 @@ import sys
 import shutil
 import pathlib
 
-from polog.handlers.file.file_lock import FileLock
+from polog.handlers.file.locks.double_lock import DoubleLock
 
 
 class FileDependencyWrapper:
@@ -22,7 +22,7 @@ class FileDependencyWrapper:
         file - список с аргументами от пользователя. Он валиден, если пуст, либо содержит 1 элемент - файловый объект или строку с путем к файлу.
         """
         self.file, self.filename = self.get_file_object(file)
-        self.lock = FileLock(self.filename, lock_type)
+        self.lock = DoubleLock(self.filename, lock_type)
 
     def is_file_object(self, file):
         """
