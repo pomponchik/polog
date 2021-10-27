@@ -33,7 +33,7 @@ def test_base_behavior_rotation_file_size(size_limit, message, iterations, numbe
     for iteration in range(iterations):
         log(message)
 
-    rotator = Rotator(f'{size_limit} >> {dirname_for_test}', FileDependencyWrapper([filename_for_test]), lock_type='thread+file')
+    rotator = Rotator(f'{size_limit} >> {dirname_for_test}', FileDependencyWrapper([filename_for_test], lock_type='thread+file'))
     rotator.maybe_do()
 
     assert len(os.listdir(dirname_for_test)) == 1
