@@ -10,6 +10,8 @@ import pytest
 from polog import log, config
 from polog.handlers.file.writer import file_writer
 
+TIMEOUT = 2
+
 
 def test_base_writer(number_of_strings_in_the_files, delete_files):
     """
@@ -94,7 +96,7 @@ def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test
 
     expected_number_of_logs = number_of_logs_per_thread * number_of_threads
 
-    time.sleep(1.5)
+    time.sleep(TIMEOUT)
 
     files = [filename_for_test]
 
@@ -114,7 +116,7 @@ def create_logs_for_process(process_index, number_of_logs, filename_for_test, di
         message = f'{process_index} {index}'
         log(message)
 
-    time.sleep(timeout)
+    time.sleep(TIMEOUT)
 
 def test_multiprocessing_concurrent_write(number_of_strings_in_the_files, filename_for_test, dirname_for_test):
     """
@@ -122,7 +124,6 @@ def test_multiprocessing_concurrent_write(number_of_strings_in_the_files, filena
     """
     number_of_logs_per_process = 2000
     number_of_processes = 20
-    timeout = 1.5
 
     processes = [Process(target=create_logs_for_process, args=(index, number_of_logs_per_process, filename_for_test, dirname_for_test, timeout)) for index in range(number_of_processes)]
     for process in processes:
