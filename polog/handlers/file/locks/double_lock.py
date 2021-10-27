@@ -30,7 +30,7 @@ class DoubleLock:
         if not isinstance(lock_type, str):
             raise ValueError('A set of lock types can only be specified as a string, using the "+" sign as a connector. Example: "thread+file".')
 
-        allowed_types = set('file', 'thread')
+        allowed_types = set(('file', 'thread'))
         maybe_types = {x for x in lock_type.split('+') if x}
         for maybe_type in maybe_types:
             if maybe_type not in allowed_types:
