@@ -70,10 +70,13 @@ def number_of_strings_in_the_files():
     def result(*paths):
         result = 0
         for path in paths:
-            with open(path, 'r') as file:
-                for line in file:
-                    if line:
-                        result += 1
+            try:
+                with open(path, 'r') as file:
+                    for line in file:
+                        if line:
+                            result += 1
+            except FileNotFoundError:
+                pass
         return result
     return result
 
@@ -96,4 +99,4 @@ def dirname_for_test(delete_files):
     shutil.rmtree(path, ignore_errors=True)
     os.mkdir(path)
     yield path
-    #shutil.rmtree(path, ignore_errors=True)
+    shutil.rmtree(path, ignore_errors=True)
