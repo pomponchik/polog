@@ -12,6 +12,7 @@ class RulesElector:
     def choose(self, source):
         """
         Берем строку source и скармливаем ее в конструкторы классов, перечисленных в self.rules.
+        
         Если конкретное правило не узнает себя в переданной строке, метод .prove_source() у него вернет False и мы переходим к следующему правилу.
         Если ни одно из правил себя не узнало, поднимется исключение. Это значит, что форматирование исходной строки некорректно.
         """
@@ -22,4 +23,4 @@ class RulesElector:
                     return rule
             except Exception as e:
                 raise e
-        raise ValueError(f'The rule "{source}" is formatted incorrectly. Read the documentstion.')
+        raise ValueError(f'The rule "{source}" is formatted incorrectly. Read the documentation.')
