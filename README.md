@@ -959,7 +959,7 @@ config.add_handlers(file_writer('file.log', rotation='200 megabytes >> archive')
 
 ```python
 '200 megabytes'
-'5 megabytes'
+'1 gigabyte'
 '5 gb'
 ```
 
