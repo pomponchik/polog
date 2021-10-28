@@ -19,5 +19,8 @@ def test_less_or_equal_than_zero_multiplier_in_file_size(filename_for_test):
     assert FileSizeRule('0 mb', None).prove_source() == False
 
 def test_check_file_size():
+    """
+    Проверяем, что проверка размера файла проходит корректно.
+    """
     assert FileSizeRule('12 mb', FileDependencyWrapperMock(12 * 1024 * 1024)).check() == True
     assert FileSizeRule('12 mb', FileDependencyWrapperMock(12 * 1024 * 1024 + 1)).check() == False
