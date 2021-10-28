@@ -7,8 +7,11 @@ class FileSizeRule(AbstractRule):
     Правило для ротации логов в зависимости от размера файла, куда они пишутся.
     """
     def prove_source(self):
-        result = self.tokens.check_regexp('ns')
-        return result
+        if not self.tokens.check_regexp('ns'):
+            return False
+        if self.tokens['n'][0].content <= 0:
+            return False
+        return True
 
     def check(self):
         file_wrapper = self.file
