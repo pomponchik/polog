@@ -1,7 +1,9 @@
 import fcntl
 
+from polog.handlers.file.locks.abstract_single_lock import AbstractSingleLock
 
-class FileLock:
+
+class FileLock(AbstractSingleLock):
     """
     Реализация файловой блокировки (см. https://en.wikipedia.org/wiki/File_locking).
 
@@ -12,9 +14,14 @@ class FileLock:
     Для файловой блокировки создается отдельный специальный файл с расширением .lock. Это необходимо, поскольку сам файл с логами ненадежен - его отдельные процессы могут перемещать или удалять.
     """
     def __init__(self, original_file_name, lock_file_extension='lock'):
+        """
+        Инициализация блокировки.
+        
+        original_file_name - имя файла, куда идет запись логов, и который мы хотим защитить локом. Если передать вместо него None, блокировка включена не будет.
+        lock_file_extension - расширение файла блокировки. Для реализации блокировки будет создан еще один файл, имя которого образовано из имени оригинального файла + нового расширения.
+        """
         if not original_file_name:
-            self.acquire = self.empty_acquire
-            self.release = self.empty_release
+            self.off()
         else:
             self.filename = f'{original_file_name}.{lock_file_extension}'
             self.file = open(self.filename, 'w')
@@ -30,15 +37,3 @@ class FileLock:
         Отпустить лок.
         """
         fcntl.flock(self.file.fileno(), fcntl.LOCK_UN)
-
-    def empty_acquire(self):
-        """
-        Сделать вид, что взял лок.
-        """
-        pass
-
-    def empty_release(self):
-        """
-        Сделать вид, что отпустил лок.
-        """
-        pass

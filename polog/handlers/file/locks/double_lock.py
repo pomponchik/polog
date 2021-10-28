@@ -14,6 +14,7 @@ class DoubleLock:
         self.types = self.get_lock_types(lock_type)
         self.thread_lock = self.get_thread_lock()
         self.file_lock = self.get_file_lock(filename, lock_file_extension)
+        self.active = bool(self.thread_lock.active + self.file_lock.active)
 
     def __enter__(self):
         """
@@ -29,21 +30,33 @@ class DoubleLock:
         self.thread_lock.release()
         self.file_lock.release()
 
-    def get_lock_types(self, lock_type):
+    @staticmethod
+    def get_lock_types(lock_type):
         """
         Получить коллекцию строк - видов локов, которые нужно включить.
         """
-        if not lock_type:
-            return ()
+        if lock_type is None:
+            return []
         if not isinstance(lock_type, str):
             raise ValueError('A set of lock types can only be specified as a string, using the "+" sign as a connector. Example: "thread+file".')
+        if not lock_type.strip():
+            raise ValueError('You did not specify any locks, but you did not pass None.')
 
-        allowed_types = set(('file', 'thread'))
-        maybe_types = {x for x in lock_type.split('+') if x}
+        allowed_types = ('file', 'thread')
+        maybe_types = [x.strip() for x in lock_type.split('+') if x.strip()]
+
+        result = []
+        previously_seen = set()
         for maybe_type in maybe_types:
             if maybe_type not in allowed_types:
                 raise ValueError(f'{len(allowed_types)} types of blocking are allowed: {", ".join([x for x in allowed_types])}. You passed "{maybe_type}".')
-        return allowed_types
+            if maybe_type in previously_seen:
+                raise ValueError(f'You have specified a type of lock "{maybe_type}" more than once. Did you mean another blocking?')
+            result.append(maybe_type)
+            previously_seen.add(maybe_type)
+
+        result.sort()
+        return result
 
     def get_thread_lock(self):
         """

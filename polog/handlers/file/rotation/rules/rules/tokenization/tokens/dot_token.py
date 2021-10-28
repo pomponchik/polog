@@ -19,4 +19,4 @@ class DotToken(AbstractToken):
         """
         По сути этот метод не имеет никакого смысла. Переопределен просто чтобы было.
         """
-        return '.'
+        return self.source

@@ -27,6 +27,7 @@ def test_base_behavior_rotation_file_size(size_limit, message, iterations, numbe
     3. После ротации в исходном файле - 0 строк.
     """
     handler = file_writer(filename_for_test)
+    dirname_for_test = os.path.join(dirname_for_test, 'rotation_dir')
     config.add_handlers(handler)
     config.set(pool_size=0)
 
@@ -36,7 +37,7 @@ def test_base_behavior_rotation_file_size(size_limit, message, iterations, numbe
     rotator = Rotator(f'{size_limit} >> {dirname_for_test}', FileDependencyWrapper([filename_for_test], lock_type='thread+file'))
     rotator.maybe_do()
 
-    assert len(os.listdir(dirname_for_test)) == 1
+    assert len([x for x in os.listdir(dirname_for_test) if not x.endswith('.lock')]) == 1
 
     archive_file = os.listdir(dirname_for_test)[0]
     archive_file = os.path.join(dirname_for_test, archive_file)

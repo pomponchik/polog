@@ -98,7 +98,7 @@ def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test
 
     time.sleep(TIMEOUT)
 
-    files = [filename_for_test]
+    files = []
 
     for filename in os.listdir(dirname_for_test):
         files.append(os.path.join(dirname_for_test, filename))
@@ -108,6 +108,11 @@ def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test
     config.delete_handlers(handler)
 
 def create_logs_for_process(process_index, number_of_logs, filename_for_test, dirname_for_test):
+    """
+    Функция предназначена для запуска в отдельном процессе.
+
+    Она записывает в файл filename_for_test number_of_logs строчек лога.
+    """
     config.set(pool_size=2, level=1)
     handler = file_writer(filename_for_test, rotation=f'3 kb >> {dirname_for_test}')
     config.add_handlers(handler)
@@ -133,7 +138,7 @@ def test_multiprocessing_concurrent_write(number_of_strings_in_the_files, filena
 
     expected_number_of_logs = number_of_logs_per_process * number_of_processes
 
-    files = [filename_for_test]
+    files = []
 
     for filename in os.listdir(dirname_for_test):
         files.append(os.path.join(dirname_for_test, filename))

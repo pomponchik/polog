@@ -1,7 +1,9 @@
 from threading import Lock
 
+from polog.handlers.file.locks.abstract_single_lock import AbstractSingleLock
 
-class ThreadLock:
+
+class ThreadLock(AbstractSingleLock):
     """
     Обертка вокруг обычного тред-лока (см. https://en.wikipedia.org/wiki/Lock_(computer_science)).
 
@@ -9,8 +11,7 @@ class ThreadLock:
     """
     def __init__(self, on=True):
         if not on:
-            self.acquire = self.empty_acquire
-            self.release = self.empty_release
+            self.off()
         else:
             self.lock = Lock()
 
@@ -25,15 +26,3 @@ class ThreadLock:
         Отпустить лок.
         """
         self.lock.release()
-
-    def empty_acquire(self):
-        """
-        Сделать вид, что взял лок.
-        """
-        pass
-
-    def empty_release(self):
-        """
-        Сделать вид, что отпустил лок.
-        """
-        pass

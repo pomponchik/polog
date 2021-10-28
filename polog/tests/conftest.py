@@ -77,26 +77,27 @@ def number_of_strings_in_the_files():
                             result += 1
             except FileNotFoundError:
                 pass
+            except IsADirectoryError:
+                pass
         return result
     return result
 
 @pytest.fixture
-def filename_for_test(delete_files):
+def filename_for_test(dirname_for_test):
     """
     Получаем имя файла в тестовой директории и удаляем за собой файл.
     """
-    filename = f'polog/tests/data/data_{uuid.uuid1().hex}.log'
-    delete_files(filename)
-    yield filename
-    delete_files(filename)
+    yield os.path.join(dirname_for_test, f'data_{uuid.uuid1().hex}.log')
 
 @pytest.fixture
 def dirname_for_test(delete_files):
     """
     Получаем имя файла в тестовой директории и удаляем за собой файл.
     """
-    path = f'polog/tests/data/test_dir'
+    path = f'polog/tests/data/'
     shutil.rmtree(path, ignore_errors=True)
     os.mkdir(path)
     yield path
     shutil.rmtree(path, ignore_errors=True)
+    os.mkdir(path)
+    open(os.path.join(path, '.gitkeep'), 'w').close()
