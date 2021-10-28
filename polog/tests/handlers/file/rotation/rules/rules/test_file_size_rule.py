@@ -23,4 +23,4 @@ def test_check_file_size():
     Проверяем, что проверка размера файла проходит корректно.
     """
     assert FileSizeRule('12 mb', FileDependencyWrapperMock(12 * 1024 * 1024)).check() == True
-    assert FileSizeRule('12 mb', FileDependencyWrapperMock(12 * 1024 * 1024 + 1)).check() == False
+    assert FileSizeRule('12 mb', FileDependencyWrapperMock(12 * 1024 * 1024 - 1)).check() == False
