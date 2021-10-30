@@ -5,7 +5,7 @@ class DotToken(AbstractToken):
     """
     Токен "по умолчанию". Любая строка может представляет токен данного типа, если только она не представляет токен какого-то другого типа.
     """
-    regexp_letter = '.'
+    regexp_letter = 'd'
 
     @classmethod
     def its_me(cls, chunk):
