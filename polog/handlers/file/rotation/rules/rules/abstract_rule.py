@@ -23,8 +23,7 @@ class AbstractRule:
 
     def __repr__(self):
         type_name = type(self).__name__
-        source = self.source
-        result = f'{type_name}("{source}")'
+        result = f'{type_name}("{self.source}")'
         return result
 
     def get_tokens(self, source):
