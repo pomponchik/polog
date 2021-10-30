@@ -18,7 +18,8 @@ class AbstractRule:
         self.source = source
         self.file = file
         self.tokens = self.get_tokens(source)
-        self.extract_data_from_string()
+        if self.prove_source():
+            self.extract_data_from_string()
 
     def __repr__(self):
         type_name = type(self).__name__
@@ -27,17 +28,19 @@ class AbstractRule:
         return result
 
     def get_tokens(self, source):
+        """
+        Получаем группу токенов.
+        """
         tokens = Tokenizator(source).generate_tokens()
         return tokens
 
-    def extract_data_from_string(self, source):
+    def extract_data_from_string(self):
         """
         Эта функция не должна ничего возвращать, она сохраняет извлеченные из исходной строки данные в объект класса сама.
         """
         raise NotImplementedError
 
-    @classmethod
-    def prove_source(cls, source):
+    def prove_source(self):
         """
         Здесь мы проверяем, что исходная строка в нужном нам формате, то есть описывает тот тип правил, который обрабатывается конкретным наследником данного класса.
         """

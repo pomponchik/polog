@@ -96,8 +96,8 @@ def dirname_for_test(delete_files):
     """
     path = f'polog/tests/data/'
     shutil.rmtree(path, ignore_errors=True)
-    os.mkdir(path)
+    os.makedirs(path)
     yield path
     shutil.rmtree(path, ignore_errors=True)
-    os.mkdir(path)
+    os.makedirs(path)
     open(os.path.join(path, '.gitkeep'), 'w').close()

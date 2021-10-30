@@ -31,7 +31,7 @@ def test_raise_errors_in_metatoken():
         class TestToken(metaclass=MetaToken):
             regexp_letter = True
 
-    for letter in 'ns.':
+    for letter in 'nsd':
         with pytest.raises(AttributeError):
             class TestToken(metaclass=MetaToken):
                 regexp_letter = letter
