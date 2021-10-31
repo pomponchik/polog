@@ -21,7 +21,7 @@ class file_writer(BaseHandler):
         'rotation': lambda x: x is None or isinstance(x, str),
     }
 
-    def __init__(self, *file, formatter=None, rotation=None, forced_flush=True, separator='\n', only_errors=False, filter=None, alt=None, file_wrapper=FileDependencyWrapper, base_formatter=BaseFormatter, rotator=Rotator, lock_type='thread+file'):
+    def __init__(self, *file, formatter=None, rotation=None, forced_flush=True, separator='\n', only_errors=False, filter=None, alt=None, file_wrapper=FileDependencyWrapper, base_formatter=BaseFormatter, rotator=Rotator, lock_type='thread'):
         super().__init__(only_errors=only_errors, filter=filter, alt=alt)
         self.do_input_proves(forced_flush=forced_flush, separator=separator, formatter=formatter, rotation=rotation)
         self.file = file_wrapper([x for x in file], lock_type)
