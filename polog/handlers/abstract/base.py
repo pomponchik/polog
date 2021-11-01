@@ -53,7 +53,7 @@ class BaseHandler:
         """
         if type(self.only_errors) is bool:
             if self.only_errors == True:
-                success = log.get('success')
+                success = log.get('success', True)
                 if success:
                     return False
         if callable(self.filter):

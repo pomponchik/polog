@@ -155,15 +155,43 @@ def test_alt_function(filename_for_test, number_of_strings_in_the_files, handler
     """
     file_handler = file_writer(filename_for_test, only_errors=True, alt=handler)
     config.set(pool_size=0, level=1)
+    config.delete_handlers(handler)
     config.add_handlers(file_handler)
     handler.clean()
 
     log('kek')
-
     assert handler.last is not None
+    handler.clean()
 
+    log('kek', success=True)
+    assert handler.last is not None
     handler.clean()
 
     log('kek', success=False)
-
     assert handler.last is None
+    handler.clean()
+
+    config.delete_handlers(file_handler)
+
+    class FakeFileWrapper:
+        def __init__(self, file, lock_type):
+            pass
+        def write(self, data):
+            raise ValueError
+
+    file_handler = file_writer(filename_for_test, alt=handler, file_wrapper=FakeFileWrapper)
+    config.add_handlers(file_handler)
+
+    log('kek')
+    assert handler.last is not None
+    handler.clean()
+
+    config.delete_handlers(file_handler)
+
+    file_handler = file_writer(filename_for_test, alt=handler)
+    config.add_handlers(file_handler)
+
+    log('kek')
+    assert handler.last is None
+
+    handler.clean()
