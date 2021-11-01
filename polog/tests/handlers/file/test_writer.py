@@ -145,7 +145,7 @@ def test_multiprocessing_concurrent_write(number_of_strings_in_the_files, filena
 
     assert number_of_strings_in_the_files(*files) == expected_number_of_logs
 
-def test_alt_function(filename_for_test, number_of_strings_in_the_files, handler):
+def test_alt_function_for_file_writer(filename_for_test, number_of_strings_in_the_files, handler):
     """
     Проверяем, что вызов альтернативной функции работает корректно.
 
