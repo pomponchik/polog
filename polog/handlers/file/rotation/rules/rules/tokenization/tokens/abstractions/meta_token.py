@@ -26,11 +26,14 @@ class MetaToken(type):
         3. Иметь длину в 1 символ.
         4. Не быть одним из зарезервированных для синтаксиса токенизатора символов.
         5. Не повторяться у двух разных классов.
+        6. Не быть определенным у абстрактного класса.
 
         При несоблюдении любого из этих правил, поднимется исключение.
         """
         x = super().__new__(cls, name, bases, dct)
         if x.__name__ == 'AbstractToken':
+            if hasattr(x, 'regexp_letter') and getattr(x, 'regexp_letter') is not None:
+                raise AttributeError('The "regexp_letter" attribute should not be defined for the abstract token class.')
             return x
         if not hasattr(x, 'regexp_letter') or type(x.regexp_letter) is not str or len(x.regexp_letter) != 1 or x.regexp_letter in cls.forbidden_regexp_letters:
             raise AttributeError(f'The attribute "regexp_letter" of the class {x.__name__} must be a string of the lenth == 1, not "*" and not ".". When inheriting from an abstract class, you should correctly override this parameter. These conditions are automatically checked in the metaclass.')

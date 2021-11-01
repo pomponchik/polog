@@ -1,14 +1,19 @@
 import io
+import os
 import sys
 import time
+from threading import Thread, get_ident
+from multiprocessing import Process
 
 import pytest
 
 from polog import log, config
 from polog.handlers.file.writer import file_writer
 
+TIMEOUT = 3
 
-def test_base_writer(number_of_strings_in_the_file, delete_files):
+
+def test_base_writer(number_of_strings_in_the_files, delete_files):
     """
     Базовый сценарий - запись логов в файл.
 
@@ -23,7 +28,7 @@ def test_base_writer(number_of_strings_in_the_file, delete_files):
     for iteration in range(iterations):
         log('kek')
 
-    assert number_of_strings_in_the_file(path) == iterations
+    assert number_of_strings_in_the_files(path) == iterations
 
     config.delete_handlers(handler)
     delete_files(path)
@@ -64,3 +69,177 @@ def test_parameter_is_not_string_and_not_file_object(delete_files):
     with pytest.raises(ValueError):
         file_writer(777)
     delete_files(path)
+
+def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test, dirname_for_test):
+    """
+    Запускаем много логов в нескольких потоках и проверяем, что они все успевают записаться в файл, и при этом в ничего не было потеряно при ротациях.
+    """
+    number_of_logs_per_thread = 2000
+    number_of_threads = 20
+
+    config.set(pool_size=20, level=1)
+
+    handler = file_writer(filename_for_test, rotation=f'3 kb >> {dirname_for_test}')
+    config.add_handlers(handler)
+
+    def create_a_lot_of_logs(number_of_logs):
+        thread_name = get_ident()
+        for index in range(number_of_logs):
+            message = f'{thread_name} {index}'
+            log(message)
+
+    threads = [Thread(target=create_a_lot_of_logs, args=(number_of_logs_per_thread,)) for x in range(number_of_threads)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    expected_number_of_logs = number_of_logs_per_thread * number_of_threads
+
+    time.sleep(TIMEOUT)
+
+    files = []
+
+    for filename in os.listdir(dirname_for_test):
+        files.append(os.path.join(dirname_for_test, filename))
+
+    assert number_of_strings_in_the_files(*files) == expected_number_of_logs
+
+    config.delete_handlers(handler)
+
+def create_logs_for_process(process_index, number_of_logs, filename_for_test, dirname_for_test):
+    """
+    Функция предназначена для запуска в отдельном процессе.
+
+    Она записывает в файл filename_for_test number_of_logs строчек лога.
+    """
+    config.set(pool_size=2, level=1)
+    handler = file_writer(filename_for_test, rotation=f'3 kb >> {dirname_for_test}', lock_type='file+thread')
+    config.add_handlers(handler)
+
+    for index in range(number_of_logs):
+        message = f'{process_index} {index}'
+        log(message)
+
+    time.sleep(TIMEOUT)
+
+def test_multiprocessing_concurrent_write(number_of_strings_in_the_files, filename_for_test, dirname_for_test):
+    """
+    Запускаем много логов в нескольких процессах и проверяем, что они все успевают записаться в файл, и при этом в ничего не было потеряно при ротациях.
+    """
+    number_of_logs_per_process = 2000
+    number_of_processes = 20
+
+    processes = [Process(target=create_logs_for_process, args=(index, number_of_logs_per_process, filename_for_test, dirname_for_test)) for index in range(number_of_processes)]
+    for process in processes:
+        process.start()
+    for process in processes:
+        process.join()
+
+    expected_number_of_logs = number_of_logs_per_process * number_of_processes
+
+    files = []
+
+    for filename in os.listdir(dirname_for_test):
+        files.append(os.path.join(dirname_for_test, filename))
+
+    assert number_of_strings_in_the_files(*files) == expected_number_of_logs
+
+def test_alt_function_for_file_writer(filename_for_test, number_of_strings_in_the_files, handler):
+    """
+    Проверяем, что вызов альтернативной функции работает корректно.
+
+    Это должно происходить в двух случаях:
+    1. В случае, если запись лога запрещена фильтрами.
+    2. Если лог записать по какой-то причине не удалось (то есть в процессе записи поднялось любое исключение).
+    """
+    file_handler = file_writer(filename_for_test, only_errors=True, alt=handler)
+    config.set(pool_size=0, level=1)
+    config.delete_handlers(handler)
+    config.add_handlers(file_handler)
+    handler.clean()
+
+    log('kek')
+    assert handler.last is not None
+    handler.clean()
+
+    log('kek', success=True)
+    assert handler.last is not None
+    handler.clean()
+
+    log('kek', success=False)
+    assert handler.last is None
+    handler.clean()
+
+    config.delete_handlers(file_handler)
+
+    class FakeFileWrapper:
+        def __init__(self, file, lock_type):
+            pass
+        def write(self, data):
+            raise ValueError
+
+    file_handler = file_writer(filename_for_test, alt=handler, file_wrapper=FakeFileWrapper)
+    config.add_handlers(file_handler)
+
+    log('kek')
+    assert handler.last is not None
+    handler.clean()
+
+    config.delete_handlers(file_handler)
+
+    file_handler = file_writer(filename_for_test, alt=handler)
+    config.add_handlers(file_handler)
+
+    log('kek')
+    assert handler.last is None
+
+    handler.clean()
+
+def test_filter_function_for_file_handler(filename_for_test, number_of_strings_in_the_files):
+    """
+    Проверяем, что фильтр работает.
+    """
+    file_handler = file_writer(filename_for_test, filter=lambda x: True)
+    config.add_handlers(file_handler)
+    config.set(pool_size=0, level=1)
+
+    log('kek')
+
+    assert number_of_strings_in_the_files(filename_for_test) == 1
+
+    config.delete_handlers(file_handler)
+    file_handler = file_writer(filename_for_test, filter=lambda x: False)
+    config.add_handlers(file_handler)
+
+    log('kek')
+
+    assert number_of_strings_in_the_files(filename_for_test) == 1
+
+def test_only_errors_for_file_handler(filename_for_test, number_of_strings_in_the_files):
+    """
+    Проверяем, что базовый фильтр, отсекающий не-ошибки, работает.
+    """
+    file_handler = file_writer(filename_for_test, only_errors=True)
+    config.add_handlers(file_handler)
+    config.set(pool_size=0, level=1)
+
+    log('kek')
+
+    assert number_of_strings_in_the_files(filename_for_test) == 0
+
+    log('kek', success=False)
+
+    assert number_of_strings_in_the_files(filename_for_test) == 1
+
+    config.delete_handlers(file_handler)
+    file_handler = file_writer(filename_for_test, only_errors=False)
+    config.add_handlers(file_handler)
+
+    log('kek')
+
+    assert number_of_strings_in_the_files(filename_for_test) == 2
+
+    log('kek', success=False)
+
+    assert number_of_strings_in_the_files(filename_for_test) == 3

@@ -12,5 +12,7 @@ dist
 build
 .pytest_cache
 *.log
+*.logs
 .coverage
 htmlcov
+*.lock

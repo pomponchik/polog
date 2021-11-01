@@ -3,13 +3,15 @@ import sys
 import shutil
 import pathlib
 
+from polog.handlers.file.locks.double_lock import DoubleLock
+
 
 class FileDependencyWrapper:
     """
     Обертка для системных функций по работе с файлами.
     """
 
-    def __init__(self, file):
+    def __init__(self, file, lock_type):
         """
         На вход подается путь к файлу, файловый объект, либо ничего.
 
@@ -20,6 +22,7 @@ class FileDependencyWrapper:
         file - список с аргументами от пользователя. Он валиден, если пуст, либо содержит 1 элемент - файловый объект или строку с путем к файлу.
         """
         self.file, self.filename = self.get_file_object(file)
+        self.lock = DoubleLock(self.filename, lock_type)
 
     def is_file_object(self, file):
         """
@@ -64,7 +67,8 @@ class FileDependencyWrapper:
         """
         Запись строки в файл.
         """
-        self.file.write(log_string)
+        with self.lock:
+            self.file.write(log_string)
 
     def close(self):
         """
@@ -91,7 +95,8 @@ class FileDependencyWrapper:
         """
         Сброс буфера в файл.
         """
-        self.file.flush()
+        with self.lock:
+            self.file.flush()
 
     def get_size(self):
         """
@@ -106,14 +111,19 @@ class FileDependencyWrapper:
     def move_file(self, path_to_copy):
         """
         Перемещаем исходный файл в path_to_copy.
+
+        Перемещение файла - опасный процесс с точки зрения concurrency. Если его не защитить блокировками, возможна ситуация, когда, к примеру, один актор начал перемещать файл, уже скопировал его значение в новый, но старый еще не удалил, и в это время другой актор что-то записал в файл, после чего первый его удалил.
+        Для наших целей для обеспечения целостности записей требуется аж 2 вида блокировок:
+        1. Блокировка файла на уровне ОС. Делается, чтобы другие процессы / потоки, открывшие параллельно тот же файл, не могли тут ничего сломать, пока мы работаем с файлом.
+        2. Блокировка на уровне потока. Нужна, поскольку с одним обработчиком (читай - одним и тем же файловым объектом) могут параллельно работать воркеры из нескольких потоков.
         """
-        if self.filename is None:
-            raise ValueError('Copying is not possible, the name of the source file is unknown.')
-        try:
-            shutil.move(self.filename, path_to_copy)
-        except FileNotFoundError:
-            self.make_dirs_for_path(path_to_copy)
-            shutil.move(self.filename, path_to_copy)
+        with self.lock:
+            try:
+                shutil.move(self.filename, path_to_copy)
+            except FileNotFoundError:
+                self.make_dirs_for_path(path_to_copy)
+                shutil.move(self.filename, path_to_copy)
+            self.reopen()
 
     def make_dirs_for_path(self, path):
         """

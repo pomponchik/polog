@@ -5,7 +5,7 @@ class DotToken(AbstractToken):
     """
     Токен "по умолчанию". Любая строка может представляет токен данного типа, если только она не представляет токен какого-то другого типа.
     """
-    regexp_letter = '.'
+    regexp_letter = 'd'
 
     @classmethod
     def its_me(cls, chunk):
@@ -17,6 +17,6 @@ class DotToken(AbstractToken):
 
     def parse(self):
         """
-        По сути этот метод не имеет никакого смысла. Переопределен просто чтобы было.
+        Возвращаем исходную строку, чтобы работали сравнения токенов.
         """
-        return '.'
+        return self.source

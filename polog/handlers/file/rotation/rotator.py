@@ -1,6 +1,7 @@
 import os
 import datetime
 from threading import Lock
+from multiprocessing import current_process
 
 from polog.handlers.file.rotation.parser import Parser
 
@@ -50,7 +51,6 @@ class Rotator:
         В качестве нового имени файла используем название файла корневого скрипта, с измененным на .log расширением и суффиксом, отображающим текущую дату и время.
         """
         self.file.move_file(os.path.join(self.to, self.new_filename()))
-        self.file.reopen()
 
     def generate_rules(self, source_rules):
         """
@@ -122,7 +122,8 @@ class Rotator:
         Создаем новое имя файла при ротации.
         Оно основано на текущем времени / дате.
         """
-        stamp = str(datetime.datetime.now())
-        stamp = stamp.replace(' ', '_')
-        result = f'{stamp}.logs'
+        stamp = str(datetime.datetime.now()).replace(' ', '_')
+        process_id = current_process().pid
+
+        result = f'{stamp}_{process_id}.logs'
         return result

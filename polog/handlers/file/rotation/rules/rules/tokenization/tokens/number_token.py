@@ -6,7 +6,11 @@ class NumberToken(AbstractToken):
 
     @classmethod
     def its_me(cls, chunk):
-        return chunk.isdecimal()
+        try:
+            number = int(chunk)
+            return True
+        except Exception:
+            return False
 
     def parse(self):
         return int(self.source)

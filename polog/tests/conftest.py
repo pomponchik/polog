@@ -1,4 +1,6 @@
 import os
+import shutil
+import uuid
 
 import pytest
 
@@ -61,15 +63,41 @@ def delete_files():
     return result
 
 @pytest.fixture
-def number_of_strings_in_the_file():
+def number_of_strings_in_the_files():
     """
-    Функция, подсчитывающая не пустые строки в файле, путь к которому был передан в качестве аргумента.
+    Функция, подсчитывающая не пустые строки в файлах, пути к которым были переданы в качестве аргументов.
     """
-    def result(path):
+    def result(*paths):
         result = 0
-        with open(path, 'r') as file:
-            for line in file:
-                if line:
-                    result += 1
+        for path in paths:
+            try:
+                with open(path, 'r') as file:
+                    for line in file:
+                        if line:
+                            result += 1
+            except FileNotFoundError:
+                pass
+            except IsADirectoryError:
+                pass
         return result
     return result
+
+@pytest.fixture
+def filename_for_test(dirname_for_test):
+    """
+    Получаем имя файла в тестовой директории и удаляем за собой файл.
+    """
+    yield os.path.join(dirname_for_test, f'data_{uuid.uuid1().hex}.log')
+
+@pytest.fixture
+def dirname_for_test(delete_files):
+    """
+    Получаем имя файла в тестовой директории и удаляем за собой файл.
+    """
+    path = f'polog/tests/data/'
+    shutil.rmtree(path, ignore_errors=True)
+    os.makedirs(path)
+    yield path
+    shutil.rmtree(path, ignore_errors=True)
+    os.makedirs(path)
+    open(os.path.join(path, '.gitkeep'), 'w').close()

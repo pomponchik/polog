@@ -24,5 +24,5 @@ class Parser:
         """
         Делим строку по разделителю.
         """
-        result = [x.strip() for x in source.split(';')]
+        result = [x.strip() for x in source.replace(';', ',').split(',') if x.strip()]
         return result
