@@ -144,3 +144,27 @@ def test_multiprocessing_concurrent_write(number_of_strings_in_the_files, filena
         files.append(os.path.join(dirname_for_test, filename))
 
     assert number_of_strings_in_the_files(*files) == expected_number_of_logs
+
+def test_alt_function(filename_for_test, number_of_strings_in_the_files, handler):
+    """
+    Проверяем, что вызов альтернативной функции работает корректно.
+
+    Это должно происходить в двух случаях:
+    1. В случае, если запись лога запрещена фильтрами.
+    2. Если лог записать по какой-то причине не удалось (то есть в процессе записи поднялось любое исключение).
+    """
+    file_handler = file_writer(filename_for_test, only_errors=True, alt=handler)
+    config.set(pool_size=0, level=1)
+    config.add_handlers(file_handler)
+    handler.clean()
+
+    log('kek')
+
+    assert handler.last is not None
+
+    handler.clean()
+
+    log('kek', success=False)
+
+    print(handler.last)
+    assert handler.last is None
