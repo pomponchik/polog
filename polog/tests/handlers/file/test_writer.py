@@ -195,3 +195,21 @@ def test_alt_function_for_file_writer(filename_for_test, number_of_strings_in_th
     assert handler.last is None
 
     handler.clean()
+
+def test_filter_function_for_file_handler(filename_for_test, number_of_strings_in_the_files):
+    """
+    Проверяем, что фильтр работает.
+    """
+    file_handler = file_writer(filename_for_test, filter=lambda x: True)
+    config.add_handlers(file_handler)
+    config.set(pool_size=0, level=1)
+
+    log('kek')
+
+    assert number_of_strings_in_the_files(filename_for_test) == 1
+
+    config.delete_handlers(file_handler)
+    file_handler = file_writer(filename_for_test, filter=lambda x: False)
+    config.add_handlers(file_handler)
+
+    assert number_of_strings_in_the_files(filename_for_test) == 1
