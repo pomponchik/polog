@@ -166,5 +166,4 @@ def test_alt_function(filename_for_test, number_of_strings_in_the_files, handler
 
     log('kek', success=False)
 
-    print(handler.last)
     assert handler.last is None
