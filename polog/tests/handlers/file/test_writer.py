@@ -212,4 +212,31 @@ def test_filter_function_for_file_handler(filename_for_test, number_of_strings_i
     file_handler = file_writer(filename_for_test, filter=lambda x: False)
     config.add_handlers(file_handler)
 
+    log('kek')
+
     assert number_of_strings_in_the_files(filename_for_test) == 1
+
+def test_only_errors_for_file_handler(filename_for_test, number_of_strings_in_the_files):
+    file_handler = file_writer(filename_for_test, only_errors=True)
+    config.add_handlers(file_handler)
+    config.set(pool_size=0, level=1)
+
+    log('kek')
+
+    assert number_of_strings_in_the_files(filename_for_test) == 0
+
+    log('kek', success=False)
+
+    assert number_of_strings_in_the_files(filename_for_test) == 1
+
+    config.delete_handlers(file_handler)
+    file_handler = file_writer(filename_for_test, only_errors=False)
+    config.add_handlers(file_handler)
+
+    log('kek')
+
+    assert number_of_strings_in_the_files(filename_for_test) == 2
+
+    log('kek', success=False)
+
+    assert number_of_strings_in_the_files(filename_for_test) == 3
