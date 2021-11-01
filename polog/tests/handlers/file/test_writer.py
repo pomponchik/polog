@@ -217,6 +217,9 @@ def test_filter_function_for_file_handler(filename_for_test, number_of_strings_i
     assert number_of_strings_in_the_files(filename_for_test) == 1
 
 def test_only_errors_for_file_handler(filename_for_test, number_of_strings_in_the_files):
+    """
+    Проверяем, что базовый фильтр, отсекающий не-ошибки, работает.
+    """
     file_handler = file_writer(filename_for_test, only_errors=True)
     config.add_handlers(file_handler)
     config.set(pool_size=0, level=1)
