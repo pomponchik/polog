@@ -4,6 +4,7 @@ from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
 from polog.core.stores.handlers import global_handlers
 from polog.data_structures.trees.named_tree.projector import TreeProjector
+from polog.core.stores.fields import in_place_fields, engine_fields
 
 
 class config:
@@ -134,15 +135,26 @@ class config:
         """
         Добавляем кастомные "поля" логов.
 
+        Данные поля будут извлекаться в том же потоке, в котором собственно происходит логируемое событие. За счет этого возможно залогировать, к примеру, идентификатор потока, в котором произошло событие.
+
         Поле - это некоторый объект, имеющий метод .get_data() с той же сигнатурой, что у обработчиков (см. комментарий к методу .add_handlers() этого же класса). Он будет вызываться при каждом формировании лога, а результат его работы - передаваться обработчикам так же, как и все прочие поля.
 
         В данном случае поля передаются в виде именованных переменных, где имена переменных - это названия полей, а значения - сами функции.
         """
-        settings = SettingsStore()
         for key, value in fields.items():
             if not hasattr(value, 'get_data') or not SignatureMatcher.is_handler(value.get_data):
-                raise ValueError('The signature of the field handler must be the same as that of other Polog handlers.')
-            settings.extra_fields[key] = value
+                raise ValueError('The field handler must have a method .get_data() with the signature that is standard for Polog handlers.')
+            in_place_fields[key] = value
+
+    @staticmethod
+    def add_engine_fields(**fields):
+        """
+        Добавляем кастомные "поля" логов, которые будут извлекаться внутри движка. В остальном идентично тем полям, что добавляются через .add_fields().
+        """
+        for key, value in fields.items():
+            if not hasattr(value, 'get_data') or not SignatureMatcher.is_handler(value.get_data):
+                raise ValueError('The field handler must have a method .get_data() with the signature that is standard for Polog handlers.')
+            engine_fields[key] = value
 
     @staticmethod
     def delete_fields(*fields):
@@ -153,4 +165,15 @@ class config:
         for name in fields:
             if not isinstance(name, str):
                 raise KeyError('Fields are deleted by name. The name is an instance of the str class.')
-            settings.extra_fields.pop(name)
+            in_place_fields.pop(name)
+
+    @staticmethod
+    def delete_engine_fields(*fields):
+        """
+        Удаляем кастомные поля по их названиям. См. метод .add_engine_fields().
+        """
+        settings = SettingsStore()
+        for name in fields:
+            if not isinstance(name, str):
+                raise KeyError('Fields are deleted by name. The name is an instance of the str class.')
+            engine_fields.pop(name)

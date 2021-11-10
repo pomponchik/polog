@@ -6,6 +6,7 @@ from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.not_none_to_dict import not_none_to_dict
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
+from polog.core.stores.fields import in_place_fields
 
 
 class AbstractHandleLogger:
@@ -53,9 +54,10 @@ class AbstractHandleLogger:
     # Данное множество просматривается в приоритете по сравнению с разрешенными полями и блокирует запись в том числе запрещенных позиционных аргументов.
     _forbidden_fields = set()
 
-    def __init__(self, settings=SettingsStore()):
+    def __init__(self, settings=SettingsStore(), in_place_fields=in_place_fields):
         self._settings = settings
         self._engine = Engine()
+        self._in_place_fields = in_place_fields
 
     def __getattribute__(self, name):
         """
@@ -141,7 +143,7 @@ class AbstractHandleLogger:
                 if not prove(value):
                     self._maybe_raise(ValueError, f'The "{key}" argument is in the wrong format.')
                     continue
-            elif key in self._settings.extra_fields:
+            elif key in self._in_place_fields:
                 value = str(value)
             else:
                 self._maybe_raise(KeyError, f'Unknown argument name "{key}". Allowed arguments: {", ".join(self._allowed_types.keys())} and users fields.')

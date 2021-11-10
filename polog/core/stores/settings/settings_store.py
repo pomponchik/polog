@@ -138,7 +138,6 @@ class SettingsStore(ReadOnlySingleton):
         ),
     }
     points_are_informed = False
-    extra_fields = {}
     lock = Lock()
 
     def __init__(self, **kwargs):

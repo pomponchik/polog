@@ -20,6 +20,7 @@ from polog.loggers.handle.message import message as _message
 from polog.core.log_item import LogItem
 from polog.data_structures.trees.named_tree.projector import TreeProjector
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
+from polog.core.stores.fields import in_place_fields
 
 
 class FunctionLogger:
@@ -27,10 +28,11 @@ class FunctionLogger:
     Экземпляры данного класса - декораторы, включающие автоматическое логирование для функций.
     """
 
-    def __init__(self, settings=SettingsStore(), handlers=global_handlers):
+    def __init__(self, settings=SettingsStore(), handlers=global_handlers, in_place_fields=in_place_fields):
         self.settings = settings
         self.engine = Engine()
         self.global_handlers = handlers
+        self.in_place_fields = in_place_fields
 
     def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False, handlers=None):
         """
@@ -176,8 +178,7 @@ class FunctionLogger:
         Здесь происходит извлечение данных для дополнительных полей.
         Если поле уже заполнено ранее, здесь оно не изменяется.
         """
-        extra_fields = self.settings.extra_fields
-        for name, field in extra_fields.items():
+        for name, field in self.in_place_fields.items():
             if name not in args_dict:
                 try:
                     value = field.get_data(log)
