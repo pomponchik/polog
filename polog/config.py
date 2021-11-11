@@ -5,6 +5,10 @@ from polog.core.utils.pony_names_generator import PonyNamesGenerator
 from polog.core.stores.handlers import global_handlers
 from polog.data_structures.trees.named_tree.projector import TreeProjector
 from polog.core.stores.fields import in_place_fields, engine_fields
+from polog.loggers.auto.function_logger import flog
+from polog.loggers.handle.handle_log import handle_log
+from polog.loggers.handle.message import message
+from polog import log
 
 
 class config:
@@ -37,13 +41,18 @@ class config:
     def levels(**kwargs):
         """
         Установка кастомных уровней логирования.
+
         Имена переменных здесь соответствуют названиям новых уровней логирования, а их значения - собственно сами уровни.
+        Запрещено использовать имена, которые пересекаются с именами, используемыми в качестве имен методов в логгерах. Это необходимо, поскольку имена логирования можно использовать в качестве динамических методов логгеров, и нужно, чтобы они не пересекались.
         """
+        forbidden_names = set(dir(flog)).union(set(dir(handle_log))).union(set(dir(log))).union(set(dir(message)))
         for key, value in kwargs.items():
             if not isinstance(value, int):
                 raise TypeError(f'Variable "{key}" has not type int.')
             if value < 0:
                 raise ValueError('The logging level cannot be less than zero.')
+            if key in forbidden_names:
+                raise NameError(f'The name "{key}" cannot be used for the logging level. It is already used as a service name in the logger.')
             Levels.set(key, value)
 
     @staticmethod

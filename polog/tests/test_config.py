@@ -178,7 +178,7 @@ def test_delete_handlers():
         pass
     def new_handler2(log):
         pass
-    
+
     config.add_handlers(lolkek123=new_handler)
     config.delete_handlers('lolkek123')
     assert config.get_handlers().get('lolkek123') is None
@@ -269,3 +269,15 @@ def test_delete_wrong_type_handler():
     """
     with pytest.raises(ValueError):
         config.delete_handlers(1)
+
+def test_forbidden_name_for_level():
+    """
+    Часть возможных имен уровней логирования зарезервированы для внутреннего использования в Polog (для имен методов) и не могут быть использованы.
+    Проверяем, что при попытке определить уровень логирования с таким именем поднимется исключение.
+    """
+    with pytest.raises(NameError):
+        config.levels(message=5)
+    with pytest.raises(NameError):
+        config.levels(_maybe_raise=5)
+    with pytest.raises(NameError):
+        config.levels(_specific_processing=5)
