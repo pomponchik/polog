@@ -45,7 +45,7 @@ class FunctionLogger:
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 """
-                Обертка для корутин, вызов обернутой функции происходит через await.
+                Обертка для корутинных функций, вызов обернутой функции происходит через await.
                 """
                 _message._clean_context()
                 args_dict = self.get_base_args_dict(func, message)
