@@ -20,7 +20,8 @@ from polog.loggers.handle.message import message as _message
 from polog.core.log_item import LogItem
 from polog.data_structures.trees.named_tree.projector import TreeProjector
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
-from polog.core.stores.fields import in_place_fields
+from polog.core.stores.fields import in_place_fields, engine_fields
+from polog import field as FieldClass
 
 
 class FunctionLogger:
@@ -28,13 +29,14 @@ class FunctionLogger:
     Экземпляры данного класса - декораторы, включающие автоматическое логирование для функций.
     """
 
-    def __init__(self, settings=SettingsStore(), handlers=global_handlers, in_place_fields=in_place_fields):
+    def __init__(self, settings=SettingsStore(), handlers=global_handlers, in_place_fields=in_place_fields, engine_fields=engine_fields):
         self.settings = settings
         self.engine = Engine()
         self.global_handlers = handlers
         self.in_place_fields = in_place_fields
+        self.engine_fields = engine_fields
 
-    def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False, handlers=None):
+    def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False, handlers=None, extra_fields=None, extra_engine_fields=None):
         """
         Фабрика декораторов логирования для функций. Можно вызывать как со скобками, так и без.
         """
@@ -42,6 +44,8 @@ class FunctionLogger:
             # Если функция уже ранее была задекорирована, мы декорируем ее саму, а не ее в уже задекорированном виде.
             func, before_change_func = RegisteringFunctions().get_original(func), func
             local_handlers = self.get_handlers(handlers)
+            in_place_fields = self.get_extra_fields(extra_fields, self.in_place_fields)
+            engine_fields = self.get_extra_fields(extra_engine_fields, self.engine_fields)
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 """
@@ -55,10 +59,10 @@ class FunctionLogger:
                     result = await func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, *args, **kwargs)
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                     self.reraise_exception(e)
                 finish = time.time()
-                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, *args, **kwargs)
+                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                 return result
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -73,10 +77,10 @@ class FunctionLogger:
                     result = func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, *args, **kwargs)
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                     self.reraise_exception(e)
                 finish = time.time()
-                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, *args, **kwargs)
+                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                 return result
             if inspect.iscoroutinefunction(func):
                 result = async_wrapper
@@ -132,7 +136,7 @@ class FunctionLogger:
             raise exc
         raise LoggedError(str(exc)) from exc
 
-    def log_exception_info(self, exc, finish, start, args_dict, errors_level, handlers, *args, **kwargs):
+    def log_exception_info(self, exc, finish, start, args_dict, errors_level, handlers, in_place_fields, engine_fields, *args, **kwargs):
         """
         Здесь происходит заполнение автоматически извлекаемых полей в случае исключения.
         В т. ч. извлекается вся информация об исключении - название, сообщение и т. д.
@@ -152,10 +156,10 @@ class FunctionLogger:
                 if not (input_variables is None):
                     args_dict['input_variables'] = input_variables
                 log = self.create_log_item(args, kwargs, args_dict, handlers)
-                self.extract_extra_fields(log, args_dict)
+                self.extract_extra_fields(log, args_dict, in_place_fields)
                 self.engine.write(log)
 
-    def log_normal_info(self, result, finish, start, args_dict, level, handlers, *args, **kwargs):
+    def log_normal_info(self, result, finish, start, args_dict, level, handlers, in_place_fields, engine_fields, *args, **kwargs):
         """
         Заполнение автоматических полей в случае, когда исключения не было.
         """
@@ -170,15 +174,15 @@ class FunctionLogger:
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
             log = self.create_log_item(args, kwargs, args_dict, handlers)
-            self.extract_extra_fields(log, args_dict)
+            self.extract_extra_fields(log, args_dict, in_place_fields)
             self.engine.write(log)
 
-    def extract_extra_fields(self, log, args_dict):
+    def extract_extra_fields(self, log, args_dict, fields):
         """
         Здесь происходит извлечение данных для дополнительных полей.
         Если поле уже заполнено ранее, здесь оно не изменяется.
         """
-        for name, field in self.in_place_fields.items():
+        for name, field in fields.items():
             if name not in args_dict:
                 try:
                     value = field.get_data(log)
@@ -242,6 +246,47 @@ class FunctionLogger:
             local_scope_tree[new_name] = handler
 
         return local_scope_tree
+
+    def get_extra_fields(self, maybe_fields, default_fields):
+        if maybe_fields is None:
+            return default_fields
+        if not isinstance(maybe_fields, dict) and not isinstance(maybe_fields, list) and not isinstance(maybe_fields, tuple):
+            raise ValueError(f'A dictionary containing log field extractors is expected. You can also pass a list or tuple containing such dictionaries and ellipsis. You passed "{maybe_fields}".')
+
+        all_fields = [maybe_fields] if isinstance(maybe_fields, dict) else maybe_fields
+
+        if Ellipsis in all_fields:
+            is_ellipsis = True
+            while Ellipsis in all_fields:
+                try:
+                    all_fields.pop(all_fields.index(Ellipsis))
+                except ValueError:
+                    break
+        else:
+            is_ellipsis = False
+
+        pre_result = {}
+
+        for fields in all_fields:
+            for name, field in fields.items():
+                if not isinstance(name, str):
+                    raise ValueError(f'Strings should be used as keys in the dictionary of additional log fields. You passed: "{name}".')
+                if not isinstance(field, FieldClass):
+                    raise ValueError(f'An object of the field class is expected as a field object. You passed: "{field}".')
+                if name in pre_result:
+                    raise ValueError(f'Field name conflict. You have used the name "{name}" more than once.')
+
+                pre_result[name] = field
+
+        if not is_ellipsis:
+            return pre_result
+
+        result = {**default_fields}
+
+        for name, field in pre_result.items():
+            result[name] = field
+
+        return result
 
 
 flog = FunctionLogger()

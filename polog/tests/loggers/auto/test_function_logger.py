@@ -201,7 +201,7 @@ def test_log_exception_info():
     try:
         raise ValueError('lol')
     except Exception as e:
-        flog.log_exception_info(e, 1.0, 0.5, data, 7, [])
+        flog.log_exception_info(e, 1.0, 0.5, data, 7, [], {}, {})
     assert data['exception_type'] == 'ValueError'
     assert data['exception_message'] == 'lol'
     assert data['time_of_work'] == 0.5
@@ -220,7 +220,7 @@ def test_log_normal_info():
     Проверяем, что базовая информация извлекается.
     """
     data = {}
-    flog.log_normal_info('kek', 1.0, 0.5, data, 7, [])
+    flog.log_normal_info('kek', 1.0, 0.5, data, 7, [], {}, {})
     assert data.get('exception_type') is None
     assert data.get('exception_message') is None
     assert data['time_of_work'] == 0.5
@@ -244,8 +244,8 @@ def test_extract_extra_fields_base():
         return 'world'
     extra_fields = {'hello': field(extractor_1), 'world': field(extractor_2)}
     args_dict = {}
-    local_flog = FunctionLogger(in_place_fields=extra_fields)
-    local_flog.extract_extra_fields(None, args_dict)
+    local_flog = FunctionLogger()
+    local_flog.extract_extra_fields(None, args_dict, extra_fields)
     assert args_dict == {'hello': 'hello', 'world': 'world'}
 
 def test_extract_extra_fields_other_type_with_converter():
@@ -258,8 +258,8 @@ def test_extract_extra_fields_other_type_with_converter():
         return 2
     extra_fields = {'1': field(extractor_1, converter=lambda x: str(x) + ' converted'), '2': field(extractor_2, converter=lambda x: str(x) + ' converted')}
     args_dict = {}
-    local_flog = FunctionLogger(in_place_fields=extra_fields)
-    local_flog.extract_extra_fields(None, args_dict)
+    local_flog = FunctionLogger()
+    local_flog.extract_extra_fields(None, args_dict, extra_fields)
     assert args_dict == {'1': '1 converted', '2': '2 converted'}
 
 def test_extract_extra_fields_other_type_without_converter():
@@ -272,8 +272,8 @@ def test_extract_extra_fields_other_type_without_converter():
         return 2
     extra_fields = {'1': field(extractor_1), '2': field(extractor_2)}
     args_dict = {}
-    local_flog = FunctionLogger(in_place_fields=extra_fields)
-    local_flog.extract_extra_fields(None, args_dict)
+    local_flog = FunctionLogger()
+    local_flog.extract_extra_fields(None, args_dict, extra_fields)
     assert args_dict == {'1': '1', '2': '2'}
 
 def test_project_tree_of_handlers_from_global_scope_of_names(handler):
