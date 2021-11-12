@@ -16,7 +16,7 @@ class LogItem:
     Логи передаются в обработчики и уже там каким-то образом обрабатываются, например сохраняются в файл или отправляются на сторонний сервер. При этом коллекция обработчиков хранится в самом логе. Это нужно, поскольку с логами, полученными из разных мест программы, могут работать разные наборы обработчиков.
     """
 
-    __slots__ = ('_function_input_data', '_handlers', 'fields')
+    __slots__ = ('_function_input_data', '_handlers', 'fields', 'extra_fields')
 
     def __getitem__(self, key):
         """
@@ -237,6 +237,14 @@ class LogItem:
         """
         self._handlers = handlers
 
+    def set_extra_fields(self, fields):
+        """
+        Сохраняем словарь с дополнительными полями лога.
+
+        Необходимость хранить его в логе, опять же, связана с тем, что для разных событий набор полей может быть разным.
+        """
+        self.extra_fields = fields
+
     def get_handlers(self):
         """
         Получаем коллекцию обработчиков, в которую нужно передать данный объект лога.
@@ -245,3 +253,12 @@ class LogItem:
             return self._handlers
         except AttributeError:
             return ()
+
+    def get_extra_fields(self):
+        """
+        Получаем словарь дополнительных полей лога.
+        """
+        try:
+            return self.extra_fields
+        except AttributeError:
+            return {}

@@ -5,6 +5,7 @@ import pytest
 
 from polog.errors import RewritingLogError
 from polog.core.log_item import LogItem, FunctionInputData
+from polog import field
 
 
 def test_init_empty_log():
@@ -13,7 +14,6 @@ def test_init_empty_log():
     """
     log = LogItem()
 
-
 def test_set_field_to_log_error():
     """
     Проверяем, что при попытке изменить содержимое поля лога через синтаксис словаря поднимается специальное исключение (RewritingLogError).
@@ -21,7 +21,6 @@ def test_set_field_to_log_error():
     log = LogItem()
     with pytest.raises(RewritingLogError):
         log['kek'] = 'lol'
-
 
 def test_delete_field_from_log_error():
     """
@@ -37,7 +36,6 @@ def test_delete_field_from_log_error():
     # Когда ключ есть.
     with pytest.raises(RewritingLogError):
         del log['lol']
-
 
 def test_log_to_string_representstion():
     """
@@ -70,7 +68,6 @@ def test_log_to_string_representstion():
     log_4_id = id(log_4)
     assert str(log_4) == '<log item #' + str(log_4_id) + ' (empty)>'
 
-
 def test_get_field_content_from_log_with_brackets():
     """
     Извлекаем значение из лога с помощью квадратных скобок.
@@ -90,7 +87,6 @@ def test_get_field_content_from_log_with_brackets():
     log = LogItem()
     log.set_data({'lol': 'kek'})
     assert log['lol'] == 'kek'
-
 
 def test_get_field_content_from_log_with_method_get():
     """
@@ -114,7 +110,6 @@ def test_get_field_content_from_log_with_method_get():
     assert log.get('lol') == 'kek'
     assert log.get('lol', 'no_kek') == 'kek'
 
-
 def test_operator_in():
     """
     Проверяем, что оператор in по отношению к логу работает корректно.
@@ -132,7 +127,6 @@ def test_operator_in():
     log_3 = LogItem()
     log_3.set_data({'lol': 'kek'})
     assert ('lol' in log_3) == True
-
 
 def test_iteration_by_log():
     """
@@ -174,7 +168,6 @@ def test_iteration_by_log():
     assert count == 3
     assert keys == list(data.keys())
 
-
 def test_equal_logs():
     """
     Проверяем, что проверка логов на равенство работает.
@@ -213,7 +206,6 @@ def test_equal_logs():
     log_2.set_data(data)
     assert log_1 is not log_2
     assert log_1 == log_2
-
 
 def test_other_comparisons():
     """
@@ -258,7 +250,6 @@ def test_other_comparisons():
     with pytest.raises(TypeError):
         empty_log_1 <= empty_log_2
 
-
 def test_get_items():
     """
     Проверяем работу метода .items(). Должно работать по аналогии со словарем.
@@ -270,7 +261,6 @@ def test_get_items():
     log.set_data({'lol': 'kek'})
 
     assert tuple(log.items()) == (('lol', 'kek'), )
-
 
 def test_get_keys():
     """
@@ -284,7 +274,6 @@ def test_get_keys():
 
     assert tuple(log.keys()) == ('lol', )
 
-
 def test_get_values():
     """
     Проверяем работу метода .keys(). Должно работать по аналогии со словарем.
@@ -296,7 +285,6 @@ def test_get_values():
     log.set_data({'lol': 'kek'})
 
     assert tuple(log.values()) == ('kek', )
-
 
 def test_function_input_data_set_and_get():
     """
@@ -329,3 +317,25 @@ def test_handlers_set_and_get():
     log.set_handlers(lst)
 
     assert log.get_handlers() == lst
+
+def test_set_and_get_extra_fields_to_log_item():
+    """
+    Пробуем сохранить в логе дополнительные поля и потом получить их.
+    """
+    log = LogItem()
+
+    def extractor(item):
+        return 'kek'
+    fields = {'kek': field(extractor)}
+    log.set_extra_fields(fields)
+
+    assert log.get_extra_fields() is fields
+    assert log.get_extra_fields() == fields
+
+def test_not_set_and_get_extra_fields_to_log_item():
+    """
+    Пробуем получить дополнительные поля из лога, когда мы их в него ранее не передавали (исключение подниматься не должно).
+    """
+    log = LogItem()
+
+    assert log.get_extra_fields() == {}
