@@ -372,3 +372,35 @@ def test_create_log_item_in_flog():
     assert log.get_handlers() is handlers
     assert log.function_input_data.args is args
     assert log.function_input_data.kwargs is kwargs
+
+def test_extract_extra_fields_locally_in_the_function_decorator(handler):
+    """
+    Пробуем указать словарь с дополнительными полями в декораторе.
+    Эти поля должны извлекаться.
+    """
+    def exctractor(log_item):
+        return 'lol'
+    @flog(extra_fields={'lolkek': field(exctractor)})
+    def function():
+        pass
+
+    function()
+    time.sleep(0.0001)
+
+    handler.last['lolkek'] == 'lol'
+
+def test_extract_extra_engine_fields_in_the_function_decorator(handler):
+    """
+    Пробуем указать словарь с дополнительными полями в декораторе для извлечения в движке.
+    Эти поля должны извлекаться.
+    """
+    def exctractor(log_item):
+        return 'lol'
+    @flog(extra_engine_fields={'lolkek': field(exctractor)})
+    def function():
+        pass
+
+    function()
+    time.sleep(0.0001)
+
+    handler.last['lolkek'] == 'lol'

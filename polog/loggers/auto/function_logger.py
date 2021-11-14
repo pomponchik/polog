@@ -21,7 +21,7 @@ from polog.core.log_item import LogItem
 from polog.data_structures.trees.named_tree.projector import TreeProjector
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
 from polog.core.stores.fields import in_place_fields, engine_fields
-from polog import field as FieldClass
+from polog.field import field as FieldClass
 
 
 class FunctionLogger:
@@ -155,8 +155,8 @@ class FunctionLogger:
                 _message._copy_context(args_dict)
                 if not (input_variables is None):
                     args_dict['input_variables'] = input_variables
-                log = self.create_log_item(args, kwargs, args_dict, handlers)
-                self.extract_extra_fields(log, args_dict, in_place_fields)
+                log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields)
+                log.extract_extra_fields_from(in_place_fields)
                 self.engine.write(log)
 
     def log_normal_info(self, result, finish, start, args_dict, level, handlers, in_place_fields, engine_fields, *args, **kwargs):
@@ -173,24 +173,11 @@ class FunctionLogger:
             input_variables = json_vars(*args, **kwargs)
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
-            log = self.create_log_item(args, kwargs, args_dict, handlers)
-            self.extract_extra_fields(log, args_dict, in_place_fields)
+            log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields)
+            log.extract_extra_fields_from(in_place_fields)
             self.engine.write(log)
 
-    def extract_extra_fields(self, log, args_dict, fields):
-        """
-        Здесь происходит извлечение данных для дополнительных полей.
-        Если поле уже заполнено ранее, здесь оно не изменяется.
-        """
-        for name, field in fields.items():
-            if name not in args_dict:
-                try:
-                    value = field.get_data(log)
-                    args_dict[name] = value
-                except:
-                    pass
-
-    def create_log_item(self, args, kwargs, data, handlers):
+    def create_log_item(self, args, kwargs, data, handlers, engine_fields):
         """
         Здесь порождается объект лога.
 
@@ -200,6 +187,7 @@ class FunctionLogger:
         log.set_data(data)
         log.set_function_input_data(args, kwargs)
         log.set_handlers(handlers)
+        log.set_extra_fields(engine_fields)
         return log
 
     def get_handlers(self, handlers):
