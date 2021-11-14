@@ -14,6 +14,7 @@ def handler():
     Получаем стандартный обработчик, сохраняющий логи в оперативную память.
     """
     new_handler = memory_saver()
+    new_handler.clean()
     try:
         config.add_handlers(new_handler)
     except ValueError as e:

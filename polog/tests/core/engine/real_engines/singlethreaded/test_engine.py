@@ -13,8 +13,6 @@ def test_simple_behavior(handler):
     """
     Проверяем, что лог в принципе записывается.
     """
-    handler.clean()
-
     settings = SettingsStore()
     settings['max_queue_size'] = 0
     settings['pool_size'] = 0
@@ -29,8 +27,6 @@ def test_change_engine(handler):
     """
     Проверяем, объект движка подменяется при манипуляциях с настройками.
     """
-    handler.clean()
-
     settings = SettingsStore()
     engine_wrapper = Engine()
 

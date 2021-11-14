@@ -38,7 +38,6 @@ def test_lost_items_on_stop(settings_mock, handler):
     """
     Проверяем, что при остановке движка логи не теряются.
     """
-    handler.clean()
     settings_mock.handlers['lol'] = handler
     engine = MultiThreadedRealEngine(settings_mock)
     log = LogItem()

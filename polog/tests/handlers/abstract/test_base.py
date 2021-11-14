@@ -24,7 +24,6 @@ def test_filter_false(handler):
     """
     Проверяем, что фильтр, который всегда возвращает False, блокирует запись лога.
     """
-    handler.clean()
     def false_filter(log):
         return False
     concrete = ConcreteHandler(filter=false_filter)
@@ -36,7 +35,6 @@ def test_filter_true(handler):
     """
     Проверяем, что фильтр, который всегда возвращает True, не блокирует запись лога.
     """
-    handler.clean()
     def true_filter(log):
         return True
     concrete = ConcreteHandler(filter=true_filter)
@@ -48,7 +46,6 @@ def test_only_errors_false_true(handler):
     """
     Проверяем, что настройка only_errors в положении False не блокирует запись логов.
     """
-    handler.clean()
     concrete = ConcreteHandler(only_errors=False)
     concrete(dict(message='kek', success=True))
     time.sleep(0.0001)
@@ -58,7 +55,6 @@ def test_only_errors_false_false(handler):
     """
     Проверяем, что настройка only_errors в положении False не блокирует запись логов.
     """
-    handler.clean()
     concrete = ConcreteHandler(only_errors=False)
     concrete(dict(message='kek', success=False))
     time.sleep(0.0001)
@@ -68,7 +64,6 @@ def test_only_errors_true_false(handler):
     """
     Проверяем, что настройка only_errors в положении True не блокирует запись логов о неуспешных операциях.
     """
-    handler.clean()
     concrete = ConcreteHandler(only_errors=True)
     concrete(dict(message='kek', success=False))
     time.sleep(0.0001)
@@ -78,7 +73,6 @@ def test_only_errors_true_true(handler):
     """
     Проверяем, что настройка only_errors в положении True блокирует запись логов об успешных операциях.
     """
-    handler.clean()
     concrete = ConcreteHandler(only_errors=True)
     concrete(dict(message='kek', success=True))
     time.sleep(0.0001)
@@ -88,7 +82,6 @@ def test_alt(handler):
     """
     Проверяем, что функция alt запускается, когда в обработчике что-то пошло не так.
     """
-    handler.clean()
     def alt(log_item):
         log('lol')
     concrete = ErrorHandler(alt=alt)

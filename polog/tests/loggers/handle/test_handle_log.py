@@ -10,7 +10,6 @@ def test_base(handler):
     """
     Проверка, что в базовом случае лог записывается.
     """
-    handler.clean()
     log('lol')
     time.sleep(0.0001)
     assert handler.last is not None
@@ -19,7 +18,6 @@ def test_exception(handler):
     """
     Проверка, что из исключения извлекается вся нужная инфа.
     """
-    handler.clean()
     try:
         raise ValueError('kek')
     except ValueError as e:
@@ -33,7 +31,6 @@ def test_level(handler):
     """
     Проверка, что указанный уровень лога срабатывает.
     """
-    handler.clean()
     log('lol', level=100)
     time.sleep(0.0001)
     assert handler.last['level'] == 100
@@ -44,7 +41,6 @@ def test_function(handler):
     """
     def function():
         pass
-    handler.clean()
     log('lol', function=function)
     time.sleep(0.0001)
     assert handler.last['function'] == function.__name__
@@ -54,7 +50,6 @@ def test_raise(handler):
     """
     Проверка, что при неправильно поданном типе именованной переменной возникает исключение.
     """
-    handler.clean()
     config.set(silent_internal_exceptions=False)
     with pytest.raises(ValueError):
         log('lol', function=1)
@@ -65,7 +60,6 @@ def test_vars_to_local_variables(handler):
     """
     Проверяем, что переданные вручную локальные переменные попадают в лог.
     """
-    handler.clean()
     a = 1
     b = 2
     c = "3"
@@ -79,7 +73,6 @@ def test_vars_from_exception(handler):
     """
     Проверяем, что при исключении автоматически извлекаются те же данные о локальных переменных, что можно извлечь вручную.
     """
-    handler.clean()
     a = 1
     b = 2
     c = "3"
@@ -98,7 +91,6 @@ def test_another_field(handler):
     """
     Проверяем, что регистрируются пользовательские поля.
     """
-    handler.clean()
     def extractor(log_item):
         pass
     config.add_fields(lolkek=field(extractor))
@@ -119,7 +111,6 @@ def test_getattribute(handler):
     """
     log() должно быть возможно вызывать не только непосредственно, но и через методы, имена которых соответствуют зарегистрированным пользователем уровням логирования.
     """
-    handler.clean()
     config.levels(lolkek=777)
     log.lolkek("kek, i'm a cheburek")
     time.sleep(0.0001)
@@ -159,7 +150,6 @@ def test_filter_logs_by_level(handler):
     """
     Проверяем, что лог уровнем ниже установленного не записывается.
     """
-    handler.clean()
     config.set(level=5)
 
     log('kek', level=1)

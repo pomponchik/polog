@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from polog.errors import RewritingLogError
+from polog.core.utils.exception_escaping import exception_escaping
 
 
 @dataclass
@@ -119,6 +120,51 @@ class LogItem:
         Поведение при использовании оператора '>=' ("больше или равно").
         """
         return self.compare_or_raise(other, lambda a, b: a >= b, '>=')
+
+    def execute(self):
+        """
+        Метод, предназначенный для выполнения внутри движка.
+        В нем должны выполняться все действия, которые нужно сделать с логом - извлечение дополнительных полей, передача лога в обработчики и т. д.
+        """
+        self.extract_extra_fields()
+        self.call_handlers()
+
+    def call_handlers(self):
+        """
+        Вызов всех прикрепленных к логу обработчиков по очереди.
+        """
+        for handler in self.get_handlers():
+            self.call_one_handler(handler)
+
+    @exception_escaping
+    def call_one_handler(self, handler):
+        """
+        Вызов одного обработчика с экранированием ошибок.
+        """
+        handler(self)
+
+    def extract_extra_fields(self):
+        """
+        Обогащение лога дополнительными полями.
+        """
+        self.extract_extra_fields_from(self.get_extra_fields())
+
+    def extract_extra_fields_from(self, fields):
+        """
+        Обогащение лога дополнительными полями из переданного словаря.
+
+        Поле - это объект класса field, имеющий метод .get_data(), сигнатура которого аналогична обработчикам Polog.
+
+        fields - словарь, в котором ключи - строки с названиями полей, значения - поля.
+        """
+        data = self.fields
+        for name, field in fields.items():
+            if name not in data:
+                try:
+                    value = field.get_data(self)
+                    data[name] = value
+                except:
+                    pass
 
     def compare(self, other, operation, if_not=False):
         """

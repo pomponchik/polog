@@ -196,7 +196,6 @@ def test_add_field(handler):
     """
     Проверяем, что кастомные поля добавляются и работают.
     """
-    handler.clean()
     def extractor(log):
         return 'lol'
     @flog
@@ -212,7 +211,6 @@ def test_delete_field(handler):
     """
     Проверяем, что кастомные поля удаляются.
     """
-    handler.clean()
     def extractor(log):
         return 'lol'
     @flog

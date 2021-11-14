@@ -18,10 +18,12 @@ def test_empty(handler):
     @flog(message='base text')
     def function():
         return True
-    handler.clean()
+
     config.set(level=1)
+
     function()
     time.sleep(0.0001)
+
     assert handler.last is not None
     assert handler.last['module'] == function.__module__
     assert handler.last['function'] == function.__name__
@@ -33,14 +35,15 @@ def test_empty_async(handler):
     @flog(message='base text')
     async def function():
         return True
-    handler.clean()
+
     config.set(level=1)
+
     asyncio.run(function())
     time.sleep(0.001)
-    log = handler.last
-    assert log is not None
-    assert log['module'] == function.__module__
-    assert log['function'] == function.__name__
+
+    assert handler.last is not None
+    assert handler.last['module'] == function.__module__
+    assert handler.last['function'] == function.__name__
 
 def test_message(handler):
     """
@@ -49,7 +52,6 @@ def test_message(handler):
     @flog(message='base text')
     def function():
         return True
-    handler.clean()
     config.set(level=1)
     function()
     time.sleep(0.0001)
@@ -64,10 +66,12 @@ def test_double(handler):
     def function():
         time.sleep(0.0001)
         return True
-    handler.clean()
+
     config.set(level=1)
+
     function()
     time.sleep(0.0001)
+
     assert len(handler.all) == 1
     assert handler.last['message'] == 'base text 2'
 
@@ -108,14 +112,17 @@ def test_level(handler):
     @flog(level='lolkeklolkeklol')
     def function():
         pass
-    handler.clean()
+
     config.levels(lolkeklolkeklol=88)
     function()
     time.sleep(0.0001)
+
     assert handler.last['level'] == 88
+
     config.levels(lolkeklolkeklol=77)
     function()
     time.sleep(0.0001)
+
     assert handler.last['level'] == 77
 
 def test_get_base_args_dict():

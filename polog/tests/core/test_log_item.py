@@ -339,3 +339,118 @@ def test_not_set_and_get_extra_fields_to_log_item():
     log = LogItem()
 
     assert log.get_extra_fields() == {}
+
+def test_set_and_call_handlers_in_log_item(handler):
+    """
+    Проверяем, что хендлеры сохраняются в объекте лога и вызываются.
+    """
+    log = LogItem()
+    log.set_handlers([handler])
+
+    log.call_handlers()
+
+    assert handler.last is log
+
+def test_not_set_and_call_handlers_in_log_item(handler):
+    """
+    Вызываем метод .call_handlers(), не передавая до этого список обработчиков.
+    Исключения быть не должно.
+    """
+    log = LogItem()
+    log.call_handlers()
+
+def test_set_and_call_one_handler_in_log_item(handler):
+    """
+    Проверяем, что хендлер вызывается от объекта лога.
+    """
+    log = LogItem()
+
+    log.call_one_handler(handler)
+
+    assert handler.last is log
+
+def test_set_and_call_one_wrong_handler_in_log_item():
+    """
+    Передаем вместо обработчика None. Исключение не должно "выбраться" из метода .call_one_handler().
+    Это необходимо для экранирования ошибок в отдельных обработчиках.
+    """
+    log = LogItem()
+    log.call_one_handler(None)
+
+def test_set_and_extract_extra_fields_in_log_item():
+    """
+    Проверяем, что экстракция полей работает.
+    """
+    log = LogItem()
+
+    def extractor(item):
+        return 'kek'
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log.set_extra_fields(fields)
+    log.set_data({})
+
+    log.extract_extra_fields()
+
+    assert log[field_name] == 'kek'
+
+def test_set_and_wrong_extract_extra_fields_in_log_item():
+    """
+    Проверяем, что, если при извлечении поля поднимается исключение, оно не выходит за пределы функции.
+    """
+    log = LogItem()
+
+    def extractor(item):
+        raise ValueError('test exception')
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log.set_extra_fields(fields)
+    log.set_data({})
+
+    log.extract_extra_fields()
+
+def test_set_and_extract_extra_fields_from_dict_in_log_item():
+    """
+    Передаем в метод .extract_extra_fields_from() словарь с полями и проверяем, что они извлекаются.
+    """
+    log = LogItem()
+
+    def extractor(item):
+        return 'kek'
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log.set_data({})
+
+    log.extract_extra_fields_from(fields)
+
+    assert log[field_name] == 'kek'
+
+def test_execute_log_item_call_handlers(handler):
+    """
+    Проверяем, что при вызове метода .execute() у объекта лога у него вызываются обработчики.
+    """
+    log = LogItem()
+    log.set_data({})
+    log.set_handlers([handler])
+
+    log.execute()
+
+    assert handler.last is log
+
+def test_execute_log_item_extract_fields(handler):
+    """
+    Проверяем, что при вызове метода .execute() у объекта лога извлекаются дополнительные поля.
+    """
+    log = LogItem()
+    log.set_data({})
+    log.set_handlers([handler])
+
+    def extractor(item):
+        return 'kek'
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log.set_extra_fields(fields)
+
+    log.execute()
+
+    assert handler.last[field_name] == 'kek'
