@@ -3,6 +3,7 @@ from polog.loggers.auto.class_logger import clog
 from polog.loggers.handle.handle_log import handle_log
 from polog.loggers.handle.message import message
 from polog.loggers.router import log
+from polog.loggers.handle.smart_assert import smart_assert as ass
 from polog.config import config
 from polog.forbid import logging_is_forbidden
 from polog.utils.json_vars import json_vars

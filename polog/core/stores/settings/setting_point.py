@@ -10,7 +10,7 @@ class SettingPoint:
     В глобальном классе настроек имени каждой отдельной настройки соответствует экземпляр данного класса.
     Вся логика, связанная с проверкой возможности сохранить новое значение для конкретной настройки, находится здесь. Таким образом, в основном классе остается только функциональность агрегации.
     """
-    def __init__(self, default, change_once=False, change_only_before_start=False, proves=None, converter=None, no_check_first_time=False, action=None, conflicts=None, read_lock=False, shared_lock_with=()):
+    def __init__(self, default, change_once=False, change_only_before_start=False, proves=None, converter=None, convert_first_time=False, no_check_first_time=False, action=None, conflicts=None, read_lock=False, shared_lock_with=()):
         """
         Значения параметров:
 
@@ -19,6 +19,7 @@ class SettingPoint:
         change_only_before_start (bool) - запрет на сохранение новых значений после записи первого лога.
         proves (dict, в котором каждый ключ - строка, а каждое значение - callable на 1 аргумент) - набор функций, в которые скармливается каждое новое сохраняемое значение, предназначенный для проверки его валидности. Каждая функция должна принимать один параметр, и для валидных значений возвращать True, для остальных - False. По умолчанию для дефолтного значения проверка тоже делается, но это можно отключить, см. параметр "no_check_first_time". Ключи используются для конструирования сообщений об ошибках и должны естественным (английским) языком описывать то ограничение, соблюдение которого проверяет данная функция.
         converter (callable, 1 аргумент) - функция, которая применяется к каждому сохраняемому значению непосредственно перед сохранением, если она была передана в конструктор, возвращает новое значение. Используется в случаях, когда пользователь может передавать значения в некотором произвольном формате, а внутри программы используется единый формат. Важно: проверка валидности значения осуществляется до применения данной функции, т. е. к вводу в произвольном формате.
+        convert_first_time (bool) - проверять дефолтное значение. False (по умолчанию) - не проверять.
         no_check_first_time (bool) - не проверять дефолтное значение. False (по умолчанию) - проверять.
         action (callable, 3 аргумента) - действие, которое необходимо произвести сразу после присвоения нового значения. Принимает 3 аргумента: старое значение настройки, новое значение и экземпляр класса-агрегатора, чтобы была возможность обратиться к смежным полям.
         conflicts (dict, в котором каждый ключ - строка с названием другого поля настроек, а каждое значение - callable на 3 аргумента) - набор функций, каждая из которых возвращает True или False, в зависимости от того, соответственно, есть конфликт с данным полем или нет. Каждая из функций в словаре принимает 3 аргумента: старое значение настройки, новое значение и текущее значение поля, конфликт с которым проверяется.
@@ -28,9 +29,9 @@ class SettingPoint:
         self.set_proves(proves)
         if not no_check_first_time:
             self.prove_value(default)
-        self.value = default
         self.converter = converter
         self.change_once = change_once
+        self.convert_first_time = convert_first_time
         self.no_check_first_time = no_check_first_time
         self.change_only_before_start = change_only_before_start
         self.changed = False
@@ -39,6 +40,7 @@ class SettingPoint:
         self.set_action(action)
         self.set_conflicts(conflicts)
         self.set_read_lock(read_lock)
+        self.set_default_value(default)
 
     def __str__(self):
         return f'<SettingPoint object "{self.name}" with value {self.value}, #{id(self)}>'
@@ -72,6 +74,20 @@ class SettingPoint:
             self.value = value
             self.do_action(old_value, value)
             self.changed = True
+
+    def set_default_value(self, default):
+        """
+        Присвоение обязательного дефолтного значения.
+
+        По умолчанию дефолтное значение не конвертируется. Однако если параметр convert_first_time установлен в True, конвертация происходит.
+        После установки дефолтного значения, данный метод более не вызывается.
+        """
+        if self.convert_first_time:
+            if self.converter is not None:
+                default = self.converter(default)
+            else:
+                raise ValueError('Checking the default parameter is mandatory, but the function for checking is not defined.')
+        self.value = default
 
     def get(self):
         """

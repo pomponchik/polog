@@ -54,7 +54,7 @@ def test_no_check_first_time():
 
 def test_converter():
     """
-    Проверяем, что конвертер не трогает дефолтное значение, но новые значения конвертит.
+    Проверяем, что конвертер по умолчанию не трогает дефолтное значение, но новые значения конвертит.
     Также проверяем, что проверки проходятся до того, как срабатывает конвертер.
     """
     point = SettingPoint('lol', converter=lambda x: 'kek', proves={'prove': lambda x: x != 'lolkek'})
@@ -63,6 +63,26 @@ def test_converter():
         point.set('lolkek') # Проверяет, что проверка отрабатывает, хотя конвертер вывел бы значение из-под ее действия, если бы отработал до нее.
     point.set('keklol')
     assert point.get() == 'kek' # Проверяем, что подставилось значение из конвертера.
+
+def test_converter_in_first_time_off():
+    """
+    Проверяем, что если параметр convert_first_time установлен в False, используется поведение по умолчанию.
+    А именно - конвертация дефолтного значения не происходит (но последующие значения конвертируются).
+    """
+    point = SettingPoint('lol', converter=lambda x: 'kek', convert_first_time=False)
+    assert point.get() == 'lol'
+    point.set('perekek')
+    assert point.get() == 'kek'
+
+def test_converter_in_first_time_on():
+    """
+    Проверяем, что если параметр convert_first_time установлен в True, дефолтный параметр сразу конвертируется.
+    Последующие значения также конвертируются.
+    """
+    point = SettingPoint('lol', converter=lambda x: 'kek', convert_first_time=True)
+    assert point.get() == 'kek'
+    point.set('perekek')
+    assert point.get() == 'kek'
 
 def test_change_once():
     """

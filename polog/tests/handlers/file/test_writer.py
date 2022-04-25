@@ -157,6 +157,7 @@ def test_alt_function_for_file_writer(filename_for_test, number_of_strings_in_th
     config.set(pool_size=0, level=1)
     config.delete_handlers(handler)
     config.add_handlers(file_handler)
+    handler.clean()
 
     log('kek')
     assert handler.last is not None

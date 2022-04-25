@@ -1,6 +1,8 @@
 import time
+import json
 
 import pytest
+import ujson
 
 from polog import config, handle_log as log, field, flog
 from polog.core.stores.settings.settings_store import SettingsStore
@@ -49,6 +51,20 @@ def test_set_valid_key_delay_before_exit():
     assert SettingsStore()['silent_internal_exceptions'] == True
     config.set(silent_internal_exceptions=False)
     assert SettingsStore()['silent_internal_exceptions'] == False
+    # debug_mode
+    config.set(debug_mode=True)
+    assert SettingsStore()['debug_mode'] == True
+    config.set(debug_mode=False)
+    assert SettingsStore()['debug_mode'] == False
+    # smart_assert_politic
+    config.set(smart_assert_politic='all')
+    assert callable(SettingsStore()['smart_assert_politic'])
+    smart_assert_one = SettingsStore()['smart_assert_politic']
+    config.set(smart_assert_politic='if_debug')
+    assert callable(SettingsStore()['smart_assert_politic'])
+    assert smart_assert_one is not SettingsStore()['smart_assert_politic']
+    config.set(smart_assert_politic='all')
+    assert smart_assert_one is SettingsStore()['smart_assert_politic']
 
 def test_set_invalid_key():
     """

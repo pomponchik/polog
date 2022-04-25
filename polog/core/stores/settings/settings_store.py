@@ -136,6 +136,24 @@ class SettingsStore(ReadOnlySingleton):
                 'the "dumps" attribute of the value must be called': lambda x: callable(getattr(x, 'dumps')),
             },
         ),
+        'smart_assert_politic': SettingPoint(
+            'if_debug',
+            proves={
+                'the value can only be a string': lambda x: isinstance(x, str),
+                'the value must be a name of the politic: "all" or "if_debug"': lambda x: x in ('all', 'if_debug'),
+            },
+            converter={
+                'all': lambda debug_mode, expression_result: not expression_result,
+                'if_debug': lambda debug_mode, expression_result: not debug_mode and not expression_result,
+            }.get,
+            convert_first_time=True,
+        ),
+        'debug_mode': SettingPoint(
+            __debug__,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
     }
     points_are_informed = False
     lock = Lock()
