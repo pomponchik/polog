@@ -22,6 +22,7 @@ from polog.data_structures.trees.named_tree.projector import TreeProjector
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
 from polog.core.stores.fields import in_place_fields, engine_fields
 from polog.field import field as FieldClass
+from polog.data_structures.wrappers.fields_container.container import FieldsContainer
 
 
 class FunctionLogger:
@@ -235,6 +236,12 @@ class FunctionLogger:
         return local_scope_tree
 
     def get_extra_fields(self, maybe_fields, default_fields):
+        """
+        Здесь определяется набор дополнительных полей, который будет извлекаться в данном декораторе.
+
+        maybe_fields - словарь с ключами-строками и значениями-полями (экземплярами класса field), либо список/кортеж с такими словарями и ellipsis'ами.
+        default_fields - словарь с дефолтными дополнительными полями. Поля отсюда будут браться, если в списке maybe_fields лежал ellipsis.
+        """
         if maybe_fields is None:
             return default_fields
         if not isinstance(maybe_fields, dict) and not isinstance(maybe_fields, list) and not isinstance(maybe_fields, tuple):
@@ -266,14 +273,9 @@ class FunctionLogger:
                 pre_result[name] = field
 
         if not is_ellipsis:
-            return pre_result
+            return FieldsContainer(pre_result, {})
 
-        result = {**default_fields}
-
-        for name, field in pre_result.items():
-            result[name] = field
-
-        return result
+        return FieldsContainer(pre_result, default_fields)
 
 
 flog = FunctionLogger()
