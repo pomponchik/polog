@@ -241,48 +241,6 @@ def test_log_normal_info():
     assert data.get('module') is None
     assert data.get('result') == json_one_variable('kek')
 
-def test_extract_extra_fields_base():
-    """
-    Проверяем, что в базовом случае дополнительные поля извлекаются.
-    """
-    def extractor_1(log):
-        return 'hello'
-    def extractor_2(log):
-        return 'world'
-    extra_fields = {'hello': field(extractor_1), 'world': field(extractor_2)}
-    args_dict = {}
-    local_flog = FunctionLogger()
-    local_flog.extract_extra_fields(None, args_dict, extra_fields)
-    assert args_dict == {'hello': 'hello', 'world': 'world'}
-
-def test_extract_extra_fields_other_type_with_converter():
-    """
-    Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, но используется конвертер.
-    """
-    def extractor_1(log):
-        return 1
-    def extractor_2(log):
-        return 2
-    extra_fields = {'1': field(extractor_1, converter=lambda x: str(x) + ' converted'), '2': field(extractor_2, converter=lambda x: str(x) + ' converted')}
-    args_dict = {}
-    local_flog = FunctionLogger()
-    local_flog.extract_extra_fields(None, args_dict, extra_fields)
-    assert args_dict == {'1': '1 converted', '2': '2 converted'}
-
-def test_extract_extra_fields_other_type_without_converter():
-    """
-    Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, и конвертер не используется.
-    """
-    def extractor_1(log_item):
-        return 1
-    def extractor_2(log_item):
-        return 2
-    extra_fields = {'1': field(extractor_1), '2': field(extractor_2)}
-    args_dict = {}
-    local_flog = FunctionLogger()
-    local_flog.extract_extra_fields(None, args_dict, extra_fields)
-    assert args_dict == {'1': '1', '2': '2'}
-
 def test_project_tree_of_handlers_from_global_scope_of_names(handler):
     """
     Проверяем корректность отделения локального пространства имен обработчиков из глобального.
@@ -365,7 +323,7 @@ def test_create_log_item_in_flog():
     data = {'lol': 'kek'}
     handlers = NamedTree()
 
-    log = flog.create_log_item(args, kwargs, data, handlers)
+    log = flog.create_log_item(args, kwargs, data, handlers, {}, {})
 
     assert isinstance(log, LogItem)
     assert log['lol'] == 'kek'

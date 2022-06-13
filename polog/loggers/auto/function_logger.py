@@ -155,8 +155,7 @@ class FunctionLogger:
                 _message._copy_context(args_dict)
                 if not (input_variables is None):
                     args_dict['input_variables'] = input_variables
-                log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields)
-                log.extract_extra_fields_from(in_place_fields)
+                log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
                 self.engine.write(log)
 
     def log_normal_info(self, result, finish, start, args_dict, level, handlers, in_place_fields, engine_fields, *args, **kwargs):
@@ -173,11 +172,10 @@ class FunctionLogger:
             input_variables = json_vars(*args, **kwargs)
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
-            log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields)
-            log.extract_extra_fields_from(in_place_fields)
+            log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
             self.engine.write(log)
 
-    def create_log_item(self, args, kwargs, data, handlers, engine_fields):
+    def create_log_item(self, args, kwargs, data, handlers, engine_fields, in_place_fields):
         """
         Здесь порождается объект лога.
 
@@ -188,6 +186,7 @@ class FunctionLogger:
         log.set_function_input_data(args, kwargs)
         log.set_handlers(handlers)
         log.set_extra_fields(engine_fields)
+        log.extract_extra_fields_from(in_place_fields)
         return log
 
     def get_handlers(self, handlers):

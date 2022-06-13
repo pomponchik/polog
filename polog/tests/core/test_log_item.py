@@ -417,6 +417,7 @@ def test_set_and_extract_extra_fields_from_dict_in_log_item():
 
     def extractor(item):
         return 'kek'
+
     field_name = 'perekek_perekek_perekekoperekek'
     fields = {field_name: field(extractor)}
     log.set_data({})
@@ -424,6 +425,38 @@ def test_set_and_extract_extra_fields_from_dict_in_log_item():
     log.extract_extra_fields_from(fields)
 
     assert log[field_name] == 'kek'
+
+def test_set_and_extract_extra_fields_other_type_without_converter():
+    """
+    Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, и конвертер не используется.
+    """
+    def extractor(item):
+        return 1
+
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log = LogItem()
+    log.set_data({})
+
+    log.extract_extra_fields_from(fields)
+
+    assert log[field_name] == '1'
+
+def test_extract_extra_fields_other_type_with_converter():
+    """
+    Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, но используется конвертер.
+    """
+    def extractor(log):
+        return 1
+
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor, converter=lambda x: str(x) + ' converted')}
+    log = LogItem()
+    log.set_data({})
+
+    log.extract_extra_fields_from(fields)
+
+    assert log[field_name] == '1 converted'
 
 def test_execute_log_item_call_handlers(handler):
     """
