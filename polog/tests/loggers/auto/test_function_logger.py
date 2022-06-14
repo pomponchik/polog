@@ -366,8 +366,7 @@ def test_extract_extra_engine_fields_in_the_function_decorator(handler):
 
 def test_compare_engine_thread_native_id_and_local(handler):
     """
-    Пробуем указать словарь с дополнительными полями в декораторе для извлечения в движке.
-    Эти поля должны извлекаться.
+    Доказываем, что поля extra_fields извлекаются в том же потоке, в котором вызывался логгер, а extra_engine_fields (при условии использования многопоточного движка) - в каком-то другом потоке.
     """
     config.set(pool_size=2)
 
@@ -381,4 +380,13 @@ def test_compare_engine_thread_native_id_and_local(handler):
     function()
     time.sleep(0.0001)
 
+    assert handler.last['lol'] is not None
     assert handler.last['lol'] != handler.last['kek']
+    assert handler.last['kek'] == str(get_native_id())
+
+    config.set(pool_size=0)
+
+    function()
+
+    assert handler.last['lol'] == handler.last['kek']
+    assert handler.last['lol'] == str(get_native_id())
