@@ -24,7 +24,7 @@ def test_exception(handler):
         raise ValueError('kek')
     except ValueError as e:
         log('lol', exception=e)
-    
+
     assert handler.last is not None
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
@@ -142,9 +142,11 @@ def test_extract_function_data_wrong_function_object():
         @__module__.getter
         def __module__(self):
             raise AttributeError('kek')
+    
     pseudo = PseudoFunction()
     data = {'function': pseudo}
     log._extract_function_data(data)
+
     assert isinstance(data['function'], str)
     assert 'module' not in data['function']
 
