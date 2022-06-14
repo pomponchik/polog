@@ -420,6 +420,41 @@ def test_multiple_extra_fields_dicts(handler):
 
         handler.clean()
 
+def test_multiple_extra_fields_dicts_and_ellipsis(handler):
+    """
+    Проверяем, что троеточие (ellipsis) не влияет на извлечение полей из словарей.
+    Пробуем разное количество троеточий в списке, ничего не должно ломаться.
+    В остальном тест идентичен test_multiple_extra_fields_dicts().
+    """
+    config.set(pool_size=0)
+
+    def exctractor_1(log_item):
+        return 1
+    def exctractor_2(log_item):
+        return 2
+
+    for name in ('extra_fields', 'extra_engine_fields'):
+        for number in range(5):
+            dicts = [{'lol': field(exctractor_1)}, {'kek': field(exctractor_2)}, ...]
+
+            for _ in range(number):
+                dicts.append(...)
+
+            kwargs = {
+                name: dicts,
+            }
+
+            @flog(**kwargs)
+            def function():
+                pass
+
+            function()
+
+            assert handler.last['lol'] == '1'
+            assert handler.last['kek'] == '2'
+
+            handler.clean()
+
 def test_affects_to_global_fields_stores(handler):
     """
     Проверяем, что установленные локально в одном декораторе поля не влияют на глобальное хранилище дополнительных полей.
