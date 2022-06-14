@@ -223,6 +223,21 @@ def test_add_field(handler):
     assert handler.last['new_field'] == 'lol'
     config.delete_fields('new_field')
 
+def test_add_engine_field(handler):
+    """
+    Проверяем, что кастомные поля добавляются и работают.
+    """
+    def extractor(log):
+        return 'lol'
+    @flog
+    def function():
+        pass
+    config.add_engine_fields(new_field=field(extractor))
+    function()
+    time.sleep(0.0001)
+    assert handler.last['new_field'] == 'lol'
+    config.delete_engine_fields('new_field')
+
 def test_delete_field(handler):
     """
     Проверяем, что кастомные поля удаляются.
@@ -234,6 +249,21 @@ def test_delete_field(handler):
         pass
     config.add_fields(new_field=field(extractor))
     config.delete_fields('new_field')
+    function()
+    time.sleep(0.0001)
+    assert handler.last.fields.get('new_field') is None
+
+def test_delete_engine_field(handler):
+    """
+    Проверяем, что кастомные поля удаляются.
+    """
+    def extractor(log):
+        return 'lol'
+    @flog
+    def function():
+        pass
+    config.add_engine_fields(new_field=field(extractor))
+    config.delete_engine_fields('new_field')
     function()
     time.sleep(0.0001)
     assert handler.last.fields.get('new_field') is None
@@ -276,6 +306,13 @@ def test_add_wrong_field():
     """
     with pytest.raises(ValueError):
         config.add_fields(press_f='kek')
+
+def test_add_wrong_engine_field():
+    """
+    Проверяем, что поднимается исключение, если вместо поля для извлечения внутри движка скормить объект с неподходящей сигнатурой.
+    """
+    with pytest.raises(ValueError):
+        config.add_engine_fields(press_f='kek')
 
 def test_delete_wrong_type_handler():
     """
