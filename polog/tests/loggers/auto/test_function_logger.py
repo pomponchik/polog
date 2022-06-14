@@ -355,6 +355,7 @@ def test_extract_extra_engine_fields_in_the_function_decorator(handler):
     """
     def exctractor(log_item):
         return 'lol'
+
     @flog(extra_engine_fields={'lolkek': field(exctractor)})
     def function():
         pass
@@ -390,3 +391,57 @@ def test_compare_engine_thread_native_id_and_local(handler):
 
     assert handler.last['lol'] == handler.last['kek']
     assert handler.last['lol'] == str(get_native_id())
+
+def test_multiple_extra_fields_dicts(handler):
+    """
+    Проверяем, что при передаче списка из нескольких словарей, поля задействуются из обоих.
+    Делаем две проверки: для extra_fields и для extra_engine_fields.
+    """
+    config.set(pool_size=0)
+
+    def exctractor_1(log_item):
+        return 1
+    def exctractor_2(log_item):
+        return 2
+
+    for name in ('extra_fields', 'extra_engine_fields'):
+        kwargs = {
+            name: [{'lol': field(exctractor_1)}, {'kek': field(exctractor_2)}],
+        }
+
+        @flog(**kwargs)
+        def function():
+            pass
+
+        function()
+
+        assert handler.last['lol'] == '1'
+        assert handler.last['kek'] == '2'
+
+        handler.clean()
+
+def test_affects_to_global_fields_stores(handler):
+    """
+    Проверяем, что установленные локально в одном декораторе поля не влияют на глобальное хранилище дополнительных полей.
+    """
+    config.set(pool_size=0)
+
+    def exctractor(log_item):
+        return 'kek'
+
+    for name in ('extra_fields', 'extra_engine_fields'):
+        kwargs = {
+            name: {'lol': field(exctractor)},
+        }
+
+        @flog()
+        def function(**kwargs):
+            pass
+
+        @flog
+        def function_2():
+            pass
+
+        function_2()
+
+        assert handler.last.get('lol') is None
