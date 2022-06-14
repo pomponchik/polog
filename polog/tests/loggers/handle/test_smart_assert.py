@@ -121,10 +121,9 @@ def test_write_false_to_log_of_smart_assert(handler):
     2. Исключение не поднимается.
     3. Без переданного сообщения используется сериализация переданного выражения.
     """
-    config.set(debug_mode=False)
+    config.set(debug_mode=False, pool_size=0)
 
     ass(False)
-    sleep(0.00001)
 
     assert handler.last['message'] == 'False'
 
@@ -135,10 +134,9 @@ def test_write_empty_list_to_log_of_smart_assert(handler):
     2. Исключение не поднимается.
     3. Без переданного сообщения используется сериализация переданного выражения.
     """
-    config.set(debug_mode=False)
+    config.set(debug_mode=False, pool_size=0)
 
     ass([])
-    sleep(0.00001)
 
     assert handler.last['message'] == '[]'
 
@@ -149,9 +147,8 @@ def test_write_string_message_to_log_of_smart_assert(handler):
     2. Исключение не поднимается.
     3. С переданным сообщением, оно сохраняется в лог.
     """
-    config.set(debug_mode=False)
+    config.set(debug_mode=False, pool_size=0)
 
     ass(False, 'kek')
-    sleep(0.00001)
 
     assert handler.last['message'] == 'kek'

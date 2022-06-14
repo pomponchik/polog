@@ -18,11 +18,13 @@ def test_exception(handler):
     """
     Проверка, что из исключения извлекается вся нужная инфа.
     """
+    config.set(pool_size=0)
+
     try:
         raise ValueError('kek')
     except ValueError as e:
         log('lol', exception=e)
-    time.sleep(0.0001)
+    
     assert handler.last is not None
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'

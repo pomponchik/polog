@@ -60,7 +60,7 @@ def test_affects(handler):
     """
     Пробуем зааффектить одним вызовом message() другой.
     """
-    config.set(level=1)
+    config.set(level=1, pool_size=0)
 
     def function_without_flog():
         message('lol', local_variables='kek')
@@ -72,14 +72,13 @@ def test_affects(handler):
     function_without_flog()
     function_with_flog()
 
-    time.sleep(0.0001)
     assert handler.last.get('local_variables') is None
 
 def test_another_field(handler):
     """
     Проверяем, что работает прописывание собственных значений для пользовательских полей.
     """
-    config.set(level=1)
+    config.set(level=1, pool_size=0)
 
     def extractor(log_item):
         pass
@@ -90,7 +89,7 @@ def test_another_field(handler):
         message('lolkek', lolkek='lolkek')
 
     function()
-    time.sleep(0.0001)
+
     assert handler.last['lolkek'] == 'lolkek'
 
 def test_unknown_argument():

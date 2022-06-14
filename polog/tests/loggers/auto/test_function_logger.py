@@ -1,5 +1,6 @@
 import time
 import asyncio
+from threading import get_native_id
 
 import pytest
 
@@ -345,7 +346,7 @@ def test_extract_extra_fields_locally_in_the_function_decorator(handler):
     function()
     time.sleep(0.0001)
 
-    handler.last['lolkek'] == 'lol'
+    assert handler.last['lolkek'] == 'lol'
 
 def test_extract_extra_engine_fields_in_the_function_decorator(handler):
     """
@@ -361,4 +362,23 @@ def test_extract_extra_engine_fields_in_the_function_decorator(handler):
     function()
     time.sleep(0.0001)
 
-    handler.last['lolkek'] == 'lol'
+    assert handler.last['lolkek'] == 'lol'
+
+def test_compare_engine_thread_native_id_and_local(handler):
+    """
+    Пробуем указать словарь с дополнительными полями в декораторе для извлечения в движке.
+    Эти поля должны извлекаться.
+    """
+    config.set(pool_size=2)
+
+    def exctractor(log_item):
+        return get_native_id()
+
+    @flog(extra_engine_fields={'lol': field(exctractor)}, extra_fields={'kek': field(exctractor)})
+    def function():
+        pass
+
+    function()
+    time.sleep(0.0001)
+
+    assert handler.last['lol'] != handler.last['kek']
