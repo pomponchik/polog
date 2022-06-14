@@ -869,7 +869,7 @@ def current_datetime(request):
 config.add_engine_fields(ip=field(ip_extractor))
 ```
 
-И используйте параметр ```extra_engine_fields``` вместо ```extra_fields``` для декораторов:
+И параметр ```extra_engine_fields``` вместо ```extra_fields``` для декораторов:
 
 ```python
 @log(extra_engine_fields={'ip': field(ip_extractor)})
