@@ -469,8 +469,8 @@ def test_affects_to_global_fields_stores(handler):
             name: {'lol': field(exctractor)},
         }
 
-        @flog()
-        def function(**kwargs):
+        @flog(**kwargs)
+        def function():
             pass
 
         @flog
@@ -480,3 +480,55 @@ def test_affects_to_global_fields_stores(handler):
         function_2()
 
         assert handler.last.get('lol') is None
+
+        handler.clean()
+
+def test_base_behavior_with_ellipsis(handler):
+    """
+    Проверяем работу троеточия (ellipsis), что срабатывают и объявленные глобально поля и локальные.
+    """
+    config.set(pool_size=0)
+
+    def global_exctractor(log_item):
+        return 'global'
+
+    def local_exctractor(log_item):
+        return 'local'
+
+    config.add_fields(global_item=field(global_exctractor))
+
+    @flog(extra_fields=[{'local': field(local_exctractor)}, ...])
+    def function():
+        pass
+
+    function()
+
+    assert handler.last['local'] == 'local'
+    assert handler.last['global_item'] == 'global'
+
+    config.delete_fields('global_item')
+
+def test_base_behavior_without_ellipsis(handler):
+    """
+    Проверяем, что без троеточия (ellipsis) срабатывают только локальные поля, а глобальные не используются.
+    """
+    config.set(pool_size=0)
+
+    def global_exctractor(log_item):
+        return 'global'
+
+    def local_exctractor(log_item):
+        return 'local'
+
+    config.add_fields(global_item=field(global_exctractor))
+
+    @flog(extra_fields=[{'local': field(local_exctractor)}])
+    def function():
+        pass
+
+    function()
+
+    assert handler.last['local'] == 'local'
+    assert handler.last.get('global_item') is None
+
+    config.delete_fields('global_item')
