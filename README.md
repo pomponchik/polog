@@ -445,7 +445,7 @@ from polog import config
 config.set_log_as_built_in()
 ```
 
-Далее вы подробнее узнаете, как все это работает.
+Далее вы подробнее узнаете, как все это работает. Там ```log()``` не будет дополнительно импортироваться.
 
 
 ### Декорируем функции
@@ -457,9 +457,6 @@ config.set_log_as_built_in()
 Параметр ```message``` можно использовать для добавления произвольного текста к каждому логу.
 
 ```python
-from polog import log
-
-
 @log(message='This function is very important!!!')
 def very_important_function():
   ...
@@ -470,7 +467,7 @@ def very_important_function():
 Если в задекорированной функции возникло необработанное исключение, по умолчанию ```@log``` записывает его, после чего подменяет внутренним исключением ```LoggedError```. В дальнейшем, если логгеру встречается это исключение, оно игнорируется. Отловить его вы  можете следующим образом:
 
 ```python
-from polog import log, LoggedError
+from polog import LoggedError
 
 
 @log
@@ -611,7 +608,7 @@ def some_function():
 Пример работы:
 
 ```python
-from polog import log, message
+from polog import message
 
 
 @log(message='original message')
@@ -644,9 +641,6 @@ def some_function():
 Пример использования:
 
 ```python
-from polog import log
-
-
 log('Very important message!!!')
 ```
 
@@ -664,7 +658,7 @@ log('Very important message!!!', level=40)
 При желании, вы можете вызывать от объекта ```log``` методы, соответствующие названиям зарегистрированных ранее уровней логирования:
 
 ```python
-from polog import config, log
+from polog import config
 # Присваиваем уровню 100 имя "lol".
 config.levels(lol=100)
 # Регистрируем лог уровня "lol".
@@ -704,7 +698,7 @@ except ZeroDivisionError as e:
 Также вы можете передавать в ```log()``` произвольные переменные, которые считаете нужным залогировать. Для этого нужно использовать функцию ```json_vars()```, которая принимает любые аргументы и переводит их в стандартный json-формат:
 
 ```python
-from polog import log, json_vars
+from polog import json_vars
 
 
 def bar(a, b, c, other=None):
@@ -820,7 +814,6 @@ log.get_handlers()
 ```python
 import datetime
 from django.http import HttpResponse
-from polog import log
 
 
 @log
@@ -899,7 +892,7 @@ def current_datetime(request):
 Простейшая функция-обработчик может выглядеть примерно так:
 
 ```python
-from polog import config, log
+from polog import config
 
 
 def print_function_name(log_item):
@@ -992,9 +985,6 @@ config.add_handlers(
 Теперь используем их:
 
 ```python
-from polog import log
-
-
 @log(handlers=[handler_3, 'lol.kek'])
 def function(a, b):
   return a * b
