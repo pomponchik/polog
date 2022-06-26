@@ -1,3 +1,5 @@
+import builtins
+
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
 from polog.core.utils.signature_matcher import SignatureMatcher
@@ -186,3 +188,11 @@ class config:
             if not isinstance(name, str):
                 raise KeyError('Fields are deleted by name. The name is an instance of the str class.')
             engine_fields.pop(name)
+
+    @staticmethod
+    def set_log_as_built_in():
+        """
+        Устанавливаем функцию log() как встроенную функцию.
+        Это значит, что ее можно использовать в любом месте программы, не импортируя.
+        """
+        builtins.log = log

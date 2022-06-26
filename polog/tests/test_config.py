@@ -1,5 +1,6 @@
 import time
 import json
+from multiprocessing import Process
 
 import pytest
 import ujson
@@ -8,6 +9,7 @@ from polog import config, handle_log as log, field, flog
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
 from polog.data_structures.trees.named_tree.tree import NamedTree
+from polog.tests.test_config_without_log import do_log
 
 
 def test_set_valid_key_delay_before_exit():
@@ -332,3 +334,13 @@ def test_forbidden_name_for_level():
         config.levels(_maybe_raise=5)
     with pytest.raises(NameError):
         config.levels(_specific_processing=5)
+
+def test_set_log_as_built_in(filename_for_test, number_of_strings_in_the_files):
+    """
+    Проверяем, что использование функции log() без импорта работает.
+    """
+    process = Process(target=do_log, args=(filename_for_test, ))
+    process.start()
+    process.join()
+
+    assert number_of_strings_in_the_files(filename_for_test) == 1
