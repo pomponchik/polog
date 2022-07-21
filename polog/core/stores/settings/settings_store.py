@@ -162,6 +162,12 @@ class SettingsStore(ReadOnlySingleton):
             },
             action=fields_intersection_action,
         ),
+        'unknown_fields_in_handle_logs': SettingPoint(
+            True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
     }
     points_are_informed = False
     lock = Lock()

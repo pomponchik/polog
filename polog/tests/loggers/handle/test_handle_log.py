@@ -159,3 +159,30 @@ def test_filter_logs_by_level(handler):
     log('kek', level=1)
     time.sleep(0.0001)
     assert handler.last is None
+
+def test_set_value_to_not_specified_field_by_default(handler):
+    """
+    Пробуем скормить ручному логгеру поле с неизвестным ранее названием.
+    Ожидаемое поведение по умолчанию (то есть с настройкой unknown_fields_in_handle_logs=True): значение должно напрямую оказаться в логе.
+    """
+    config.set(pool_size=0, unknown_fields_in_handle_logs=True)
+
+    assert not config.get_all_fields('kekopekokek')
+
+    log('kek', kekopekokek='kek')
+    assert handler.last['kekopekokek'] == 'kek'
+
+    log('kek', kekopekokek=5)
+    assert handler.last['kekopekokek'] == 5
+
+def test_set_value_to_not_specified_field_false(handler):
+    """
+    Пробуем скормить ручному логгеру поле с неизвестным ранее названием.
+    Ожидаемое модифицированное поведение (то есть с настройкой unknown_fields_in_handle_logs=False): должно подняться исключение.
+    """
+    config.set(pool_size=0, unknown_fields_in_handle_logs=False)
+
+    assert not config.get_all_fields('kekopekokek')
+
+    with pytest.raises(KeyError):
+        log('kek', kekopekokek='kek')
