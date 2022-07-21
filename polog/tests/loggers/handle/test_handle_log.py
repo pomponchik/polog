@@ -101,14 +101,6 @@ def test_another_field(handler):
     time.sleep(0.0001)
     assert handler.last['lolkek'] == 'lol'
 
-def test_unknown_field(handler):
-    """
-    Проверяем, что при попытке записать в поле, не зарегистрированное ранее через config, поднимется исключение.
-    """
-    config.set(silent_internal_exceptions=False)
-    with pytest.raises(KeyError):
-        log('kek', lolkekcheburek='lol')
-
 def test_getattribute(handler):
     """
     log() должно быть возможно вызывать не только непосредственно, но и через методы, имена которых соответствуют зарегистрированным пользователем уровням логирования.

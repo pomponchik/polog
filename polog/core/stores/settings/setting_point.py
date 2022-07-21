@@ -115,14 +115,12 @@ class SettingPoint:
         with self.lock:
             return self.value
 
-    #@exception_escaping
+    @exception_escaping
     def do_action(self, old_value, new_value):
         """
         Выполняем функцию, переданную пользователем, после сохранения нового значения.
         """
-        print('doDOdo')
         self.action(old_value, new_value, self.store)
-        print('after')
 
     def prove_conflicts(self, old_value, new_value):
         """
