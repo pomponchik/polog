@@ -22,7 +22,7 @@ class SettingsStore(ReadOnlySingleton):
     # По сути весь класс SettingsStore проксирует доступ к этому словарю.
     points = {
         'pool_size': SettingPoint(
-            2,
+            0,
             proves={
                 'the value must be an integer': lambda x: isinstance(x, int),
                 'the value must be greater than or equal to zero': lambda x: x >= 0,
