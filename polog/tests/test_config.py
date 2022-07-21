@@ -99,12 +99,15 @@ def test_levels_set_wrong_value():
         config.levels(lol=-100)
     with pytest.raises(TypeError):
         config.levels(lol=1.5)
+    with pytest.raises(TypeError):
+        config.levels(lol='1.5')
 
 def test_standard_levels():
     """
     Проверяем, что уровни логирования из стандартной схемы устанавливаются.
     """
     config.standard_levels()
+
     assert Levels.get('DEBUG') == 10
     assert Levels.get('INFO') == 20
     assert Levels.get('WARNING') == 30
