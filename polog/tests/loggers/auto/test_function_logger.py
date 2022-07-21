@@ -397,6 +397,10 @@ def test_multiple_extra_fields_dicts(handler):
     Проверяем, что при передаче списка из нескольких словарей, поля задействуются из обоих.
     Делаем две проверки: для extra_fields и для extra_engine_fields.
     """
+    # На всякий случай чистим глобальные хранилища полей.
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+    
     config.set(pool_size=0)
 
     def exctractor_1(log_item):
@@ -426,6 +430,10 @@ def test_multiple_extra_fields_dicts_and_ellipsis(handler):
     Пробуем разное количество троеточий в списке, ничего не должно ломаться.
     В остальном тест идентичен test_multiple_extra_fields_dicts().
     """
+    # На всякий случай чистим глобальные хранилища полей.
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
     config.set(pool_size=0)
 
     def exctractor_1(log_item):
@@ -459,6 +467,10 @@ def test_affects_to_global_fields_stores(handler):
     """
     Проверяем, что установленные локально в одном декораторе поля не влияют на глобальное хранилище дополнительных полей.
     """
+    # На всякий случай чистим глобальные хранилища полей.
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
     config.set(pool_size=0)
 
     def exctractor(log_item):

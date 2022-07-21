@@ -190,6 +190,24 @@ class config:
             engine_fields.pop(name)
 
     @staticmethod
+    def get_in_place_fields(*names):
+        if not names:
+            return {**in_place_fields}
+        return {name: in_place_fields.get(name) for name in names if in_place_fields.get(name) is not None}
+
+    @staticmethod
+    def get_engine_fields(*names):
+        if not names:
+            return {**engine_fields}
+        return {name: engine_fields.get(name) for name in names if engine_fields.get(name) is not None}
+
+    @classmethod
+    def get_all_fields(cls, *names):
+        result = {**cls.get_in_place_fields(*names)}
+        result.update(cls.get_engine_fields(*names))
+        return result
+
+    @staticmethod
     def set_log_as_built_in():
         """
         Устанавливаем функцию log() как встроенную функцию.

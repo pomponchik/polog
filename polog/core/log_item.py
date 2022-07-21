@@ -19,6 +19,20 @@ class LogItem:
 
     __slots__ = ('_function_input_data', '_handlers', 'fields', 'extra_fields')
 
+    def __new__(cls, **kwargs):
+        """
+
+        """
+        def __new__(cls, **kwargs):
+            return object.__new__(cls, **kwargs)
+
+        from polog.core.stores.settings.settings_store import SettingsStore
+        cls.store = SettingsStore()
+        cls._fields_intersection = cls.store['fields_intersection']
+
+        cls.__new__ = __new__
+        return __new__(cls, **kwargs)
+
     def __getitem__(self, key):
         """
         Возвращаем содержимое полей по ключу.
@@ -159,7 +173,7 @@ class LogItem:
         """
         data = self.fields
         for name, field in fields.items():
-            if name not in data:
+            if name not in data or self._fields_intersection:
                 try:
                     value = field.get_data(self)
                     data[name] = value

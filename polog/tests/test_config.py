@@ -5,7 +5,7 @@ from multiprocessing import Process
 import pytest
 import ujson
 
-from polog import config, handle_log as log, field, flog
+from polog import config, handle_log, field, flog, log
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
 from polog.data_structures.trees.named_tree.tree import NamedTree
@@ -124,7 +124,7 @@ def test_add_handlers():
     def new_handler(log):
         lst.append(log['level'])
     config.add_handlers(new_handler)
-    log('lol')
+    handle_log('lol')
     time.sleep(0.0001)
     assert len(lst) > 0
 
@@ -231,7 +231,7 @@ def test_add_engine_field(handler):
     """
     def extractor(log):
         return 'lol'
-    @flog
+    @log
     def function():
         pass
     config.add_engine_fields(new_field=field(extractor))
@@ -246,7 +246,7 @@ def test_delete_field(handler):
     """
     def extractor(log):
         return 'lol'
-    @flog
+    @log
     def function():
         pass
     config.add_fields(new_field=field(extractor))
@@ -261,7 +261,7 @@ def test_delete_engine_field(handler):
     """
     def extractor(log):
         return 'lol'
-    @flog
+    @log
     def function():
         pass
     config.add_engine_fields(new_field=field(extractor))
@@ -344,3 +344,193 @@ def test_set_log_as_built_in(filename_for_test, number_of_strings_in_the_files):
     process.join()
 
     assert number_of_strings_in_the_files(filename_for_test) == 1
+
+def test_set_in_place_fields_and_get_it_all():
+    """
+    Пробуем передать поля для извлечения "на месте" в конфиг и потом проверяем, что они же и возвращаются.
+    """
+    lol_field = field(lambda x: 'lol')
+    kek_field = field(lambda x: 'kek')
+
+    config.add_fields(lol=lol_field)
+    config.add_fields(kek=kek_field)
+
+    all_in_place_fields = config.get_in_place_fields()
+
+    assert len(all_in_place_fields) >= 2
+    assert all_in_place_fields['lol'] is lol_field
+    assert all_in_place_fields['kek'] is kek_field
+
+def test_set_engine_fields_and_get_it_all():
+    """
+    Пробуем передать поля для извлечения внутри движка в конфиг и потом проверяем, что они же и возвращаются.
+    """
+    lol_field = field(lambda x: 'lol')
+    kek_field = field(lambda x: 'kek')
+
+    config.add_engine_fields(lol=lol_field)
+    config.add_engine_fields(kek=kek_field)
+
+    engine_fields = config.get_engine_fields()
+
+    assert len(engine_fields) >= 2
+    assert engine_fields['lol'] is lol_field
+    assert engine_fields['kek'] is kek_field
+
+def test_set_in_place_field_and_get_it():
+    """
+    Пробуем передать поля для извлечения "на месте" в конфиг, после чего извлекаем по имени только одно из них.
+    Проверяем, что возвращается оно и только оно.
+    """
+    lol_field = field(lambda x: 'lol')
+    kek_field = field(lambda x: 'kek')
+
+    config.add_fields(lol=lol_field)
+    config.add_fields(kek=kek_field)
+
+    all_in_place_fields = config.get_in_place_fields('lol')
+
+    assert len(all_in_place_fields) == 1
+    assert all_in_place_fields['lol'] is lol_field
+
+def test_set_engine_field_and_get_it():
+    """
+    Пробуем передать поля для извлечения внутри движка в конфиг, после чего извлекаем по имени только одно из них.
+    Проверяем, что возвращается оно и только оно.
+    """
+    lol_field = field(lambda x: 'lol')
+    kek_field = field(lambda x: 'kek')
+
+    config.add_engine_fields(lol=lol_field)
+    config.add_engine_fields(kek=kek_field)
+
+    engine_fields = config.get_engine_fields('lol')
+
+    assert len(engine_fields) == 1
+    assert engine_fields['lol'] is lol_field
+
+def test_set_and_get_engine_and_in_place_fields_without_intersection():
+    """
+    Проверяем, что поля для извлечения сразу и внутри движка - не пересекаются.
+    """
+    lol_engine_field = field(lambda x: 'lol')
+    kek_engine_field = field(lambda x: 'kek')
+    kekburek_engine_field = field(lambda x: 'kekburek')
+    assert not config.get_engine_fields('kekburek')
+
+    lol_in_place_field = field(lambda x: 'lol')
+    kek_in_place_field = field(lambda x: 'kek')
+    berekuk_in_place_field = field(lambda x: 'berekuk')
+    assert not config.get_in_place_fields('berekuk')
+
+    config.add_engine_fields(lol=lol_engine_field)
+    config.add_engine_fields(kek=kek_engine_field)
+    config.add_engine_fields(kekburek=kekburek_engine_field)
+
+    config.add_fields(lol=lol_in_place_field)
+    config.add_fields(kek=kek_in_place_field)
+    config.add_fields(berekuk=berekuk_in_place_field)
+
+    in_place_fields = config.get_in_place_fields()
+    engine_fields = config.get_engine_fields()
+
+    assert in_place_fields['lol'] is not engine_fields['lol']
+    assert in_place_fields['kek'] is not engine_fields['kek']
+
+    assert engine_fields['lol'] is not engine_fields['kek']
+    assert in_place_fields['lol'] is not in_place_fields['kek']
+
+    assert 'kekburek' in engine_fields
+    assert 'kekburek' not in in_place_fields
+
+    assert 'berekuk' in in_place_fields
+    assert 'berekuk' not in engine_fields
+
+def test_get_all_fields_without_intersection():
+    """
+    Пробуем получить все дополнительные поля (то есть предназначенные как для извлечения "на месте", так и внутри движка).
+    Но без пересечения имен, то есть мы не проверяем приоритет. Мы проверяем только что возвращаются все поля, которые мы передали.
+    Предварительно чистим все старые поля, которые могли создаваться в рамках других тестов.
+    """
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
+    lol_engine_field = field(lambda x: 'lol')
+    kek_in_place_field = field(lambda x: 'kek')
+
+    config.add_engine_fields(lol=lol_engine_field)
+    config.add_fields(kek=kek_in_place_field)
+
+    all_fields = config.get_all_fields()
+
+    assert len(all_fields) == 2
+    assert all_fields['lol'] is lol_engine_field
+    assert all_fields['kek'] is kek_in_place_field
+
+def test_get_all_fields_without_intersection_by_names():
+    """
+    Проверяем то же самое, что и в test_get_all_fields_without_intersection(), но здесь нас интересует фильтрация результата.
+    """
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
+    lol_engine_field = field(lambda x: 'lol')
+    kek_in_place_field = field(lambda x: 'kek')
+
+    config.add_engine_fields(lol=lol_engine_field)
+    config.add_fields(kek=kek_in_place_field)
+
+    all_fields = config.get_all_fields('lol')
+
+    assert len(all_fields) == 1
+    assert all_fields['lol'] is lol_engine_field
+
+    all_fields = config.get_all_fields('kek')
+
+    assert len(all_fields) == 1
+    assert all_fields['kek'] is kek_in_place_field
+
+    all_fields = config.get_all_fields('lol', 'kek')
+
+    assert len(all_fields) == 2
+    assert all_fields['lol'] is lol_engine_field
+    assert all_fields['kek'] is kek_in_place_field
+
+def test_get_all_fields_with_intersection(handler):
+    """
+    Здесь проверются две вещи:
+    1. При пересечении имен полей для извлечения "на месте" и внутри движка, по итогу возвращается то, что для движка.
+    2. Этот порядок совпадает с реальным порядком извлечения полей внутри Polog (то есть, поскольку движковые поля извлекаются позднее, они перекрывают поля для извлечения "на месте").
+    """
+    config.set(pool_size=0)
+
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
+    lol_engine_field = field(lambda x: 'lol_engine')
+    lol_in_place_field = field(lambda x: 'lol_in_place')
+
+    config.add_engine_fields(lol=lol_engine_field)
+    config.add_fields(lol=lol_in_place_field)
+
+    all_fields = config.get_all_fields('lol')
+
+    assert len(all_fields) == 1
+    assert all_fields['lol'] is lol_engine_field
+
+    all_fields = config.get_all_fields()
+
+    assert len(all_fields) == 1
+    assert all_fields['lol'] is lol_engine_field
+
+    @log
+    def kek():
+        pass
+
+    config.set(fields_intersection=True)
+    kek()
+    assert handler.last['lol'] == 'lol_engine'
+
+    config.set(fields_intersection=False)
+    kek()
+    assert handler.last['lol'] == 'lol_in_place'

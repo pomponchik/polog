@@ -3,10 +3,11 @@ import inspect
 from threading import Lock
 
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
-from polog.core.utils.reload_engine import reload_engine
 from polog.core.stores.settings.setting_point import SettingPoint
 from polog.core.stores.levels import Levels
 from polog.core.engine.real_engines.fabric import real_engine_fabric
+
+from polog.core.stores.settings.actions import reload_engine, fields_intersection_action
 
 
 class SettingsStore(ReadOnlySingleton):
@@ -29,7 +30,7 @@ class SettingsStore(ReadOnlySingleton):
             conflicts={
                 'max_queue_size': lambda new_value, old_value, other_field_value: new_value == 0 and other_field_value != 0,
             },
-            action=lambda old_value, new_value, store: reload_engine() if old_value != new_value else None,
+            action=reload_engine,
             read_lock=True,
             shared_lock_with=(
                 'max_queue_size',
@@ -45,7 +46,7 @@ class SettingsStore(ReadOnlySingleton):
             conflicts={
                 'pool_size': lambda new_value, old_value, other_field_value: new_value != 0 and other_field_value == 0,
             },
-            action=lambda old_value, new_value, store: reload_engine() if old_value != new_value else None,
+            action=reload_engine,
             read_lock=True,
             shared_lock_with=(
                 'pool_size',
@@ -153,6 +154,13 @@ class SettingsStore(ReadOnlySingleton):
             proves={
                 'the value must be boolean': lambda x: isinstance(x, bool),
             },
+        ),
+        'fields_intersection': SettingPoint(
+            False,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+            action=fields_intersection_action,
         ),
     }
     points_are_informed = False

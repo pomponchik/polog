@@ -10,8 +10,6 @@ def ip_extractor(log):
     ip = request.META.get('REMOTE_ADDR')
     return ip
 
-config.add_fields(ip=field(ip_extractor))
-
 class Request:
     META = {'REMOTE_ADDR': '123.456.789.010'}
 
@@ -21,6 +19,8 @@ def test_django_example(handler):
     Проверяем, что пример кода из README.md работает.
     В данном случае мы проверяем, что извлекается ip-адрес из обработчика запросов Django.
     """
+    config.add_fields(ip=field(ip_extractor))
+
     @flog
     def django_handler_example(request):
         html = 'text'
@@ -37,6 +37,8 @@ def test_django_example_error(handler):
     В README.md есть пример кода с извлечением ip-адреса в обработчике запроса Django.
     В данном теста мы проверяем, что он работает.
     """
+    config.add_fields(ip=field(ip_extractor))
+    
     @flog
     def django_handler_error(request):
         html = 1 / 0

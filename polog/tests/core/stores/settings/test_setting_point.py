@@ -207,3 +207,35 @@ def test_conflicts():
         store['point_3'] = 'cheburek_kek'
 
     store['point_3'] = 'lolkek'
+
+def test_run_callback_when_setting_changes():
+    """
+    Проверяем, что в нормальных условиях (когда новое значение корректно и принимается) установленный коллбек - вызывается.
+    """
+    kek = 0
+    def callback(a, b, c):
+        nonlocal kek
+        kek = 1
+
+    point = SettingPoint('lol', action=callback)
+    point.set_store_object({})
+    point.set('kek')
+
+    assert kek == 1
+
+def test_run_callback_when_setting_no_changes():
+    """
+    Проверяем, что если новое значение не принимается, то коллбек вызван не будет.
+    """
+    kek = 0
+    def callback(a, b, c):
+        nonlocal kek
+        kek = 1
+
+    point = SettingPoint('lol', action=callback, proves={'lol': lambda x: x != 'kek'})
+    point.set_store_object({})
+
+    with pytest.raises(ValueError):
+        point.set('kek')
+
+    assert kek == 0

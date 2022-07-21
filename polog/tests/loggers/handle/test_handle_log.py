@@ -142,7 +142,7 @@ def test_extract_function_data_wrong_function_object():
         @__module__.getter
         def __module__(self):
             raise AttributeError('kek')
-    
+
     pseudo = PseudoFunction()
     data = {'function': pseudo}
     log._extract_function_data(data)
