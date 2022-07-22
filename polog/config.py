@@ -63,7 +63,7 @@ class config:
         Установка уровней логирования в соответствии со стандартной схемой (кроме уровня NOTSET):
         https://docs.python.org/3.8/library/logging.html#logging-levels
         """
-        levels = {'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}
+        levels = {'NOTSET': 0, 'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}
         for key, value in levels.items():
             Levels.set(key, value)
             Levels.set(key.lower(), value)

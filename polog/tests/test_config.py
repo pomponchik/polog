@@ -108,6 +108,7 @@ def test_standard_levels():
     """
     config.standard_levels()
 
+    assert Levels.get('NOTSET') == 0
     assert Levels.get('DEBUG') == 10
     assert Levels.get('INFO') == 20
     assert Levels.get('WARNING') == 30
@@ -537,3 +538,24 @@ def test_get_all_fields_with_intersection(handler):
     config.set(fields_intersection=False)
     kek()
     assert handler.last['lol'] == 'lol_in_place'
+
+def test_set_zero_level(handler):
+    """
+    Пробуем установить нулевой уровень в качестве базового. Должно работать.
+    """
+    config.set(level=0, pool_size=0)
+
+    log('kek', level=1)
+
+    assert handler.last is not None
+
+def test_set_name_to_zero_level(handler):
+    """
+    Устанавливаем имя для нулевого уровня. Должно работать.
+    """
+    config.set(level=0, pool_size=0)
+    config.levels(lol=0)
+
+    log('kek', level='lol')
+
+    assert handler.last is not None
