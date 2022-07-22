@@ -73,7 +73,7 @@ class SettingsStore(ReadOnlySingleton):
             },
         ),
         'level': SettingPoint(
-            1,
+            0,
             proves={
                 'the value can be a string or an integer greater than or equal to zero': lambda x: (isinstance(x, int) and x >= 0) or isinstance(x, str),
             },
