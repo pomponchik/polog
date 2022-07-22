@@ -243,3 +243,83 @@ def test_only_errors_for_file_handler(filename_for_test, number_of_strings_in_th
     log('kek', success=False)
 
     assert number_of_strings_in_the_files(filename_for_test) == 3
+
+def test_check_chunks_output(filename_for_test):
+    """
+    Проверяем, что вывод содержит некоторые ожидаемые кусочки.
+    """
+    file_handler = file_writer(filename_for_test)
+    config.add_handlers(kek=file_handler)
+    config.set(pool_size=0, level=1)
+
+    log('kek', level=10)
+
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+
+    assert 'MANUAL' in string
+    assert '"kek"' in string
+    assert 'UNKNOWN' in string
+
+    log('kek', level=10, success=True)
+
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+
+    assert 'SUCCESS' in string
+
+    log('kek', level=10, success=False)
+
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+
+    assert 'ERROR' in string
+
+    config.delete_handlers('kek')
+
+def test_check_full_string(handler, filename_for_test):
+    """
+    По сути сквозной тест.
+    Проверяем, что строка лога, выведенного в файл, полностью соответствует шаблону.
+    """
+    file_handler = file_writer(filename_for_test)
+    config.add_handlers(kek=file_handler)
+    config.set(pool_size=0, level=1)
+    config.levels(test_check_full_string_level=10)
+
+    log('kek', level='test_check_full_string_level', success=True)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS | MANUAL | "kek" | where: base.?'
+
+    log('kek', level='test_check_full_string_level', success=False)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level |  ERROR  | MANUAL | "kek" | where: base.?'
+
+    log('kek', level='test_check_full_string_level')
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | UNKNOWN | MANUAL | "kek" | where: base.?'
+
+    log('kek', level='test_check_full_string_level', lol=10)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | UNKNOWN | MANUAL | "kek" | where: base.? | lol: 10'
+
+    log('kek', level='test_check_full_string_level', lol="kek")
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | UNKNOWN | MANUAL | "kek" | where: base.? | lol: "kek"'
+
+    @log(message='kek', level='test_check_full_string_level')
+    def function(a, b, c):
+        return a + b + c
+    function(1, 2, 3)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | result: 6 (int)'
+
+    config.delete_handlers('kek')
