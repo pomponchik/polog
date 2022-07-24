@@ -369,7 +369,7 @@ def test_compare_engine_thread_native_id_and_local(handler):
     """
     Доказываем, что поля extra_fields извлекаются в том же потоке, в котором вызывался логгер, а extra_engine_fields (при условии использования многопоточного движка) - в каком-то другом потоке.
     """
-    config.set(pool_size=2)
+    config.set(pool_size=2, level=0)
 
     def exctractor(log_item):
         return get_native_id()
@@ -400,7 +400,7 @@ def test_multiple_extra_fields_dicts(handler):
     # На всякий случай чистим глобальные хранилища полей.
     config.delete_engine_fields(*(config.get_engine_fields().keys()))
     config.delete_fields(*(config.get_in_place_fields().keys()))
-    
+
     config.set(pool_size=0)
 
     def exctractor_1(log_item):

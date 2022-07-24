@@ -11,7 +11,7 @@ class BaseLogger(AbstractHandleLogger):
     Экземпляры данного класса - вызываемые объекты, каждый вызов которых означает создание лога.
     """
     _default_values = {
-        'level': lambda fields: SettingsStore()['level'] if fields.get('success', True) else SettingsStore()['errors_level'],
+        'level': lambda fields: SettingsStore()['default_level'] if fields.get('success', True) else SettingsStore()['default_error_level'],
         'time': lambda fields: datetime.datetime.now(),
     }
 

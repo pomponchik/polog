@@ -79,7 +79,17 @@ class SettingsStore(ReadOnlySingleton):
             },
             converter=Levels.get,
         ),
-        'errors_level': SettingPoint(
+        'default_level': SettingPoint(
+            1,
+            proves={
+                'the value can be a string or an integer greater than or equal to zero': lambda x: (isinstance(x, int) and x >= 0) or isinstance(x, str),
+            },
+            converter=Levels.get,
+            shared_lock_with=(
+                'default_error_level',
+            ),
+        ),
+        'default_error_level': SettingPoint(
             2,
             proves={
                 'the value can be a string or an integer greater than or equal to zero': lambda x: (isinstance(x, int) and x >= 0) or isinstance(x, str),
@@ -216,6 +226,18 @@ class SettingsStore(ReadOnlySingleton):
         Проверка того, что переданное название пункта настроек существует.
         """
         return key in self.points
+
+    def __str__(self):
+        """
+        Распечатываем текущее состояние настроек.
+        """
+        data = {key: self.force_get(key) for key in self.points}
+        strings = {key: f'"{value}"' for key, value in data.items()}
+        for key, value in strings.items():
+            data[key] == strings[key]
+        data = [f'{key} = {value}' for key, value in data.items()]
+        data = ', '.join(data)
+        return f'<SettingStore object with data: {data}>'
 
     def force_get(self, key):
         """

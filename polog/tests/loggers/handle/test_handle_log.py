@@ -157,7 +157,7 @@ def test_set_value_to_not_specified_field_by_default(handler):
     Пробуем скормить ручному логгеру поле с неизвестным ранее названием.
     Ожидаемое поведение по умолчанию (то есть с настройкой unknown_fields_in_handle_logs=True): значение должно напрямую оказаться в логе.
     """
-    config.set(pool_size=0, unknown_fields_in_handle_logs=True)
+    config.set(pool_size=0, unknown_fields_in_handle_logs=True, level=0)
 
     assert not config.get_all_fields('kekopekokek')
 

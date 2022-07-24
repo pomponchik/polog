@@ -16,7 +16,7 @@ def test_set_and_get():
             'original_exceptions': False,
             'level': 5,
             'service_name': 'lol',
-            'errors_level': 7,
+            'default_error_level': 7,
             'max_delay_before_exit': 5,
         },
         {
@@ -24,7 +24,7 @@ def test_set_and_get():
             'original_exceptions': True,
             'level': 3,
             'service_name': 'kek',
-            'errors_level': 12,
+            'default_error_level': 12,
             'max_delay_before_exit': 3,
         },
     ]
@@ -43,7 +43,7 @@ def test_set_error_values():
         'original_exceptions': [None, 'no', 7, 1.5],
         'level': [1.2, None, -6],
         'service_name': [1.2, None],
-        'errors_level': [1.2, None, -5],
+        'default_error_level': [1.2, None, -5],
         'max_delay_before_exit': ['kek', None, -1],
         'json_module': ['kek', 1, lambda x: 'kek'],
     }
@@ -106,7 +106,8 @@ def test_set_json_module():
 @pytest.mark.parametrize("field_name", [
     'pool_size',
     'level',
-    'errors_level',
+    'default_level',
+    'default_error_level',
     'max_queue_size',
     'started',
     'original_exceptions',
@@ -127,3 +128,19 @@ def test_operator_in(field_name):
 
     assert field_name in store
     assert 'kek' not in store
+
+def test_store_to_string():
+    """
+    Проверяем, что состояние настроек выводится корректно.
+    """
+    store = SettingsStore()
+    store_string = str(store)
+
+    assert store_string.startswith('<SettingStore object with data: ')
+    assert store_string.endswith('>')
+
+    for key in store.points:
+        value = store.force_get(key)
+        if isinstance(value, str):
+            value = f'"{value}"'
+        assert f'{key} = {value}'

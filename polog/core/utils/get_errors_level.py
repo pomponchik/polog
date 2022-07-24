@@ -13,8 +13,8 @@ def get_errors_level(default_in_function):
     То же самое происходит, если указан невозможный уровень логирования (отрицательный, например).
     """
     if default_in_function is None:
-        return SettingsStore()['errors_level']
+        return SettingsStore()['default_error_level']
     try:
         return Levels.get(default_in_function)
     except (KeyError, ValueError):
-        return SettingsStore()['errors_level']
+        return SettingsStore()['default_error_level']

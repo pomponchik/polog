@@ -206,7 +206,7 @@ class AbstractHandleLogger:
             if change_success:
                 fields['success'] = False
             if change_level and not ('level' in fields):
-                fields['level'] = self._settings['errors_level']
+                fields['level'] = self._settings['default_error_level']
 
     @staticmethod
     def _maybe_raise(exception, message):

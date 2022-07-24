@@ -32,11 +32,16 @@ def test_set_valid_key_delay_before_exit():
     config.set(level=2)
     assert SettingsStore()['level'] == 2
     config.set(level=1)
-    # errors_level
-    config.set(errors_level=1)
-    assert SettingsStore()['errors_level'] == 1
-    config.set(errors_level=2)
-    assert SettingsStore()['errors_level'] == 2
+    # default_level
+    config.set(default_level=1)
+    assert SettingsStore()['default_level'] == 1
+    config.set(default_level=2)
+    assert SettingsStore()['default_level'] == 2
+    # default_error_level
+    config.set(default_error_level=1)
+    assert SettingsStore()['default_error_level'] == 1
+    config.set(default_error_level=2)
+    assert SettingsStore()['default_error_level'] == 2
     # original_exceptions
     config.set(original_exceptions=True)
     assert SettingsStore()['original_exceptions'] == True

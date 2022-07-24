@@ -23,7 +23,7 @@ def test_base_writer(number_of_strings_in_the_files, delete_files):
     path = 'polog/tests/data/data.log'
     handler = file_writer(path)
     config.add_handlers(handler)
-    config.set(pool_size=0)
+    config.set(pool_size=0, level=0)
 
     for iteration in range(iterations):
         log('kek')
@@ -42,7 +42,7 @@ def test_output_to_console_is_working_without_path_argument():
     sys.stdout = instead_of_file
     handler = file_writer()
     config.add_handlers(handler)
-    config.set(pool_size=0)
+    config.set(pool_size=0, level=0)
 
     log('kek')
 
