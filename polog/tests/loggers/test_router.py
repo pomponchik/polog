@@ -100,6 +100,19 @@ def test_function_decorator_without_breacks_and_message_and_dotlevel(handler):
     assert handler.last is not None
     assert handler.last['level'] == 43
 
+def test_define_level_name_after_using_in_the_decorator(handler):
+    config.set(level=0, pool_size=0)
+
+    @log.test_define_level_name_after_using_in_the_decorator
+    def function(a, b):
+        return a + b
+
+    config.levels(test_define_level_name_after_using_in_the_decorator=456)
+
+    assert function(1, 3) == 4
+    assert handler.last is not None
+    assert handler.last['level'] == 456
+
 def test_message(handler):
     """
     Проверка, что редактирование сообщений лога работает.

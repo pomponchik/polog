@@ -124,6 +124,18 @@ def test_changed_flag():
     point.set('cheburek')
     assert point.changed == True
 
+def test_set_changet_flag_after_error():
+    """
+    Проверяем, что при откате значения (если оно не прошло проверку) флаг "changed" не изменяется.
+    """
+    point = SettingPoint('lol', proves={'lol': lambda x: x != 'kek'})
+    point.set_store_object({})
+
+    with pytest.raises(ValueError):
+        point.set('kek')
+
+    assert not point.changed
+
 def test_set_after_start():
     """
     Проверяем работоспособность флага 'change_only_before_start' в 4 возможных комбинациях.
