@@ -178,3 +178,69 @@ def test_set_value_to_not_specified_field_false(handler):
 
     with pytest.raises(KeyError):
         log('kek', kekopekokek='kek')
+
+def test_setting_and_not_setting_of_service_name_when_handle_logging(handler):
+    """
+    Наличие ключа "service_name" в логе зависит от значения соответствующей настройки. При None ключ должен отсутствовать.
+    Проверяем, что это так.
+    """
+    config.set(pool_size=0, service_name=None)
+
+    log('lol')
+
+    assert 'service_name' not in handler.last
+
+    handler.clean()
+
+    log('lol', exception=ValueError())
+
+    assert 'service_name' not in handler.last
+
+    handler.clean()
+    config.set(service_name='base')
+
+    log('kek')
+
+    assert handler.last['service_name'] == 'base'
+
+    handler.clean()
+
+    log('kek', exception=ValueError())
+
+    assert handler.last['service_name'] == 'base'
+
+def test_auto_flag_in_handle_logging(handler):
+    """
+    Проверяем, что флаг "auto" для логов, записанных вручную, проставляется в False.
+    """
+    log('kek')
+
+    assert handler.last['auto'] == False
+
+def test_handle_logger_wrong_values():
+    """
+    Для ряда полей существуют специальные проверки, не позволяющие записать туда не подходящие по формату значения.
+    Здесь мы пробуем записать неправильные значения и должны каждый раз ловить исключения.
+    """
+    with pytest.raises(ValueError):
+        log('kek', function=1)
+    with pytest.raises(ValueError):
+        log('kek', module=1)
+    with pytest.raises(ValueError):
+        log('kek', module=lambda x: 'lol')
+    with pytest.raises(ValueError):
+        log(message=123)
+    with pytest.raises(ValueError):
+        log('kek', level=0.1)
+    with pytest.raises(ValueError):
+        log('kek', level=1.0)
+    with pytest.raises(ValueError):
+        log('kek', level=[])
+    with pytest.raises(ValueError):
+        log('kek', local_variables=[])
+    with pytest.raises(ValueError):
+        log('kek', success=5)
+    with pytest.raises(ValueError):
+        log('kek', success='yes')
+    with pytest.raises(ValueError):
+        log('kek', vars=3)

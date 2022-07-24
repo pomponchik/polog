@@ -152,3 +152,13 @@ def test_write_string_message_to_log_of_smart_assert(handler):
     ass(False, 'kek')
 
     assert handler.last['message'] == 'kek'
+
+def test_auto_flag_in_smart_assert(handler):
+    """
+    Проверяем, что флаг "auto" для логов, записанных через ассерт, проставляется в False.
+    """
+    config.set(debug_mode=False, pool_size=0)
+    
+    ass(False, 'kek')
+
+    assert handler.last['auto'] == False

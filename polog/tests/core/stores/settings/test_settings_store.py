@@ -42,12 +42,22 @@ def test_set_error_values():
     """
     all_values = {
         'pool_size': [1.4, None, 'kek', -100],
-        'original_exceptions': [None, 'no', 7, 1.5],
-        'level': [1.2, None, -6],
-        'service_name': [1.2, None],
-        'default_error_level': [1.2, None, -5],
+        'max_queue_size': [-1, -100000, 1.0, 1.5, 'lol', lambda x: x],
+        'started': ['kek', False, 123],
+        'original_exceptions': [None, 'no', 7, 1.5, 'False'],
+        'level': [1.2, None, -6, [], {}],
+        'default_level': [1.2, None, -5, 'message', 'lol kek'],
+        'default_error_level': [1.2, None, -5, 'message', 'lol kek'],
+        'service_name': [1.2, 15, [], set(), 'lol kek', '78', '&r'],
+        'silent_internal_exceptions': [123, 'no', 'False', 1.2],
         'max_delay_before_exit': ['kek', None, -1],
-        'json_module': ['kek', 1, lambda x: 'kek'],
+        'delay_on_exit_loop_iteration_in_quants': ['kek', -1, -10000, 1.2, 1.0, []],
+        'engine': [1, 'kek', lambda x, y: x, lambda: 'kek', 1.2, [], set()],
+        'json_module': ['kek', 1, lambda x: 'kek', pytest],
+        'smart_assert_politic': ['kek', 1, True, [], set(), 1.2],
+        'debug_mode': [1, 2, 1.2, 'kek', [], lambda: 'kek'],
+        'fields_intersection': [1, 2, 3, 'kek', 1.2, [], set(), int, lambda: 'kek'],
+        'unknown_fields_in_handle_logs': [1, 2, 3, 'kek', 1.2, [], set(), int, lambda: 'kek'],
     }
     store = SettingsStore()
     for key, local_values in all_values.items():
@@ -105,31 +115,33 @@ def test_set_json_module():
     store['json_module'] = json
     assert store['json_module'] is json
 
-@pytest.mark.parametrize("field_name", [
-    'pool_size',
-    'level',
-    'default_level',
-    'default_error_level',
-    'max_queue_size',
-    'started',
-    'original_exceptions',
-    'service_name',
-    'silent_internal_exceptions',
-    'max_delay_before_exit',
-    'delay_on_exit_loop_iteration_in_quants',
-    'time_quant',
-    'engine',
-    'json_module',
-])
-def test_operator_in(field_name):
+def test_operator_in():
     """
     Проверяем, что оператор in работает корректно.
     Он должен возвращать bool-значение, в зависимости от существования данного пункта настроек.
     """
-    store = SettingsStore()
+    names = [
+        'pool_size',
+        'level',
+        'default_level',
+        'default_error_level',
+        'max_queue_size',
+        'started',
+        'original_exceptions',
+        'service_name',
+        'silent_internal_exceptions',
+        'max_delay_before_exit',
+        'delay_on_exit_loop_iteration_in_quants',
+        'time_quant',
+        'engine',
+        'json_module',
+    ]
 
-    assert field_name in store
-    assert 'kek' not in store
+    for field_name in names:
+        store = SettingsStore()
+
+        assert field_name in store
+        assert 'kek' not in store
 
 def test_store_to_string():
     """

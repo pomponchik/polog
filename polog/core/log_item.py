@@ -135,6 +135,13 @@ class LogItem:
         """
         return self.compare_or_raise(other, lambda a, b: a >= b, '>=')
 
+    def __hash__(self):
+        """
+        Получение хэша, хэш берется от поля "time".
+        Полезно, чтобы логи можно было складывать во множества, например.
+        """
+        return id(self.get('time'))
+
     def execute(self):
         """
         Метод, предназначенный для выполнения внутри движка.

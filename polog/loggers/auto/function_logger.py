@@ -152,6 +152,9 @@ class FunctionLogger:
                 args_dict['local_variables'] = get_locals_from_traceback()
                 args_dict['time_of_work'] = finish - start
                 args_dict['level'] = errors_level
+                service_name = self.settings['service_name']
+                if service_name is not None:
+                    args_dict['service_name'] = service_name
                 input_variables = json_vars(*args, **kwargs)
                 _message._copy_context(args_dict)
                 if not (input_variables is None):
@@ -169,6 +172,9 @@ class FunctionLogger:
             args_dict['result'] = json_one_variable(result)
             args_dict['time_of_work'] = finish - start
             args_dict['level'] = level
+            service_name = self.settings['service_name']
+            if service_name is not None:
+                args_dict['service_name'] = service_name
             _message._copy_context(args_dict)
             input_variables = json_vars(*args, **kwargs)
             if not (input_variables is None):

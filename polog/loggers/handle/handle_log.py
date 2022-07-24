@@ -17,6 +17,9 @@ class BaseLogger(AbstractHandleLogger):
 
     def _specific_processing(self, fields):
         fields['auto'] = False
+        service_name = self._settings['service_name']
+        if service_name is not None:
+            fields['service_name'] = service_name
         self._extract_exception(fields, change_success=True, change_level=True)
         self._extract_function_data(fields)
 

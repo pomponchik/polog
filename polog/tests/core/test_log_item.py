@@ -1,11 +1,12 @@
 import time
 import datetime
+from multiprocessing import Process, Queue
 
 import pytest
 
 from polog.errors import RewritingLogError
 from polog.core.log_item import LogItem, FunctionInputData
-from polog import field
+from polog import field, config, log
 
 
 def test_init_empty_log():
@@ -13,6 +14,7 @@ def test_init_empty_log():
     Проверяем, что инстанс лога без аргументов создается.
     """
     log = LogItem()
+    assert isinstance(log, LogItem)
 
 def test_set_field_to_log_error():
     """
@@ -487,3 +489,61 @@ def test_execute_log_item_extract_fields(handler):
     log.execute()
 
     assert handler.last[field_name] == 'kek'
+
+def test_sorting_log_items(handler):
+    """
+    В документации сказано, что коллекции логов можно сортировать.
+    Проверяем, что это работает.
+    """
+    config.set(pool_size=0)
+
+    random_range_collection = set()
+
+    log('first')
+    random_range_collection.add(handler.last)
+    log('second')
+    random_range_collection.add(handler.last)
+    log('third')
+    random_range_collection.add(handler.last)
+
+    collection = list(random_range_collection)
+    collection.sort()
+
+    assert collection[0]['message'] == 'first'
+    assert collection[1]['message'] == 'second'
+    assert collection[2]['message'] == 'third'
+
+def first_generation_of_the_log(queue):
+    """
+    Вспомогательная функция для test_first_generation_of_log_object().
+    """
+    result = [hasattr(LogItem, '_fields_intersection'), hasattr(LogItem, 'store')]
+
+    first_new = LogItem.__new__
+
+    log_item = LogItem()
+
+    result.append(hasattr(LogItem, '_fields_intersection'))
+    result.append(hasattr(LogItem, 'store'))
+
+    second_new = LogItem.__new__
+    result.append(first_new is second_new)
+
+    log_item = LogItem()
+
+    third_new = LogItem.__new__
+    result.append(second_new is third_new)
+
+    queue.put(result)
+
+def test_first_generation_of_log_object():
+    """
+    Проверяем, что при создании первого лога происходит инициализация некоторых свойств класса и подмена метода .__new__().
+    """
+    queue = Queue()
+
+    process = Process(target=first_generation_of_the_log, args=(queue, ))
+    process.start()
+    process.join()
+
+    assert queue.get() == [False, False, True, True, False, True]

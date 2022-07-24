@@ -11,6 +11,7 @@ from polog.core.stores.settings.settings_store import SettingsStore
 from polog.data_structures.trees.named_tree.tree import NamedTree
 from polog.utils.json_vars import json_one_variable
 from polog.core.log_item import LogItem
+from polog.core.utils.exception_escaping import exception_escaping
 
 
 def test_empty(handler):
@@ -583,12 +584,93 @@ def test_success_flag_when_error(handler):
 
     assert handler.last['success'] == False
 
+def test_result_is_json(handler):
+    """
+    Проверяем, что поле "result" содержит json с результатами работы обернутой декоратором функции.
+    """
+    @flog
+    def function():
+        return 1
+
+    function()
+
+    assert handler.last['result'] == SettingsStore()['json_module'].dumps({'value': 1, 'type': 'int'})
+
+def test_local_variables_is_json(handler):
+    """
+    Проверяем, что поле "local_variables" содержит json с локальными переменными обернутой декоратором функции, когда в той поднимается исключение.
+    """
+    @exception_escaping
+    @flog
+    def function():
+        a = 'kek'
+        raise ValueError('kek')
+
+    function()
+
+    assert handler.last['local_variables'] == SettingsStore()['json_module'].dumps({'kwargs': {'a': {'value': 'kek', 'type': 'str'}}})
+
+def test_traceback_is_json(handler):
+    """
+    Проверяем, что поле "traceback" содержит json со списком строк трейсбека обернутой декоратором функции, когда в той поднимается исключение.
+    """
+    @exception_escaping
+    @flog
+    def function():
+        a = 'kek'
+        raise ValueError('kek')
+
+    function()
+
+    assert isinstance(handler.last['traceback'], str)
+    assert isinstance(SettingsStore()['json_module'].loads(handler.last['traceback']), list)
+
+def test_setting_and_not_setting_of_service_name(handler):
+    """
+    Наличие ключа "service_name" в логе зависит от значения соответствующей настройки. При None ключ должен отсутствовать.
+    Проверяем, что это так.
+    """
+    config.set(pool_size=0, service_name=None)
+
+    @flog
+    def function():
+        pass
+    @flog
+    def error_function():
+        raise ValueError
+
+    function()
+
+    assert 'service_name' not in handler.last
+
+    handler.clean()
+
+    with pytest.raises(ValueError):
+        error_function()
+
+    assert 'service_name' not in handler.last
+
+    handler.clean()
+    config.set(service_name='base')
+
+    function()
+
+    assert handler.last['service_name'] == 'base'
+
+    handler.clean()
+
+    with pytest.raises(ValueError):
+        error_function()
+
+    assert handler.last['service_name'] == 'base'
+
+
 def test_all_requirement_fields_are_of_expected_classes(handler):
     """
     Проверяем, что в обычном случае (когда функция, обернутая декоратором @flog, просто вызывается и успешно отрабатывает) в логе содержатся все ожидаемые поля, а все значения этих полей относятся к ожидаемым классам.
     На всякий случай прогоняем проверку много раз.
     """
-    config.set(pool_size=0)
+    config.set(pool_size=0, service_name='base')
 
     number_of_tries = 10000
 
@@ -602,12 +684,75 @@ def test_all_requirement_fields_are_of_expected_classes(handler):
         'level': int,
         'auto': bool,
         'success': bool,
-        'service': str,
+        'service_name': str,
         'function': str,
+        'module': str,
+        'result': str,
     }
 
     for index in range(number_of_tries):
         function()
         for field_name, expected_class in fields.items():
             assert isinstance(handler.last[field_name], expected_class)
+        handler.clean()
+
+def test_all_requirement_fields_are_of_expected_classes_when_error(handler):
+    """
+    Проверяем, что в обычном случае (когда функция, обернутая декоратором @flog, просто вызывается и успешно отрабатывает) в логе содержатся все ожидаемые поля, а все значения этих полей относятся к ожидаемым классам.
+    На всякий случай прогоняем проверку много раз.
+    """
+    config.set(pool_size=0, service_name='base')
+
+    number_of_tries = 10000
+
+    @exception_escaping
+    @flog
+    def function():
+        a = 'kek'
+        raise ValueError('kek')
+
+    fields = {
+        'time': datetime,
+        'time_of_work': float,
+        'level': int,
+        'auto': bool,
+        'success': bool,
+        'service_name': str,
+        'function': str,
+        'module': str,
+        'exception_type': str,
+        'exception_message': str,
+        'traceback': str,
+        'local_variables': str,
+    }
+
+    for index in range(number_of_tries):
+        function()
+        for field_name, expected_class in fields.items():
+            assert isinstance(handler.last[field_name], expected_class)
+        handler.clean()
+
+def test_normal_log_from_decorator_does_not_contain_fields(handler):
+    """
+    Лог об успешной операции не должен содержать некоторые поля. Проверяем, что их действительно нет.
+    """
+    config.set(pool_size=0, service_name='base')
+
+    number_of_tries = 10000
+
+    @flog
+    def function():
+        pass
+
+    fields = [
+        'exception_type',
+        'exception_message',
+        'traceback',
+        'local_variables',
+    ]
+
+    for index in range(number_of_tries):
+        function()
+        for field_name in fields:
+            assert field_name not in handler.last
         handler.clean()

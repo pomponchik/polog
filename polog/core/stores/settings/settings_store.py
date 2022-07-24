@@ -97,10 +97,10 @@ class SettingsStore(ReadOnlySingleton):
             converter=Levels.get,
         ),
         'service_name': SettingPoint(
-            'base',
+            None,
             proves={
-                'the value can only be a string': lambda x: isinstance(x, str),
-                'the value must follow the rules for formatting identifiers in Python': lambda x: x.isidentifier(),
+                'the value can only be a string or a None': lambda x: isinstance(x, str) or isinstance(x, type(None)),
+                'the value must follow the rules for formatting identifiers in Python': lambda x: x.isidentifier() if isinstance(x, str) else True,
             },
         ),
         'silent_internal_exceptions': SettingPoint(
@@ -113,7 +113,7 @@ class SettingsStore(ReadOnlySingleton):
             1.0,
             proves={
                 'the value must be a number (int or float)': lambda x: isinstance(x, int) or isinstance(x, float),
-                'the value must be greater than zero': lambda x: x > 0,
+                'the value must be greater than or equal to zero': lambda x: x >= 0,
             },
         ),
         'delay_on_exit_loop_iteration_in_quants': SettingPoint(
