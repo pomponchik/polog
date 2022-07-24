@@ -167,3 +167,16 @@ def test_wrong_using():
     """
     with pytest.raises(IncorrectUseOfTheDecoratorError):
         clog('kek')
+
+def test_auto_flag_with_class(handler):
+    """
+    Проверяем, что флаг "auto" для логов, записанных через декоратор, проставляется в True.
+    """
+    @clog(message='kek')
+    class A:
+        def a(self):
+            pass
+
+    A().a()
+
+    assert handler.last['auto'] == True

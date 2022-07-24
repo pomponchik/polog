@@ -1,6 +1,7 @@
 import time
 import asyncio
 from threading import get_native_id
+from datetime import datetime
 
 import pytest
 
@@ -544,3 +545,69 @@ def test_base_behavior_without_ellipsis(handler):
     assert handler.last.get('global_item') is None
 
     config.delete_fields('global_item')
+
+def test_auto_flag(handler):
+    """
+    Проверяем, что флаг "auto" для логов, записанных через декоратор, проставляется в True.
+    """
+    @flog
+    def function():
+        pass
+
+    function()
+
+    assert handler.last['auto'] == True
+
+def test_success_flag_when_success(handler):
+    """
+    Флаг "success" должен проставляться в значение True, если обернутая функция отработала без исключений.
+    """
+    @flog
+    def function():
+        pass
+
+    function()
+
+    assert handler.last['success'] == True
+
+def test_success_flag_when_error(handler):
+    """
+    Флаг "success" должен проставляться в значение True, если внутри обернутой функции поднято исключение.
+    """
+    @flog
+    def function():
+        raise ValueError
+
+    with pytest.raises(ValueError):
+        function()
+
+    assert handler.last['success'] == False
+
+def test_all_requirement_fields_are_of_expected_classes(handler):
+    """
+    Проверяем, что в обычном случае (когда функция, обернутая декоратором @flog, просто вызывается и успешно отрабатывает) в логе содержатся все ожидаемые поля, а все значения этих полей относятся к ожидаемым классам.
+    На всякий случай прогоняем проверку много раз.
+    """
+    config.set(pool_size=0)
+
+    number_of_tries = 10000
+
+    @flog
+    def function():
+        pass
+
+    fields = {
+        'time': datetime,
+        'time_of_work': float,
+        'level': int,
+        'auto': bool,
+        'success': bool,
+        'service': str,
+        'function': str,
+    }
+
+    for index in range(number_of_tries):
+        function()
+        for field_name, expected_class in fields.items():
+            assert isinstance(handler.last[field_name], expected_class)
+        handler.clean()

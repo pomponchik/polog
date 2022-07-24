@@ -1,8 +1,10 @@
 import json
+from multiprocessing import Process, Queue
 
 import pytest
 import ujson
 
+from polog import log, config
 from polog.core.stores.settings.settings_store import SettingsStore
 
 
@@ -144,3 +146,61 @@ def test_store_to_string():
         if isinstance(value, str):
             value = f'"{value}"'
         assert f'{key} = {value}'
+
+def write_started_flag(queue):
+    """
+    Вспомогательная функция для теста test_started_flag_is_working().
+    Предназначена для запуска в другом процессе с целью обнуления возможных аффектов тестов для на друга.
+    """
+    store = SettingsStore()
+
+    result = [SettingsStore()['started']]
+
+    log('kek')
+
+    result.append(SettingsStore()['started'])
+
+    queue.put(result)
+
+def test_started_flag_is_working():
+    """
+    Проверяем, что флаг "started" действительно проставляется в значение True после записи первого лога.
+    Для этого запускаем запись лога в отдельном процессе.
+    """
+    queue = Queue()
+
+    process = Process(target=write_started_flag, args=(queue, ))
+    process.start()
+    process.join()
+
+    assert queue.get() == [False, True]
+
+def write_started_flag_after_reloading(queue):
+    """
+    Вспомогательная функция для теста test_started_flag_is_not_affected_by_engine_reloading().
+    Предназначена для запуска в другом процессе с целью обнуления возможных аффектов тестов для на друга.
+    """
+    store = SettingsStore()
+
+    result = [SettingsStore()['started']]
+
+    config.set(pool_size=2)
+    config.set(pool_size=3)
+    config.set(pool_size=4)
+    config.set(pool_size=0)
+
+    result.append(SettingsStore()['started'])
+
+    queue.put(result)
+
+def test_started_flag_is_not_affected_by_engine_reloading():
+    """
+    Проверяем, что перезагрузка движка не аффектит флаг "started". Он может измениться только в результате записи первого лога.
+    """
+    queue = Queue()
+
+    process = Process(target=write_started_flag_after_reloading, args=(queue, ))
+    process.start()
+    process.join()
+
+    assert queue.get() == [False, False]
