@@ -8,15 +8,6 @@ from polog.handlers.file.writer import file_writer
 from polog.handlers.file.file_dependency_wrapper import FileDependencyWrapper
 
 
-@pytest.mark.parametrize('size_limit,message,iterations', [
-    ('3 megabytes', 'kek' * 1024, 1024),
-    ('3 kilobytes', 'kek', 1024),
-    ('3 megabyte', 'kek' * 1024, 1024),
-    ('3 kilobyte', 'kek', 1024),
-    ('3 mb', 'kek' * 1024, 1024),
-    ('3 kb', 'kek', 1024),
-    ('1 b', 'k', 1),
-])
 def test_base_behavior_rotation_file_size(size_limit, message, iterations, number_of_strings_in_the_files, delete_files, dirname_for_test, filename_for_test):
     """
     Проверяем, что ротация работает с набором валидных правил.
@@ -26,26 +17,37 @@ def test_base_behavior_rotation_file_size(size_limit, message, iterations, numbe
     2. Когда файл с ротированными логами создается, в нем ровно то количество строк, которое мы записывали в исходный файл.
     3. После ротации в исходном файле - 0 строк.
     """
-    handler = file_writer(filename_for_test)
-    dirname_for_test = os.path.join(dirname_for_test, 'rotation_dir')
-    config.add_handlers(handler)
-    config.set(pool_size=0)
+    variations = [
+        ('3 megabytes', 'kek' * 1024, 1024),
+        ('3 kilobytes', 'kek', 1024),
+        ('3 megabyte', 'kek' * 1024, 1024),
+        ('3 kilobyte', 'kek', 1024),
+        ('3 mb', 'kek' * 1024, 1024),
+        ('3 kb', 'kek', 1024),
+        ('1 b', 'k', 1),
+    ]
+    for size_limit, message, iterations in variations:
 
-    for iteration in range(iterations):
-        log(message)
+        handler = file_writer(filename_for_test)
+        dirname_for_test = os.path.join(dirname_for_test, 'rotation_dir')
+        config.add_handlers(handler)
+        config.set(pool_size=0)
 
-    rotator = Rotator(f'{size_limit} >> {dirname_for_test}', FileDependencyWrapper([filename_for_test], lock_type='thread+file'))
-    rotator.maybe_do()
+        for iteration in range(iterations):
+            log(message)
 
-    assert len([x for x in os.listdir(dirname_for_test) if not x.endswith('.lock')]) == 1
+        rotator = Rotator(f'{size_limit} >> {dirname_for_test}', FileDependencyWrapper([filename_for_test], lock_type='thread+file'))
+        rotator.maybe_do()
 
-    archive_file = os.listdir(dirname_for_test)[0]
-    archive_file = os.path.join(dirname_for_test, archive_file)
+        assert len([x for x in os.listdir(dirname_for_test) if not x.endswith('.lock')]) == 1
 
-    assert number_of_strings_in_the_files(archive_file) == iterations
-    assert number_of_strings_in_the_files(filename_for_test) == 0
+        archive_file = os.listdir(dirname_for_test)[0]
+        archive_file = os.path.join(dirname_for_test, archive_file)
 
-    config.delete_handlers(handler)
+        assert number_of_strings_in_the_files(archive_file) == iterations
+        assert number_of_strings_in_the_files(filename_for_test) == 0
+
+        config.delete_handlers(handler)
 
 def test_wrong_rule_to_rotation():
     """

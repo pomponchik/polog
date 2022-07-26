@@ -300,22 +300,23 @@ def test_local_handlers_is_working():
     time.sleep(0.00001)
     assert len(logs) == 1
 
-@pytest.mark.parametrize("handlers", [
-    ['.'],
-    [1],
-    'kek',
-    1,
-    {},
-    set(),
-])
 def test_local_handlers_wrong_handlers(handlers):
     """
     Пробуем в качестве обработчика добавить неподходящий объект (не обработчик и не строку), ожидаем, что поднимется ValueError.
     """
-    with pytest.raises(ValueError):
-        @flog(handlers=handlers)
-        def function(a, b):
-            return a + b
+    handlers_collection = [
+        ['.'],
+        [1],
+        'kek',
+        1,
+        {},
+        set(),
+    ]
+    for handlers in handlers_collection:
+        with pytest.raises(ValueError):
+            @flog(handlers=handlers)
+            def function(a, b):
+                return a + b
 
 def test_create_log_item_in_flog():
     """
