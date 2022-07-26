@@ -1,9 +1,11 @@
 import time
 import json
+from datetime import datetime
 
 import pytest
 
 from polog import handle_log as log, json_vars, field, config
+from polog.core.stores.settings.settings_store import SettingsStore
 
 
 def test_base(handler):
@@ -244,3 +246,154 @@ def test_handle_logger_wrong_values():
         log('kek', success='yes')
     with pytest.raises(ValueError):
         log('kek', vars=3)
+
+def test_level_name_converting_to_int_handle(handler):
+    """
+    Проверяем, что имя уровня логирования конвертится в число.
+    """
+    config.levels(kek=5)
+
+    log('kek', level='kek')
+
+    assert handler.last['level'] == 5
+
+def test_converting_function_object_to_name(handler):
+    """
+    Проверяем, что если передать в качестве аргумента "function" в функцию log() объект функции, будет автоматически извлечено имя функции и модуль.
+    """
+    config.set(pool_size=0)
+
+    def function_kek():
+        pass
+
+    log('kek', function=function_kek)
+
+    assert handler.last['function'] == 'function_kek'
+    assert handler.last['module'] == 'polog.tests.loggers.handle.test_handle_log'
+
+def test_converting_exception_object_to_name(handler):
+    """
+    Проверяем, что объект при передаче объекта исключения извлекаются еще несколько полей.
+    """
+    config.set(pool_size=0, default_error_level=77)
+
+    message = 'lolkek'
+    log('kek', exception=ValueError(message))
+
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == message
+    assert handler.last['success'] == False
+    assert json.loads(handler.last['traceback']) == []
+    assert handler.last['level'] == 77
+
+def test_converting_exception_object_as_e_to_name(handler):
+    """
+    Проверяем, что объект при передаче объекта исключения извлекаются еще несколько полей.
+    """
+    config.set(pool_size=0, default_error_level=77)
+
+    message = 'lolkek'
+    log('kek', e=ValueError(message))
+
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == message
+    assert handler.last['success'] == False
+    assert json.loads(handler.last['traceback']) == []
+    assert handler.last['level'] == 77
+
+def test_extracting_local_variables_error_handle_logging(handler):
+    """
+    Проверяем, что локальные переменные при передаче исключения извлекаются автоматически в json.
+    """
+    a = 5
+    b = 6
+
+    try:
+        raise ValueError('kek')
+    except Exception as e:
+        log('kek', exception=e)
+
+    vars = json.loads(handler.last['local_variables'])['kwargs']
+
+    assert vars['a'] == {"value": 5, "type": "int"}
+    assert vars['b'] == {"value": 6, "type": "int"}
+    assert vars['handler'] == {"value": str(handler), "type": type(handler).__name__}
+    assert vars['e'] == {'value': 'kek', 'type': 'ValueError'}
+
+def test_intersection_exception_and_e():
+    """
+    Пробуем одновременно задать конкурирующие параметры лога "e" и "exception".
+    При значении настройки "silent_internal_exceptions", равном False, должно подняться исключение.
+    """
+    config.set(silent_internal_exceptions=False)
+
+    with pytest.raises(ValueError):
+        try:
+            raise ValueError('kek')
+        except Exception as e:
+            log('kek', e=e, exception=KeyError('kek'))
+
+def test_intersection_exception_and_e_silent(handler):
+    """
+    Пробуем одновременно задать конкурирующие параметры лога "e" и "exception".
+    При значении настройки "silent_internal_exceptions", равном True, исключение подниматься не должно, запишется первое из переданных значений.
+    """
+    config.set(silent_internal_exceptions=True)
+
+    try:
+        raise ValueError('value')
+    except Exception as e:
+        log('kek', e=e, exception=KeyError('key'))
+
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'value'
+    assert handler.last['success'] == False
+
+def test_all_requirement_fields_are_of_expected_classes_with_handle_logging(handler):
+    """
+    Проверяем, что в самой базовой ситуации (когда при ручном логировании передается только сообщение) набор полей лога и классы данных в нем соответствуют ожидаемым.
+    """
+    config.set(pool_size=0, service_name='base')
+
+    number_of_tries = 10000
+
+    fields = {
+        'time': datetime,
+        'message': str,
+        'level': int,
+        'auto': bool,
+        'service_name': str,
+    }
+
+    for index in range(number_of_tries):
+        log('kek')
+        for field_name, expected_class in fields.items():
+            assert isinstance(handler.last[field_name], expected_class)
+        handler.clean()
+
+def test_normal_handle_log_from_decorator_does_not_contain_fields(handler):
+    """
+    Лог об успешной операции не должен содержать некоторые поля. Проверяем, что их действительно нет.
+    """
+    config.set(pool_size=0, service_name='base')
+
+    number_of_tries = 10000
+
+    fields = [
+        'exception_type',
+        'exception_message',
+        'traceback',
+        'local_variables',
+        'function',
+        'module'
+        'input_variables',
+        'local_variables',
+        'result',
+        'time_of_work',
+    ]
+
+    for index in range(number_of_tries):
+        log('kek')
+        for field_name in fields:
+            assert field_name not in handler.last
+        handler.clean()

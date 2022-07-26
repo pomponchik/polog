@@ -89,7 +89,7 @@ def test_working():
 
 def test_working_without_brackets():
     """
-    Проверяем, декоратор можно вызывать без скобок и функция остается рабочей.
+    Проверяем, что декоратор можно вызывать без скобок и функция остается рабочей.
     """
     @flog
     def function():
@@ -756,3 +756,32 @@ def test_normal_log_from_decorator_does_not_contain_fields(handler):
         for field_name in fields:
             assert field_name not in handler.last
         handler.clean()
+
+def test_level_name_converting_to_int_decorator(handler):
+    """
+    Проверяем, что имя уровня логирования конвертится в число.
+    """
+    config.levels(kek=5)
+
+    @flog(message='kek', level='kek')
+    def function():
+        pass
+
+    function()
+
+    assert handler.last['level'] == 5
+
+def test_level_name_converting_to_int_decorator_error(handler):
+    """
+    Проверяем, что имя уровня логирования конвертится в число, когда внутри обернутой функции поднимается исключение.
+    """
+    config.levels(kek=5)
+
+    @exception_escaping
+    @flog(message='kek', level='kek')
+    def function():
+        raise ValueError
+
+    function()
+
+    assert handler.last['level'] == 5

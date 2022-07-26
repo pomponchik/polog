@@ -72,6 +72,16 @@ def test_set_valid_key_delay_before_exit():
     assert smart_assert_one is not SettingsStore()['smart_assert_politic']
     config.set(smart_assert_politic='all')
     assert smart_assert_one is SettingsStore()['smart_assert_politic']
+    # fields_intersection
+    config.set(fields_intersection=True)
+    assert SettingsStore()['fields_intersection'] == True
+    config.set(fields_intersection=False)
+    assert SettingsStore()['fields_intersection'] == False
+    # unknown_fields_in_handle_logs
+    config.set(unknown_fields_in_handle_logs=True)
+    assert SettingsStore()['unknown_fields_in_handle_logs'] == True
+    config.set(unknown_fields_in_handle_logs=False)
+    assert SettingsStore()['unknown_fields_in_handle_logs'] == False
 
 def test_set_invalid_key():
     """
@@ -564,3 +574,38 @@ def test_set_name_to_zero_level(handler):
     log('kek', level='lol')
 
     assert handler.last is not None
+
+def test_set_base_field_name():
+    """
+    При попытке заменить встроенные поля внешними извлекаемыми должно подниматься исключение.
+    """
+    with pytest.raises(KeyError):
+        config.add_fields(level=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(auto=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(time=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(service_name=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(success=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(function=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(module=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(message=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(exception_type=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(exception_message=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(traceback=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(input_variables=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(local_variables=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(result=field(lambda x: 'kek'))
+    with pytest.raises(KeyError):
+        config.add_fields(time_of_work=field(lambda x: 'kek'))
