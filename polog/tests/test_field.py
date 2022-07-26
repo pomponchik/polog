@@ -2,7 +2,8 @@ import time
 
 import pytest
 
-from polog import config, flog, field
+from polog import config, flog, field, log
+from polog.core.utils.exception_escaping import exception_escaping
 
 
 def ip_extractor(log):
@@ -38,7 +39,7 @@ def test_django_example_error(handler):
     В данном теста мы проверяем, что он работает.
     """
     config.add_fields(ip=field(ip_extractor))
-    
+
     @flog
     def django_handler_error(request):
         html = 1 / 0
@@ -103,3 +104,51 @@ def test_not_correct_converter_signature():
 
     with pytest.raises(ValueError):
         config.add_fields(data=field(extractor, converter=not_converter))
+
+def test_field_through_data_passage_with_decorator(handler):
+    """
+    Проверяем, что данные из экстрактора проходят насквозь без какой-либо конвертации (например без преобразования в строку).
+    """
+    config.set(pool_size=0)
+    def extractor(log_item):
+        return 1
+    config.add_fields(data=field(extractor))
+
+    @log(message='kek')
+    def kek():
+        pass
+
+    kek()
+
+    assert handler.last['data'] == 1
+
+def test_field_through_data_passage_with_decorator(handler):
+    """
+    Аналог теста test_field_through_data_passage(), но теперь внутри обернутой функции происходит исключение.
+    """
+    config.set(pool_size=0)
+    def extractor(log_item):
+        return 1
+    config.add_fields(data=field(extractor))
+
+    @exception_escaping
+    @log(message='kek')
+    def kek():
+        raise ValueError
+
+    kek()
+
+    assert handler.last['data'] == 1
+
+def test_field_through_data_passage_with_handle_logging(handler):
+    """
+    Аналог теста test_field_through_data_passage(), но вместо декоратора проверяем ручное логирование.
+    """
+    config.set(pool_size=0)
+    def extractor(log_item):
+        return 1
+    config.add_fields(data=field(extractor))
+
+    log('kek')
+
+    assert handler.last['data'] == 1
