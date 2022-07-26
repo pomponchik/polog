@@ -122,7 +122,7 @@ def test_field_through_data_passage_with_decorator(handler):
 
     assert handler.last['data'] == 1
 
-def test_field_through_data_passage_with_decorator(handler):
+def test_field_through_data_passage_with_error_decorator(handler):
     """
     Аналог теста test_field_through_data_passage(), но теперь внутри обернутой функции происходит исключение.
     """
