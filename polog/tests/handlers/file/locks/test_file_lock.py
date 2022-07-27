@@ -1,4 +1,5 @@
 from multiprocessing import Process, current_process
+from threading import Thread
 import shutil
 import os
 
@@ -20,7 +21,7 @@ def process_race_condition_generator(filename, number_of_iterations, number_of_p
             file = open(filename, 'a', encoding='utf-8')
         lock.release()
 
-def test_file_lock_race_condition(filename_for_test, number_of_strings_in_the_files, delete_files, dirname_for_test):
+def test_file_lock_race_condition_in_processes(filename_for_test, number_of_strings_in_the_files, delete_files, dirname_for_test):
     """
     Провоцируем состояние гонки между процессами.
     """
@@ -51,3 +52,29 @@ def test_active_flag_is_working_for_file_lock(filename_for_test):
     """
     assert FileLock(filename_for_test).active == True
     assert FileLock(None).active == False
+
+def test_file_lock_race_condition_in_threads(filename_for_test):
+    """
+    Проверяем, что файловый лок работает и на тредах.
+    """
+    number_of_threads = 10
+    number_of_iterations = 10000
+
+    lock = FileLock(filename_for_test)
+    counter = 0
+
+    def increment(number_of_iterations):
+        nonlocal counter
+
+        for _ in range(number_of_iterations):
+            lock.acquire()
+            counter += 1
+            lock.release()
+
+    threads = [Thread(target=increment, args=(number_of_iterations, )) for _ in range(number_of_threads)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert counter == number_of_threads * number_of_iterations
