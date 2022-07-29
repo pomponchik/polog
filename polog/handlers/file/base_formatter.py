@@ -14,6 +14,7 @@ class BaseFormatter:
         'service_name',
         'exception_type',
         'exception_message',
+        'class',
     }
 
     def __init__(self, separator):
