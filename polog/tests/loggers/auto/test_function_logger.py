@@ -845,3 +845,32 @@ def test_get_class_name_from_classmethod(handler):
     KekClass().function()
 
     assert handler.last['class'] == 'KekClass'
+
+def test_get_class_name_from_coroutine(handler):
+    """
+    Проверяем, что у асинхронных методов имя класса извлекается.
+    """
+    config.set(pool_size=0)
+
+    class KekClass:
+        @flog
+        async def function(self):
+            pass
+
+    asyncio.run(KekClass().function())
+
+    assert handler.last['class'] == 'KekClass'
+
+def test_asyncio_result(handler):
+    """
+    Проверяем, что результат, возвращаемый корутиной, корректно записывается в лог.
+    """
+    config.set(pool_size=0)
+
+    async def function(a, b):
+        return a + b
+
+    result = asyncio.run(function(1, 2))
+
+    assert result == 3
+    assert handler.last['result'] == json_one_variable(3)
