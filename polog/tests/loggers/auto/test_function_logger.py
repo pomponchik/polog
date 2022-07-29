@@ -832,7 +832,7 @@ def test_get_class_name_from_method(handler):
 
 def test_get_class_name_from_classmethod(handler):
     """
-    Проверяем, что у методов имя класса извлекается.
+    Проверяем, что у методов класса имя класса извлекается (при условии, что наш декоратор стоит под @classmethod).
     """
     config.set(pool_size=0)
 
