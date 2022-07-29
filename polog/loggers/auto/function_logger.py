@@ -97,7 +97,7 @@ class FunctionLogger:
             return error_logger(args[0])
         raise IncorrectUseOfTheDecoratorError('You used the logging decorator incorrectly. Read the documentation.')
 
-    def get_base_args_dict(self, func, message):
+    def get_base_args_dict(self, function, message):
         """
         При каждом вызове функции с логирующим декоратором создается словарь с аргументами, которые будут переданы в очередь для обработчиков.
         В этой функции данный словарь инициализируется и заполняется значениями, которые уже известны еще до запуска задекорированной функции.
@@ -106,9 +106,24 @@ class FunctionLogger:
         args_dict['auto'] = True
         if message is not None:
             args_dict['message'] = str(message)
-        self.get_arg(func, args_dict, '__module__')
-        self.get_arg(func, args_dict, '__name__', key_name='function')
+        self.get_arg(function, args_dict, '__module__')
+        self.get_arg(function, args_dict, '__name__', key_name='function')
+        not_none_to_dict(args_dict, 'class', self.get_class_name(function))
         return args_dict
+
+    def get_class_name(self, function):
+        """
+        Получаем имя класса из объекта метода. Если функция не принадлежит к какому-то классу, возвращаем None.
+        """
+        try:
+            return function.__self__.__name__
+        except AttributeError:
+            try:
+                maybe_class_name = function.__qualname__.split('.')[-2]
+                if maybe_class_name.isidentifier():
+                    return maybe_class_name
+            except (AttributeError, IndexError):
+                pass
 
     @staticmethod
     def get_arg(obj, args, arg_name, key_name=None):

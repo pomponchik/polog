@@ -12,9 +12,6 @@ class BaseFormatterFieldsExtractors:
     Если метод возвращает None, поле не выводится в итоговую запись лога.
     """
 
-    # Словарь, где ключи - кортежи из названий модулей и функций.
-    # См. метод search_function_name().
-    FULL_FUNCTIONS_NAMES = {}
     settings = SettingsStore()
 
     @staticmethod
@@ -78,64 +75,27 @@ class BaseFormatterFieldsExtractors:
     @classmethod
     def function(cls, log):
         """
-        В этом поле выводятся данные из 3-х полей: названия функции, названия модуля и названия сервиса.
+        В этом поле выводятся данные из 4-х полей: названия функции, названия модуля, названия класса и названия сервиса.
 
         Формат вывода:
-        "where: service_name.module.function_name()"
+        "where: service_name.module_name.class_name.function_name()"
 
-        ВАЖНО: для каждой функции проводится проверка, является она "отдельно стоящей" или является частью класса. Для этого импортируется модуль и у него проверяется наличие атрибута с нужным именем функции. Если атрибут не найдет, или он не является функцией, проверяются классы, объявленные в модуле. Если каждого класса ищется метод с именем функции. Если находится, здесь выводится путь в несколько модифицированном виде:
-        "where: service_name.module.ClassName.function_name()"
-
-        Ввиду особенности механизма поиска названия класса, его легко обмануть. Самый простой способ - расположить в одном файле функцию с каким-то именем, и там же разместить класс с методом, где имя такое же. Если вызвать метод, в лог имя класса не запишется.
-
-        Ручные логи, где не указывалось место действия, будут отображены в усеченном виде:
+        Ручные логи, где не указывалось место действия, будут отображены в усеченном виде, например:
         "where: service_name.?"
         """
-        function = log.get('function')
-        module = log.get('module')
-        service = SettingsStore()['service_name']
-        if (function is not None) and (module is not None):
-            function = cls.search_function_name(function, module)
-            result = f'where: {service}.{module}.{function}()'
-            return result
-        elif function is not None:
-            result = f'where: {service}.{function}()'
-            return result
-        return f'where: {service}.?'
+        function_name = log.get('function')
+        class_name = log.get('class')
+        module_name = log.get('module')
+        service_name = SettingsStore()['service_name']
 
-    @classmethod
-    def search_function_name(cls, function_name, module_name):
-        """
-        Здесь происходит сканирование модуля с именем module_name в поисках функции с именем function_name.
-        Если нашлось - возвращается имя функции. Иначе - ищется класс с методом, который называется так же. Если нашелся, вернется имя ИмяКласса.имя_функции.
-
-        Результат сканирования кэшируется!
-        Второй раз для того же набора имени модуля / имени функции сканирование не проводится, результат берется из кэша.
-        """
-        key = (function_name, module_name)
-        if key in cls.FULL_FUNCTIONS_NAMES:
-            return cls.FULL_FUNCTIONS_NAMES[key]
-        try:
-            module = importlib.import_module(module_name)
-        except ModuleNotFoundError:
-            return function_name
-        if hasattr(module, function_name):
-            maybe_function = getattr(module, function_name)
-            if callable(maybe_function):
-                cls.FULL_FUNCTIONS_NAMES[key] = function_name
-        else:
-            new_function_name = None
-            for object_name in dir(module):
-                _object = getattr(module, object_name)
-                if inspect.isclass(_object):
-                    if hasattr(_object, function_name):
-                        new_function_name = f'{object_name}.{function_name}'
-                        break
-            if new_function_name is None:
-                cls.FULL_FUNCTIONS_NAMES[key] = function_name
-            else:
-                cls.FULL_FUNCTIONS_NAMES[key] = new_function_name
-        return cls.FULL_FUNCTIONS_NAMES[key]
+        if function_name is not None:
+            result = '.'.join([x for x in (service_name, module_name, class_name, function_name) if x is not None])
+            return f'where: {result}()'
+        
+        result = '.'.join([x for x in (service_name, module_name, class_name) if x is not None])
+        if result:
+            return f'where: {result}.?'
+        return 'where: ?'
 
     @classmethod
     def result(cls, log):

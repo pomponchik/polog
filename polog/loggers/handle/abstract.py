@@ -1,4 +1,5 @@
 import functools
+import inspect
 
 from polog.core.stores.levels import Levels
 from polog.core.engine.engine import Engine
@@ -25,6 +26,7 @@ class AbstractHandleLogger:
     _allowed_types = {
         'function': lambda x: type(x) is str or callable(x), # Функция, событие в которой логируется. Ожидается либо сам объект функции, либо строка с ее названием.
         'module': lambda x: type(x) is str, # Модуль, событие в котором логируется. Ожидается только название.
+        'class': lambda x: type(x) is str or inspect.isclass(x), # Название класса, событие в котором логируется, либо сам этот класс.
         'message': lambda x: type(x) is str, # Сообщение лога, любая строка.
         'exception': lambda x: type(x) is str or isinstance(x, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, поля с названием исключения и его сообщением будут заполнены автоматически.
         'vars': lambda x: type(x) is str, # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
@@ -35,12 +37,14 @@ class AbstractHandleLogger:
     # Функции, изменяющие исходные аргументы функций.
     _convert_values = {
         'level': Levels.get,
+        'class': lambda x: x if isinstance(x, str) else x.__name__,
     }
     # Сокращения аргументов и их полные формы.
     _convert_keys = {
         'vars': 'local_variables',
         'locals': 'local_variables',
         'e': 'exception',
+        'class_': 'class',
     }
     # Позиционные аргументы могут быть, а могут и не быть. Если они есть, будут проименованы по этой схеме.
     # Ключи - номера аргументов (отсчет идет с 0), значения - названия полей.

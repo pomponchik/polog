@@ -786,3 +786,46 @@ def test_level_name_converting_to_int_decorator_error(handler):
     function()
 
     assert handler.last['level'] == 5
+
+@flog
+def simple_function():
+    pass
+
+def test_get_class_name_from_simple_function(handler):
+    """
+    Проверяем, что у простой функции имя класса не извлекается.
+    """
+    config.set(pool_size=0)
+
+    simple_function()
+
+    assert 'class' not in handler.last
+
+def test_get_class_name_from_simple_local_function(handler):
+    """
+    Проверяем, что у функции, объявленной внутри другой функции, имя класса тоже не извлекается.
+    """
+    config.set(pool_size=0)
+
+    @flog
+    def function():
+        pass
+
+    function()
+
+    assert 'class' not in handler.last
+
+def test_get_class_name_from_method(handler):
+    """
+    Проверяем, что у методов имя класса извлекается.
+    """
+    config.set(pool_size=0)
+
+    class KekClass:
+        @flog
+        def function(self):
+            pass
+
+    KekClass().function()
+
+    assert handler.last['class'] == 'KekClass'

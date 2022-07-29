@@ -246,6 +246,10 @@ def test_handle_logger_wrong_values():
         log('kek', success='yes')
     with pytest.raises(ValueError):
         log('kek', vars=3)
+    with pytest.raises(ValueError):
+        log('kek', class_=3)
+    with pytest.raises(ValueError):
+        log('kek', class_=lambda x: 'lol')
 
 def test_level_name_converting_to_int_handle(handler):
     """
@@ -390,6 +394,7 @@ def test_normal_handle_log_from_decorator_does_not_contain_fields(handler):
         'local_variables',
         'result',
         'time_of_work',
+        'class',
     ]
 
     for index in range(number_of_tries):
@@ -397,3 +402,23 @@ def test_normal_handle_log_from_decorator_does_not_contain_fields(handler):
         for field_name in fields:
             assert field_name not in handler.last
         handler.clean()
+
+def test_extract_class_name_when_handle_logging(handler, empty_class):
+    """
+    Проверяем, что если передать объект класса, автоматом извлечется его имя.
+    """
+    config.set(pool_size=0)
+
+    log('kek', class_=empty_class)
+
+    assert handler.last['class'] == empty_class.__name__
+
+def test_class_name_when_handle_logging(handler):
+    """
+    Проверяем, что если передать имя класса, оно прямиком попадет в лог.
+    """
+    config.set(pool_size=0)
+
+    log('kek', class_='kek')
+
+    assert handler.last['class'] == 'kek'
