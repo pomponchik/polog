@@ -829,3 +829,19 @@ def test_get_class_name_from_method(handler):
     KekClass().function()
 
     assert handler.last['class'] == 'KekClass'
+
+def test_get_class_name_from_classmethod(handler):
+    """
+    Проверяем, что у методов имя класса извлекается.
+    """
+    config.set(pool_size=0)
+
+    class KekClass:
+        @classmethod
+        @flog
+        def function(self):
+            pass
+
+    KekClass().function()
+
+    assert handler.last['class'] == 'KekClass'
