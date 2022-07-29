@@ -14,6 +14,7 @@ def exception_escaping(function):
             return function(*args, **kwargs)
         except:
             pass
+    @wraps(function)
     async def async_wrapper(*args, **kwargs):
         try:
             return await function(*args, **kwargs)
