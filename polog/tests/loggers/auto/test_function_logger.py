@@ -867,6 +867,7 @@ def test_asyncio_result(handler):
     """
     config.set(pool_size=0)
 
+    @exception_escaping
     @flog
     async def function(a, b):
         return a + b
