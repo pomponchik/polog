@@ -711,6 +711,7 @@ except ZeroDivisionError as e:
 class Car:
   def wash(self):
     log('The washing begins.', class_=type(self))
+    ...
 ```
 
 И наконец, вы можете передавать в ```log()``` произвольные переменные, которые считаете нужным залогировать.
