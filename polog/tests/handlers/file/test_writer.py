@@ -356,7 +356,6 @@ def test_check_full_string(handler, filename_for_test):
     asyncio.run(Kek().method(1, 2, 3))
     with open(filename_for_test, 'r') as file:
         string = [string for string in file.read().split('\n') if string][-1]
-        print(string)
     time_of_work = f'{handler.last["time_of_work"]:.8f}'
     time_of_work = time_of_work.rstrip('0.')
     assert string.startswith(f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.Kek.method() | time of work: {time_of_work} sec. | input variables: ')
