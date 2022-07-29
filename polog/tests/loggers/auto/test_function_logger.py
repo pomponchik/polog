@@ -867,7 +867,6 @@ def test_asyncio_result(handler):
     """
     config.set(pool_size=0)
 
-    @exception_escaping
     @flog
     async def function(a, b):
         return a + b
@@ -876,3 +875,21 @@ def test_asyncio_result(handler):
 
     assert result == 3
     assert handler.last['result'] == json_one_variable(3)
+
+def test_asyncio_exception(handler):
+    """
+    Проверяем, что при исключении в корутинной функции информация корректно записывается в лог.
+    """
+    config.set(pool_size=0)
+
+    message = 'kek message'
+
+    @exception_escaping
+    @flog
+    async def function(a, b):
+        raise ValueError(message)
+
+    result = asyncio.run(function(1, 2))
+
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == message
