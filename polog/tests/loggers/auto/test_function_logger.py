@@ -107,7 +107,20 @@ def test_level(handler):
     time.sleep(0.0001)
     assert handler.last['level'] == 7
 
-def test_level(handler):
+def test_level_async(handler):
+    """
+    Проверяем, что установка уровня логирования работает.
+    """
+    @flog(level=7)
+    async def function():
+        pass
+
+    asyncio.run(function())
+
+    time.sleep(0.0001)
+    assert handler.last['level'] == 7
+
+def test_level_name(handler):
     """
     Проверяем, что установка уровня логирования идентификатором в виде строки работает.
     """
@@ -300,6 +313,21 @@ def test_local_handlers_is_working():
     time.sleep(0.00001)
     assert len(logs) == 1
 
+def test_local_handlers_is_working_async():
+    """
+    Проверяем, что можно указать асинхронной функции локальное пространство имен и обработчики из него будут работать.
+    """
+    logs = []
+    def local_handlers(log):
+        logs.append(log)
+    @flog(handlers=[local_handlers])
+    async def function(a, b):
+        return a + b
+
+    asyncio.run(function(1, 2))
+    time.sleep(0.00001)
+    assert len(logs) == 1
+
 def test_local_handlers_wrong_handlers(handlers):
     """
     Пробуем в качестве обработчика добавить неподходящий объект (не обработчик и не строку), ожидаем, что поднимется ValueError.
@@ -347,6 +375,22 @@ def test_extract_extra_fields_locally_in_the_function_decorator(handler):
         pass
 
     function()
+    time.sleep(0.0001)
+
+    assert handler.last['lolkek'] == 'lol'
+
+def test_extract_extra_fields_locally_in_the_function_decorator_async(handler):
+    """
+    Пробуем указать словарь с дополнительными полями в декораторе вокруг корутинной функции.
+    Эти поля должны извлекаться.
+    """
+    def exctractor(log_item):
+        return 'lol'
+    @flog(extra_fields={'lolkek': field(exctractor)})
+    async def function():
+        pass
+
+    asyncio.run(function())
     time.sleep(0.0001)
 
     assert handler.last['lolkek'] == 'lol'
@@ -557,6 +601,18 @@ def test_auto_flag(handler):
         pass
 
     function()
+
+    assert handler.last['auto'] == True
+
+def test_auto_flag_async(handler):
+    """
+    Проверяем, что флаг "auto" для логов, записанных через декоратор, проставляется в True.
+    """
+    @flog
+    async def function():
+        pass
+
+    asyncio.run(function())
 
     assert handler.last['auto'] == True
 
