@@ -1,4 +1,5 @@
 import time
+import asyncio
 
 import pytest
 
@@ -77,11 +78,32 @@ def test_function_decorator_with_breacks_and_message_and_dotlevel(handler):
     """
     config.set(level=1)
     config.levels(test_function_decorator_with_breacks_and_message_and_dotlevel=42)
+
     @log.test_function_decorator_with_breacks_and_message_and_dotlevel(message='kek')
     def function(a, b):
         return a + b
+
     assert function(1, 13) == 14
     time.sleep(0.0001)
+
+    assert handler.last is not None
+    assert handler.last['message'] == 'kek'
+    assert handler.last['level'] == 42
+
+def test_function_decorator_with_breacks_and_message_and_dotlevel_async(handler):
+    """
+    Проверка, что декоратор функций со скобками и с сообщением в скобках, а также с уровнем логирования через точку, работает.
+    """
+    config.set(level=1)
+    config.levels(test_function_decorator_with_breacks_and_message_and_dotlevel=42)
+
+    @log.test_function_decorator_with_breacks_and_message_and_dotlevel(message='kek')
+    async def function(a, b):
+        return a + b
+
+    assert asyncio.run(function(1, 13)) == 14
+    time.sleep(0.0001)
+
     assert handler.last is not None
     assert handler.last['message'] == 'kek'
     assert handler.last['level'] == 42
@@ -92,11 +114,31 @@ def test_function_decorator_without_breacks_and_message_and_dotlevel(handler):
     """
     config.set(level=1)
     config.levels(test_function_decorator_without_breacks_and_message_and_dotlevel=43)
+
     @log.test_function_decorator_without_breacks_and_message_and_dotlevel
     def function(a, b):
         return a + b
+
     assert function(1, 3) == 4
     time.sleep(0.0001)
+
+    assert handler.last is not None
+    assert handler.last['level'] == 43
+
+def test_function_decorator_without_breacks_and_message_and_dotlevel_async(handler):
+    """
+    Проверка, что декоратор функций без скобок, но с уровнем логирования через точку, работает.
+    """
+    config.set(level=1)
+    config.levels(test_function_decorator_without_breacks_and_message_and_dotlevel=43)
+
+    @log.test_function_decorator_without_breacks_and_message_and_dotlevel
+    async def function(a, b):
+        return a + b
+
+    assert asyncio.run(function(1, 3)) == 4
+    time.sleep(0.0001)
+
     assert handler.last is not None
     assert handler.last['level'] == 43
 
@@ -118,12 +160,33 @@ def test_message(handler):
     Проверка, что редактирование сообщений лога работает.
     """
     config.set(level=1)
+
     @log
     def function(a, b):
         log.message('kek', level=5)
         return a + b
+
     assert function(1, 2) == 3
     time.sleep(0.0001)
+
+    assert handler.last is not None
+    assert handler.last['message'] == 'kek'
+    assert handler.last['level'] == 5
+
+def test_message_async(handler):
+    """
+    Проверка, что редактирование сообщений лога работает для корутинных функций.
+    """
+    config.set(level=1)
+
+    @log
+    async def function(a, b):
+        log.message('kek', level=5)
+        return a + b
+
+    assert asyncio.run(function(1, 2)) == 3
+    time.sleep(0.0001)
+
     assert handler.last is not None
     assert handler.last['message'] == 'kek'
     assert handler.last['level'] == 5
