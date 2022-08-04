@@ -10,6 +10,8 @@ import pytest
 
 from polog import log, config
 from polog.handlers.file.writer import file_writer
+from polog.core.utils.exception_escaping import exception_escaping
+
 
 TIMEOUT = 3
 
@@ -360,5 +362,42 @@ def test_check_full_string(handler, filename_for_test):
     time_of_work = time_of_work.rstrip('0.')
     assert string.startswith(f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.Kek.method() | time of work: {time_of_work} sec. | input variables: ')
     assert string.endswith(f'1 (int), 2 (int), 3 (int) | result: 6 (int)')
+
+    @log(message='kek', level='test_check_full_string_level')
+    async def function(a, b, c):
+        return a + b + c
+    asyncio.run(function(1, 2, 3))
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | result: 6 (int)'
+
+    config.delete_handlers('kek')
+
+def test_check_full_string_errors(handler, filename_for_test):
+    """
+    По сути сквозной тест.
+    Проверяем, что строка лога, выведенного в файл, полностью соответствует шаблону.
+    Только кейсы с ловлей ошибок.
+    """
+    file_handler = file_writer(filename_for_test)
+    config.add_handlers(kek=file_handler)
+    config.set(pool_size=0, level=1, service_name='base')
+    config.levels(test_check_full_string_errors_level=10)
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
+    @exception_escaping
+    @log(message='kek', level='test_check_full_string_errors_level')
+    async def function(a, b, c):
+        raise ValueError('kek_message')
+    asyncio.run(function(1, 2, 3))
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_errors_level |  ERROR  |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | result: 6 (int) | local variables: a = 1 (int), b = 2 (int), c = 3 (int) | exception: ValueError("kek_message") | traceback: '
+
 
     config.delete_handlers('kek')
