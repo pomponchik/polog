@@ -45,7 +45,7 @@ def test_output_to_console_is_working_without_path_argument():
     sys.stdout = instead_of_file
     handler = file_writer()
     config.add_handlers(handler)
-    config.set(pool_size=0, level=0)
+    config.set(pool_size=0, level=0, default_level=5, default_error_level=5)
 
     log('kek')
 
@@ -73,15 +73,14 @@ def test_parameter_is_not_string_and_not_file_object(delete_files):
         file_writer(777)
     delete_files(path)
 
+
 def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test, dirname_for_test):
     """
     Запускаем много логов в нескольких потоках и проверяем, что они все успевают записаться в файл, и при этом в ничего не было потеряно при ротациях.
     """
     number_of_logs_per_thread = 2000
     number_of_threads = 20
-
-    config.set(pool_size=20, level=1)
-
+    config.set(pool_size=20, level=1, default_level=3, default_error_level=4)
     handler = file_writer(filename_for_test, rotation=f'3 kb >> {dirname_for_test}')
     config.add_handlers(handler)
 

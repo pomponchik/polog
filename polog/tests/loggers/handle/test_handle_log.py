@@ -277,7 +277,7 @@ def test_converting_function_object_to_name(handler):
 
 def test_converting_exception_object_to_name(handler):
     """
-    Проверяем, что объект при передаче объекта исключения извлекаются еще несколько полей.
+    Проверяем, что при передаче объекта исключения извлекаются еще несколько полей.
     """
     config.set(pool_size=0, default_error_level=77)
 
@@ -292,9 +292,9 @@ def test_converting_exception_object_to_name(handler):
 
 def test_converting_exception_object_as_e_to_name(handler):
     """
-    Проверяем, что объект при передаче объекта исключения извлекаются еще несколько полей.
+    Проверяем, что при передаче объекта исключения извлекаются еще несколько полей.
     """
-    config.set(pool_size=0, default_error_level=77)
+    config.set(pool_size=0, default_level=5, default_error_level=77)
 
     message = 'lolkek'
     log('kek', e=ValueError(message))

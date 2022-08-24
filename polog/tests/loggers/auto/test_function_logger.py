@@ -832,6 +832,7 @@ def test_level_name_converting_to_int_decorator_error(handler):
     """
     Проверяем, что имя уровня логирования конвертится в число, когда внутри обернутой функции поднимается исключение.
     """
+    config.set(default_level=3, default_error_level=4)
     config.levels(kek=5)
 
     @exception_escaping

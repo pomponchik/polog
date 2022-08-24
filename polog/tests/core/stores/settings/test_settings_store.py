@@ -52,7 +52,7 @@ def test_set_error_values():
         'silent_internal_exceptions': [123, 'no', 'False', 1.2],
         'max_delay_before_exit': ['kek', None, -1],
         'delay_on_exit_loop_iteration_in_quants': ['kek', -1, -10000, 1.2, 1.0, []],
-        'engine': [1, 'kek', lambda x, y: x, lambda: 'kek', 1.2, [], set()],
+        'engine': [1, 'kek', 1.2, [], set()],
         'json_module': ['kek', 1, lambda x: 'kek', pytest],
         'smart_assert_politic': ['kek', 1, True, [], set(), 1.2],
         'debug_mode': [1, 2, 1.2, 'kek', [], lambda: 'kek'],
@@ -62,7 +62,7 @@ def test_set_error_values():
     store = SettingsStore()
     for key, local_values in all_values.items():
         for value in local_values:
-            with pytest.raises(ValueError):
+            with pytest.raises((ValueError, KeyError)):
                 store[key] = value
 
 def test_error_keys():

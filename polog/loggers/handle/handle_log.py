@@ -10,6 +10,8 @@ class BaseLogger(AbstractHandleLogger):
     """
     Экземпляры данного класса - вызываемые объекты, каждый вызов которых означает создание лога.
     """
+    # Ключи - названия полей, значения - функции.
+    # Каждая из этих функций должна принимать словарь с уже ранее извлеченными значениями полей и возвращать значение поля, название которого является ключом.
     _default_values = {
         'level': lambda fields: SettingsStore()['default_level'] if fields.get('success', True) else SettingsStore()['default_error_level'],
         'time': lambda fields: datetime.datetime.now(),
@@ -22,6 +24,16 @@ class BaseLogger(AbstractHandleLogger):
             fields['service_name'] = service_name
         self._extract_exception(fields, change_success=True, change_level=True)
         self._extract_function_data(fields)
+        self._defaults_to_dict(fields)
+
+    def _defaults_to_dict(self, fields):
+        """
+        Некоторые значения являются обязательными, но от пользователя не поступили. В этом случае мы генерируем их автоматически.
+        В словаре self._default_values по ключам в виде названий полей лога хранятся функции. Каждая такая функция должна принимать словарь с ранее уже извлеченными полями лога и возвращать содержимое обязательного поля.
+        """
+        for key, get_default in self._default_values.items():
+            if key not in fields:
+                fields[key] = get_default(fields)
 
     def _extract_function_data(self, fields):
         """
