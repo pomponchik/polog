@@ -287,7 +287,7 @@ def test_check_full_string(handler, filename_for_test):
     """
     file_handler = file_writer(filename_for_test)
     config.add_handlers(kek_test_check_full_string=file_handler)
-    config.set(pool_size=0, level=1, service_name='base')
+    config.set(pool_size=0, level=1, service_name='base', unknown_fields_in_handle_logs=True)
     config.levels(test_check_full_string_level=10)
     config.delete_engine_fields(*(config.get_engine_fields().keys()))
     config.delete_fields(*(config.get_in_place_fields().keys()))
@@ -373,7 +373,7 @@ def test_check_full_string(handler, filename_for_test):
     time_of_work = time_of_work.rstrip('0.')
     assert string == f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | result: 6 (int)'
 
-    config.delete_handlers('kek')
+    config.delete_handlers('kek_test_check_full_string')
 
 def test_check_full_string_errors(handler, filename_for_test):
     """
@@ -400,4 +400,4 @@ def test_check_full_string_errors(handler, filename_for_test):
     assert string == f'[{handler.last["time"]}] | test_check_full_string_errors_level |  ERROR  |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | result: 6 (int) | local variables: a = 1 (int), b = 2 (int), c = 3 (int) | exception: ValueError("kek_message") | traceback: '
 
 
-    config.delete_handlers('kek')
+    config.delete_handlers('kek_test_check_full_string_errors')
