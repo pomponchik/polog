@@ -442,7 +442,7 @@ def test_set_and_extract_extra_fields_other_type_without_converter():
 
     log.extract_extra_fields_from(fields)
 
-    assert log[field_name] == '1'
+    assert log[field_name] == 1
 
 def test_extract_extra_fields_other_type_with_converter():
     """

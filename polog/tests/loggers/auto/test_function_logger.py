@@ -328,7 +328,7 @@ def test_local_handlers_is_working_async():
     time.sleep(0.00001)
     assert len(logs) == 1
 
-def test_local_handlers_wrong_handlers(handlers):
+def test_local_handlers_wrong_handlers():
     """
     Пробуем в качестве обработчика добавить неподходящий объект (не обработчик и не строку), ожидаем, что поднимется ValueError.
     """
@@ -430,14 +430,14 @@ def test_compare_engine_thread_native_id_and_local(handler):
 
     assert handler.last['lol'] is not None
     assert handler.last['lol'] != handler.last['kek']
-    assert handler.last['kek'] == str(get_native_id())
+    assert handler.last['kek'] == get_native_id()
 
     config.set(pool_size=0)
 
     function()
 
     assert handler.last['lol'] == handler.last['kek']
-    assert handler.last['lol'] == str(get_native_id())
+    assert handler.last['lol'] == get_native_id()
 
 def test_multiple_extra_fields_dicts(handler):
     """
@@ -466,8 +466,8 @@ def test_multiple_extra_fields_dicts(handler):
 
         function()
 
-        assert handler.last['lol'] == '1'
-        assert handler.last['kek'] == '2'
+        assert handler.last['lol'] == 1
+        assert handler.last['kek'] == 2
 
         handler.clean()
 
@@ -505,8 +505,8 @@ def test_multiple_extra_fields_dicts_and_ellipsis(handler):
 
             function()
 
-            assert handler.last['lol'] == '1'
-            assert handler.last['kek'] == '2'
+            assert handler.last['lol'] == 1
+            assert handler.last['kek'] == 2
 
             handler.clean()
 
