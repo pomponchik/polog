@@ -60,7 +60,7 @@ class FunctionLogger:
                     result = await func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                     self.reraise_exception(e)
                 finish = time.time()
                 self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
@@ -78,7 +78,7 @@ class FunctionLogger:
                     result = func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                     self.reraise_exception(e)
                 finish = time.time()
                 self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
@@ -152,14 +152,14 @@ class FunctionLogger:
             raise exc
         raise LoggedError(str(exc)) from exc
 
-    def log_exception_info(self, exc, finish, start, args_dict, errors_level, handlers, in_place_fields, engine_fields, *args, **kwargs):
+    def log_exception_info(self, exc, finish, start, args_dict, errors_level, simple_level, handlers, in_place_fields, engine_fields, *args, **kwargs):
         """
         Здесь происходит заполнение автоматически извлекаемых полей в случае исключения.
         В т. ч. извлекается вся информация об исключении - название, сообщение и т. д.
         """
         exc_type = type(exc)
         if not (exc_type is LoggedError):
-            errors_level = get_errors_level(errors_level)
+            errors_level = get_errors_level(errors_level, simple_level)
             if errors_level >= self.settings['level']:
                 exception_to_dict(args_dict, exc)
                 args_dict['success'] = False

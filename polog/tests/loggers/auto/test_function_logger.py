@@ -224,7 +224,7 @@ def test_log_exception_info():
     try:
         raise ValueError('lol')
     except Exception as e:
-        flog.log_exception_info(e, 1.0, 0.5, data, 7, [], {}, {})
+        flog.log_exception_info(e, 1.0, 0.5, data, 7, 5,[], {}, {})
     assert data['exception_type'] == 'ValueError'
     assert data['exception_message'] == 'lol'
     assert data['time_of_work'] == 0.5
