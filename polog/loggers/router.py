@@ -84,9 +84,10 @@ class Router:
         Во втором случае вызов будет автоматически преобразован в обычный, но с добавлением аргумента "level", соответствующего имени уровня логирования, которое было использовано при вызове.
         Если пользователь при вызове с именем уровня логирования через точку еще отдельно передаст именованный аргумент level, приоритет будет у переданного аргумента.
         """
-        if name in Levels.levels:
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
             return functools.partial(self, level=name)
-        return object.__getattribute__(self, name)
 
 
 log = Router()

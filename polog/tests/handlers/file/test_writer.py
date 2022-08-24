@@ -286,7 +286,7 @@ def test_check_full_string(handler, filename_for_test):
     Проверяем, что строка лога, выведенного в файл, полностью соответствует шаблону.
     """
     file_handler = file_writer(filename_for_test)
-    config.add_handlers(kek=file_handler)
+    config.add_handlers(kek_test_check_full_string=file_handler)
     config.set(pool_size=0, level=1, service_name='base')
     config.levels(test_check_full_string_level=10)
     config.delete_engine_fields(*(config.get_engine_fields().keys()))
@@ -382,7 +382,7 @@ def test_check_full_string_errors(handler, filename_for_test):
     Только кейсы с ловлей ошибок.
     """
     file_handler = file_writer(filename_for_test)
-    config.add_handlers(kek=file_handler)
+    config.add_handlers(kek_test_check_full_string_errors=file_handler)
     config.set(pool_size=0, level=1, service_name='base')
     config.levels(test_check_full_string_errors_level=10)
     config.delete_engine_fields(*(config.get_engine_fields().keys()))
