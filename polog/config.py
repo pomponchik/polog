@@ -199,18 +199,30 @@ class config:
 
     @staticmethod
     def get_in_place_fields(*names):
+        """
+        Получаем словарь с извлекаемыми "на месте" полями.
+        Если сюда передать одно или несколько имен полей, вернется словарь только с ними, иначе - со всеми.
+        """
         if not names:
             return {**in_place_fields}
         return {name: in_place_fields.get(name) for name in names if in_place_fields.get(name) is not None}
 
     @staticmethod
     def get_engine_fields(*names):
+        """
+        Получаем словарь с извлекаемыми внутри движка полями.
+        Если сюда передать одно или несколько имен полей, вернется словарь только с ними, иначе - со всеми.
+        """
         if not names:
             return {**engine_fields}
         return {name: engine_fields.get(name) for name in names if engine_fields.get(name) is not None}
 
     @classmethod
     def get_all_fields(cls, *names):
+        """
+        Метод возвращает вообще все ивлекаемые поля, то есть извлекаемые как внутри движка, так и "на месте".
+        В случае пересечения имен, результат будет идентичен порядку реального извлечения полей, то есть движковые поля "затрут" конкурентов.
+        """
         result = {**cls.get_in_place_fields(*names)}
         result.update(cls.get_engine_fields(*names))
         return result
