@@ -4,6 +4,7 @@ from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
 from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
+from polog.core.utils.name_manager import NameManager
 from polog.core.stores.handlers import global_handlers
 from polog.data_structures.trees.named_tree.projector import TreeProjector
 from polog.core.stores.fields import in_place_fields, engine_fields
@@ -53,8 +54,9 @@ class config:
                 raise TypeError(f'Variable "{key}" has not type int.')
             if value < 0:
                 raise ValueError('The logging level cannot be less than zero.')
-            if key in forbidden_names:
-                raise NameError(f'The name "{key}" cannot be used for the logging level. It is already used as a service name in the logger.')
+            estimate_of_name = NameManager.is_possible_level_name(key)
+            if not estimate_of_name.possibility:
+                raise NameError(estimate_of_name.reason)
             Levels.set(key, value)
 
     @staticmethod
@@ -155,6 +157,9 @@ class config:
         for key, value in fields.items():
             if not hasattr(value, 'get_data') or not SignatureMatcher.is_handler(value.get_data):
                 raise ValueError('The field handler must have a method .get_data() with the signature that is standard for Polog handlers.')
+            estimate_of_name = NameManager.is_possible_extra_field_name(key)
+            if not estimate_of_name.possibility:
+                raise NameError(estimate_of_name.reason)
             in_place_fields[key] = value
 
     @staticmethod
@@ -165,6 +170,9 @@ class config:
         for key, value in fields.items():
             if not hasattr(value, 'get_data') or not SignatureMatcher.is_handler(value.get_data):
                 raise ValueError('The field handler must have a method .get_data() with the signature that is standard for Polog handlers.')
+            estimate_of_name = NameManager.is_possible_extra_field_name(key)
+            if not estimate_of_name.possibility:
+                raise NameError(estimate_of_name.reason)
             engine_fields[key] = value
 
     @staticmethod
