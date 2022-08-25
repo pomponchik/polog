@@ -377,7 +377,7 @@ def test_check_full_string(handler, filename_for_test):
 def test_check_full_string_errors(handler, filename_for_test):
     """
     По сути сквозной тест.
-    Проверяем, что строка лога, выведенного в файл, полностью соответствует шаблону.
+    Проверяем, что строка лога, выведенного в файл, соответствует шаблону.
     Только кейсы с ловлей ошибок.
     """
     file_handler = file_writer(filename_for_test)
@@ -396,7 +396,6 @@ def test_check_full_string_errors(handler, filename_for_test):
         string = [string for string in file.read().split('\n') if string][-1]
     time_of_work = f'{handler.last["time_of_work"]:.8f}'
     time_of_work = time_of_work.rstrip('0.')
-    assert string == f'[{handler.last["time"]}] | test_check_full_string_errors_level |  ERROR  |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | result: 6 (int) | local variables: a = 1 (int), b = 2 (int), c = 3 (int) | exception: ValueError("kek_message") | traceback: '
-
+    assert string.startswith(f'[{handler.last["time"]}] | test_check_full_string_errors_level |  ERROR  |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | local variables: a = 1 (int), b = 2 (int), c = 3 (int) | exception: ValueError("kek_message") | traceback: ')
 
     config.delete_handlers('kek_test_check_full_string_errors')
