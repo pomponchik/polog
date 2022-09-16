@@ -997,3 +997,43 @@ def test_asyncio_exception(handler):
 
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == message
+
+def test_resolve_normal_level():
+    """
+    Проверяем, что определение уровня обычного события работает.
+    """
+    assert flog.resolve_normal_level(None) == flog.settings['default_level']
+    assert flog.resolve_normal_level(5) == 5
+    assert flog.resolve_normal_level(10) == 10
+    assert flog.resolve_normal_level(777) == 777
+
+    config.levels(kek=5)
+    assert flog.resolve_normal_level('kek') == 5
+
+    config.levels(kek=10)
+    assert flog.resolve_normal_level('kek') == 10
+
+def test_default_level_in_decorator(handler):
+    """
+    По дефолту уровень лога в декораторе должен браться из настроек, но клиент может переопределить.
+    Проверяем, что это так и работает.
+    """
+    config.set(pool_size=0, level=0, default_level=5)
+
+    @flog(level=10)
+    def function_1():
+        pass
+
+    @flog
+    def function_2():
+        pass
+
+    function_1()
+    assert handler.last['level'] == 10
+
+    function_2()
+    assert handler.last['level'] == 5
+
+    config.set(default_level=8)
+    function_2()
+    assert handler.last['level'] == 8

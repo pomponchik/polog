@@ -37,7 +37,7 @@ class FunctionLogger:
         self.in_place_fields = in_place_fields
         self.engine_fields = engine_fields
 
-    def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False, handlers=None, extra_fields=None, extra_engine_fields=None):
+    def __call__(self, *args, message=None, level=None, errors_level=None, is_method=False, handlers=None, extra_fields=None, extra_engine_fields=None):
         """
         Фабрика декораторов логирования для функций. Можно вызывать как со скобками, так и без.
         """
@@ -173,7 +173,8 @@ class FunctionLogger:
         """
         Заполнение автоматических полей в случае, когда исключения не было.
         """
-        level = Levels.get(level)
+        level = self.resolve_normal_level(level)
+
         if level >= self.settings['level']:
             args_dict['success'] = True
             args_dict['result'] = json_one_variable(result)
@@ -188,6 +189,17 @@ class FunctionLogger:
                 args_dict['input_variables'] = input_variables
             log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
             self.engine.write(log)
+
+    def resolve_normal_level(self, level):
+        """
+        Определяем уровень события.
+        Если клиент определил его сам - используем эту оценку. Если нет - берем дефолтное значение из настроек.
+        """
+        if level is not None:
+            level = Levels.get(level)
+        else:
+            level = self.settings['default_level']
+        return level
 
     def create_log_item(self, args, kwargs, data, handlers, engine_fields, in_place_fields):
         """
