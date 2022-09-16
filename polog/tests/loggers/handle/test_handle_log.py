@@ -422,3 +422,25 @@ def test_class_name_when_handle_logging(handler):
     log('kek', class_='kek')
 
     assert handler.last['class'] == 'kek'
+
+def test_handle_log_default_level(handler):
+    """
+    Проверяем, что по умолчанию для успешных событий берется дефолтный уровень из настроек.
+    """
+    config.set(pool_size=0, default_level=5)
+
+    log('lol')
+    assert handler.last['level'] == 5
+
+    config.set(default_level=7)
+    log('kek')
+    assert handler.last['level'] == 7
+
+def test_handle_log_not_default_level(handler):
+    """
+    Проверяем, что если клиент задал событию уровень, то используется именно он, а не взятый по дефолту из настроек.
+    """
+    config.set(pool_size=0, default_level=5)
+
+    log('lol', level=7)
+    assert handler.last['level'] == 7
