@@ -1037,3 +1037,35 @@ def test_default_level_in_decorator(handler):
     config.set(default_level=8)
     function_2()
     assert handler.last['level'] == 8
+
+def test_set_arguments_not_allowed_types():
+    """
+    Проверяем, что нельзя установить:
+    1. Не-строку в качестве сообщения в декораторе.
+    2. Что-то кроме целых чисел и строк в качестве уровней (обычного и для ошибок).
+    3. В качестве флага is_method не-булевое значение.
+    """
+    with pytest.raises(ValueError):
+        @flog(message=10)
+        def function():
+            pass
+
+    with pytest.raises(ValueError):
+        @flog(level=1.5)
+        def function():
+            pass
+
+    with pytest.raises(ValueError):
+        @flog(errors_level=1.5)
+        def function():
+            pass
+
+    with pytest.raises(ValueError):
+        @flog(is_method=12)
+        def function():
+            pass
+
+    with pytest.raises(ValueError):
+        @flog(is_method='True')
+        def function():
+            pass

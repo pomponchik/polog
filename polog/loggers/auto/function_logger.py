@@ -41,6 +41,15 @@ class FunctionLogger:
         """
         Фабрика декораторов логирования для функций. Можно вызывать как со скобками, так и без.
         """
+        if message is not None and not isinstance(message, str):
+            raise ValueError('The message of the decorator must be an instance of the str type.')
+        if level is not None and not isinstance(level, int) and not isinstance(level, str):
+            raise ValueError('The level of the decorator must be an instance of the str or int.')
+        if errors_level is not None and not isinstance(errors_level, int) and not isinstance(errors_level, str):
+            raise ValueError('The errors_level of the decorator must be an instance of the str or int.')
+        if not isinstance(is_method, bool):
+            raise ValueError('The flag "is_method" of the decorator must be an instance of the bool.')
+        
         def error_logger(func):
             # Если функция уже ранее была задекорирована, мы декорируем ее саму, а не ее в уже задекорированном виде.
             func, before_change_func = RegisteringFunctions().get_original(func), func
