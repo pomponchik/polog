@@ -15,7 +15,7 @@ from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.utils.json_vars import json_vars, json_one_variable
 from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
-from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError, HandlerNotFoundError
+from polog.errors import IncorrectUseOfTheDecoratorError, HandlerNotFoundError
 from polog.loggers.handle.message import message as _message
 from polog.core.log_item import LogItem
 from polog.data_structures.trees.named_tree.projector import TreeProjector
@@ -61,7 +61,7 @@ class FunctionLogger:
                 except Exception as e:
                     finish = time.time()
                     self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
-                    self.reraise_exception(e)
+                    raise e
                 finish = time.time()
                 self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                 return result
@@ -79,7 +79,7 @@ class FunctionLogger:
                 except Exception as e:
                     finish = time.time()
                     self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
-                    self.reraise_exception(e)
+                    raise e
                 finish = time.time()
                 self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                 return result
@@ -144,21 +144,13 @@ class FunctionLogger:
         arg = getattr(obj, arg_name, None)
         not_none_to_dict(args, key_name, arg)
 
-    def reraise_exception(self, exc):
-        """
-        Здесь решается, какое исключение поднять - оригинальное или встроенное в Polog, в зависимости от настроек.
-        """
-        if self.settings['original_exceptions']:
-            raise exc
-        raise LoggedError(str(exc)) from exc
-
     def log_exception_info(self, exc, finish, start, args_dict, errors_level, simple_level, handlers, in_place_fields, engine_fields, *args, **kwargs):
         """
         Здесь происходит заполнение автоматически извлекаемых полей в случае исключения.
         В т. ч. извлекается вся информация об исключении - название, сообщение и т. д.
         """
-        exc_type = type(exc)
-        if not (exc_type is LoggedError):
+        if not hasattr(exc, 'checked_by_polog') or not self.settings['deduplicate_errors']:
+            exc.checked_by_polog = True
             errors_level = get_errors_level(errors_level, simple_level)
             if errors_level >= self.settings['level']:
                 exception_to_dict(args_dict, exc)

@@ -42,12 +42,6 @@ def test_set_valid_key_delay_before_exit():
     assert SettingsStore()['default_error_level'] == 1
     config.set(default_error_level=2)
     assert SettingsStore()['default_error_level'] == 2
-    # original_exceptions
-    config.set(original_exceptions=True)
-    assert SettingsStore()['original_exceptions'] == True
-    config.set(original_exceptions=False)
-    assert SettingsStore()['original_exceptions'] == False
-    config.set(original_exceptions=True)
     # pool_size
     config.set(pool_size=1)
     assert SettingsStore()['pool_size'] == 1
@@ -82,6 +76,12 @@ def test_set_valid_key_delay_before_exit():
     assert SettingsStore()['unknown_fields_in_handle_logs'] == True
     config.set(unknown_fields_in_handle_logs=False)
     assert SettingsStore()['unknown_fields_in_handle_logs'] == False
+    # deduplicate_errors
+    config.set(deduplicate_errors=True)
+    assert SettingsStore()['deduplicate_errors'] == True
+    config.set(deduplicate_errors=False)
+    assert SettingsStore()['deduplicate_errors'] == False
+    config.set(deduplicate_errors=True)
 
 def test_set_invalid_key():
     """

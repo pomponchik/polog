@@ -62,8 +62,8 @@ class config:
     @staticmethod
     def standard_levels():
         """
-        Установка уровней логирования в соответствии со стандартной схемой (кроме уровня NOTSET):
-        https://docs.python.org/3.8/library/logging.html#logging-levels
+        Установка уровней логирования в соответствии со стандартной схемой.
+        См. https://docs.python.org/3.8/library/logging.html#logging-levels
         """
         levels = {'NOTSET': 0, 'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}
         for key, value in levels.items():
@@ -78,7 +78,7 @@ class config:
 
         Каждый обработчик должен быть вызываеым объектом, имеющим следующую сигнатуру (названия параметров соблюдать не обязательно):
 
-        handler(function_input, **fields)
+        handler(log_item)
 
         При несовпадении сигнатуры, будет поднято исключение.
 

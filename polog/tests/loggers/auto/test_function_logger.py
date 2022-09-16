@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from polog import flog, config, LoggedError, field
+from polog import flog, config, field
 from polog.loggers.auto.function_logger import FunctionLogger
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.data_structures.trees.named_tree.tree import NamedTree
@@ -191,30 +191,77 @@ def test_get_arg_base_full_dander(empty_class):
     flog.get_arg(obj, data, '__lol__')
     assert data['lol'] == 'kek'
 
-def test_raise_original():
+def test_raise_deduplicate_errors(handler):
     """
-    При настройке original_exceptions=True переподниматься должно оригинальное исключение.
+    При настройке deduplicate_errors=True сообщение записывается только при первом проходе исключения через декоратор.
     """
-    config.set(original_exceptions=True)
-    try:
-        raise ValueError
-    except Exception as e:
-        try:
-            flog.reraise_exception(e)
-            assert False # Проверка, что исключение в принципе переподнимается.
-        except Exception as e2:
-            assert e is e2
+    config.set(deduplicate_errors=True, pool_size=0)
 
-def test_raise_not_original():
-    """
-    При настройке original_exceptions=False переподниматься должно исключение LoggedError.
-    """
-    config.set(original_exceptions=False)
-    try:
+    @flog
+    def b():
         raise ValueError
-    except Exception as e:
-        with pytest.raises(LoggedError):
-            flog.reraise_exception(e)
+    @flog
+    def a():
+        return b()
+
+    with pytest.raises(ValueError):
+        a()
+
+    assert len(handler.all) == 1
+
+def test_raise_deduplicate_errors_async(handler):
+    """
+    Тест, аналогичный test_raise_deduplicate_errors, но для корутинных функций.
+    """
+    config.set(deduplicate_errors=True, pool_size=0)
+
+    @flog
+    async def b():
+        raise ValueError
+    @flog
+    async def a():
+        return await b()
+
+    with pytest.raises(ValueError):
+        asyncio.run(a())
+
+    assert len(handler.all) == 1
+
+def test_raise_not_deduplicate_errors(handler):
+    """
+    При настройке deduplicate_errors=False исключение, поднимающееся по стеку вызовов, записывается столько раз, сколько проходит через логирующий декоратор.
+    """
+    config.set(deduplicate_errors=False, pool_size=0)
+
+    @flog
+    def b():
+        raise ValueError
+    @flog
+    def a():
+        return b()
+
+    with pytest.raises(ValueError):
+        a()
+
+    assert len(handler.all) == 2
+
+def test_raise_not_deduplicate_errors_async(handler):
+    """
+    Тест, аналогичный test_raise_not_deduplicate_errors, но для корутинных функций.
+    """
+    config.set(deduplicate_errors=False, pool_size=0)
+
+    @flog
+    async def b():
+        raise ValueError
+    @flog
+    async def a():
+        return await b()
+
+    with pytest.raises(ValueError):
+        asyncio.run(a())
+
+    assert len(handler.all) == 2
 
 def test_log_exception_info():
     """
@@ -630,7 +677,7 @@ def test_success_flag_when_success(handler):
 
 def test_success_flag_when_error(handler):
     """
-    Флаг "success" должен проставляться в значение True, если внутри обернутой функции поднято исключение.
+    Флаг "success" должен проставляться в значение False, если внутри обернутой функции поднято исключение.
     """
     @flog
     def function():

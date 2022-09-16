@@ -15,7 +15,7 @@ def test_set_and_get():
     all_values = [
         {
             'pool_size': 7,
-            'original_exceptions': False,
+            'deduplicate_errors': False,
             'level': 5,
             'service_name': 'lol',
             'default_error_level': 7,
@@ -23,7 +23,7 @@ def test_set_and_get():
         },
         {
             'pool_size': 12,
-            'original_exceptions': True,
+            'deduplicate_errors': True,
             'level': 3,
             'service_name': 'kek',
             'default_error_level': 12,
@@ -127,7 +127,6 @@ def test_operator_in():
         'default_error_level',
         'max_queue_size',
         'started',
-        'original_exceptions',
         'service_name',
         'silent_internal_exceptions',
         'max_delay_before_exit',
@@ -135,6 +134,11 @@ def test_operator_in():
         'time_quant',
         'engine',
         'json_module',
+        'smart_assert_politic',
+        'debug_mode',
+        'fields_intersection',
+        'unknown_fields_in_handle_logs',
+        'deduplicate_errors',
     ]
 
     for field_name in names:

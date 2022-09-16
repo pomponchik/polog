@@ -1,9 +1,9 @@
 import pytest
 
-from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError, DoubleSettingError, AfterStartSettingError, RewritingLogError, HandlerNotFoundError
+from polog.errors import IncorrectUseOfTheDecoratorError, DoubleSettingError, AfterStartSettingError, RewritingLogError, HandlerNotFoundError
 
 
-errors = [LoggedError, IncorrectUseOfTheDecoratorError, DoubleSettingError, AfterStartSettingError, RewritingLogError, HandlerNotFoundError]
+errors = [IncorrectUseOfTheDecoratorError, DoubleSettingError, AfterStartSettingError, RewritingLogError, HandlerNotFoundError]
 
 def test_multiraise():
     """

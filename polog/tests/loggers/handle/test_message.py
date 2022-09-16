@@ -92,17 +92,19 @@ def test_another_field(handler):
 
     assert handler.last['lolkek'] == 'lolkek'
 
-def test_unknown_argument():
+def test_unknown_argument(handler):
     """
-    Проверяем, что функция поднимает исключение, если подать неизвестный именованный аргумент.
+    Проверяем, что в message можно передать неизвестный именной аргумент.
     """
     @flog
     def function():
         message('lolkek', unknown_argument='kek')
-    config.set(original_exceptions=True)
-    config.set(silent_internal_exceptions=False)
-    with pytest.raises(KeyError):
-        function()
+
+    config.set(silent_internal_exceptions=True, unknown_fields_in_handle_logs=True)
+
+    function()
+
+    assert handler.last['unknown_argument'] == 'kek'
 
 def test_wrong_type():
     """
@@ -111,7 +113,8 @@ def test_wrong_type():
     @flog
     def function():
         message('lolkek', success='kek')
-    config.set(original_exceptions=True)
-    config.set(silent_internal_exceptions=False)
+
+    config.set(silent_internal_exceptions=False, unknown_fields_in_handle_logs=True)
+
     with pytest.raises(ValueError):
         function()
