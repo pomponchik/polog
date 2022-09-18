@@ -462,19 +462,19 @@ def test_extract_extra_fields_other_type_with_converter():
 
 def test_execute_log_item_call_handlers(handler):
     """
-    Проверяем, что при вызове метода .execute() у объекта лога у него вызываются обработчики.
+    Проверяем, что при вызове объекта лога у него вызываются обработчики.
     """
     log = LogItem()
     log.set_data({})
     log.set_handlers([handler])
 
-    log.execute()
+    log()
 
     assert handler.last is log
 
 def test_execute_log_item_extract_fields(handler):
     """
-    Проверяем, что при вызове метода .execute() у объекта лога извлекаются дополнительные поля.
+    Проверяем, что при выполнении объекта лога извлекаются дополнительные поля.
     """
     log = LogItem()
     log.set_data({})
@@ -486,7 +486,7 @@ def test_execute_log_item_extract_fields(handler):
     fields = {field_name: field(extractor)}
     log.set_extra_fields(fields)
 
-    log.execute()
+    log()
 
     assert handler.last[field_name] == 'kek'
 

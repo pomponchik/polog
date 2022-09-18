@@ -10,4 +10,4 @@ class SingleThreadedRealEngine(AbstractRealEngine):
         """
         "Выполняем" лог, то есть запускаем все привязанные к нему действия - извлечения полей, передачу лога в обработчики и т. д.
         """
-        log.execute()
+        log()
