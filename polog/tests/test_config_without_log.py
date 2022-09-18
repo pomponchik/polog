@@ -7,6 +7,6 @@ def do_log(filename):
     Проверяем, что так можно.
     """
     config.add_handlers(file_writer(filename))
-    config.set_log_as_built_in()
+    config.set(log_is_built_in=True)
 
     log('kek')

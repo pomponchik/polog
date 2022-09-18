@@ -1,5 +1,3 @@
-import builtins
-
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
 from polog.core.utils.signature_matcher import SignatureMatcher
@@ -226,11 +224,3 @@ class config:
         result = {**cls.get_in_place_fields(*names)}
         result.update(cls.get_engine_fields(*names))
         return result
-
-    @staticmethod
-    def set_log_as_built_in():
-        """
-        Устанавливаем функцию log() как встроенную функцию.
-        Это значит, что ее можно использовать в любом месте программы, не импортируя.
-        """
-        builtins.log = log

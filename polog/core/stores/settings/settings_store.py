@@ -7,7 +7,7 @@ from polog.core.stores.settings.setting_point import SettingPoint
 from polog.core.stores.levels import Levels
 from polog.core.engine.real_engines.fabric import real_engine_fabric
 
-from polog.core.stores.settings.actions import reload_engine, fields_intersection_action
+from polog.core.stores.settings.actions import reload_engine, fields_intersection_action, set_log_as_built_in
 
 
 class SettingsStore(ReadOnlySingleton):
@@ -177,6 +177,13 @@ class SettingsStore(ReadOnlySingleton):
             proves={
                 'the value must be boolean': lambda x: isinstance(x, bool),
             },
+        ),
+        'log_is_built_in': SettingPoint(
+            False,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+            action=set_log_as_built_in,
         ),
     }
     points_are_informed = False
