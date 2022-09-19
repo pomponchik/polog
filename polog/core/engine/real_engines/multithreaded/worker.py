@@ -64,14 +64,8 @@ class Worker:
         """
         self.thread.join()
 
-    def do_anything(self, log):
+    def do_anything(self, log_item):
         """
-        Выполняем кастомные обработчики для записи логов.
-
-        Если один из них поднимет исключение, гасим его и продолжаем выполнять оставшиеся обработчики.
+        "Выполняем" лог, то есть запускаем все привязанные к нему действия - извлечения полей, передачу лога в обработчики и т. д.
         """
-        for handler in log.get_handlers():
-            try:
-                handler(log)
-            except Exception as e:
-                pass
+        log_item()

@@ -14,6 +14,7 @@ class BaseFormatter:
         'service_name',
         'exception_type',
         'exception_message',
+        'class',
     }
 
     def __init__(self, separator):
@@ -132,7 +133,10 @@ class BaseFormatter:
             if field_name not in base:
                 if field_name not in self.FORBIDDEN_EXTRA_FIELDS:
                     if value is not None:
-                        base[field_name] = f'{field_name}: "{value}"'
+                        if isinstance(value, str):
+                            base[field_name] = f'{field_name}: "{value}"'
+                        else:
+                            base[field_name] = f'{field_name}: {value}'
 
     def format(self, data):
         """

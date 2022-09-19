@@ -2,8 +2,14 @@ from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
 from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
+from polog.core.utils.name_manager import NameManager
 from polog.core.stores.handlers import global_handlers
 from polog.data_structures.trees.named_tree.projector import TreeProjector
+from polog.core.stores.fields import in_place_fields, engine_fields
+from polog.loggers.auto.function_logger import flog
+from polog.loggers.handle.handle_log import handle_log
+from polog.loggers.handle.message import message
+from polog import log
 
 
 class config:
@@ -36,22 +42,28 @@ class config:
     def levels(**kwargs):
         """
         Установка кастомных уровней логирования.
+
         Имена переменных здесь соответствуют названиям новых уровней логирования, а их значения - собственно сами уровни.
+        Запрещено использовать имена, которые пересекаются с именами, используемыми в качестве имен методов в логгерах. Это необходимо, поскольку имена логирования можно использовать в качестве динамических методов логгеров, и нужно, чтобы они не пересекались.
         """
+        forbidden_names = set(dir(flog)).union(set(dir(handle_log))).union(set(dir(log))).union(set(dir(message)))
         for key, value in kwargs.items():
             if not isinstance(value, int):
                 raise TypeError(f'Variable "{key}" has not type int.')
             if value < 0:
                 raise ValueError('The logging level cannot be less than zero.')
+            estimate_of_name = NameManager.is_possible_level_name(key)
+            if not estimate_of_name.possibility:
+                raise NameError(estimate_of_name.reason)
             Levels.set(key, value)
 
     @staticmethod
     def standard_levels():
         """
-        Установка уровней логирования в соответствии со стандартной схемой (кроме уровня NOTSET):
-        https://docs.python.org/3.8/library/logging.html#logging-levels
+        Установка уровней логирования в соответствии со стандартной схемой.
+        См. https://docs.python.org/3.8/library/logging.html#logging-levels
         """
-        levels = {'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}
+        levels = {'NOTSET': 0, 'DEBUG': 10, 'INFO': 20, 'WARNING': 30, 'ERROR': 40, 'CRITICAL': 50}
         for key, value in levels.items():
             Levels.set(key, value)
             Levels.set(key.lower(), value)
@@ -64,7 +76,7 @@ class config:
 
         Каждый обработчик должен быть вызываеым объектом, имеющим следующую сигнатуру (названия параметров соблюдать не обязательно):
 
-        handler(function_input, **fields)
+        handler(log_item)
 
         При несовпадении сигнатуры, будет поднято исключение.
 
@@ -134,15 +146,32 @@ class config:
         """
         Добавляем кастомные "поля" логов.
 
+        Данные поля будут извлекаться в том же потоке, в котором собственно происходит логируемое событие. За счет этого возможно залогировать, к примеру, идентификатор потока, в котором произошло событие.
+
         Поле - это некоторый объект, имеющий метод .get_data() с той же сигнатурой, что у обработчиков (см. комментарий к методу .add_handlers() этого же класса). Он будет вызываться при каждом формировании лога, а результат его работы - передаваться обработчикам так же, как и все прочие поля.
 
         В данном случае поля передаются в виде именованных переменных, где имена переменных - это названия полей, а значения - сами функции.
         """
-        settings = SettingsStore()
         for key, value in fields.items():
             if not hasattr(value, 'get_data') or not SignatureMatcher.is_handler(value.get_data):
-                raise ValueError('The signature of the field handler must be the same as that of other Polog handlers.')
-            settings.extra_fields[key] = value
+                raise ValueError('The field handler must have a method .get_data() with the signature that is standard for Polog handlers.')
+            estimate_of_name = NameManager.is_possible_extra_field_name(key)
+            if not estimate_of_name.possibility:
+                raise NameError(estimate_of_name.reason)
+            in_place_fields[key] = value
+
+    @staticmethod
+    def add_engine_fields(**fields):
+        """
+        Добавляем кастомные "поля" логов, которые будут извлекаться внутри движка. В остальном идентично тем полям, что добавляются через .add_fields().
+        """
+        for key, value in fields.items():
+            if not hasattr(value, 'get_data') or not SignatureMatcher.is_handler(value.get_data):
+                raise ValueError('The field handler must have a method .get_data() with the signature that is standard for Polog handlers.')
+            estimate_of_name = NameManager.is_possible_extra_field_name(key)
+            if not estimate_of_name.possibility:
+                raise NameError(estimate_of_name.reason)
+            engine_fields[key] = value
 
     @staticmethod
     def delete_fields(*fields):
@@ -153,4 +182,45 @@ class config:
         for name in fields:
             if not isinstance(name, str):
                 raise KeyError('Fields are deleted by name. The name is an instance of the str class.')
-            settings.extra_fields.pop(name)
+            in_place_fields.pop(name)
+
+    @staticmethod
+    def delete_engine_fields(*fields):
+        """
+        Удаляем кастомные поля по их названиям. См. метод .add_engine_fields().
+        """
+        settings = SettingsStore()
+        for name in fields:
+            if not isinstance(name, str):
+                raise KeyError('Fields are deleted by name. The name is an instance of the str class.')
+            engine_fields.pop(name)
+
+    @staticmethod
+    def get_in_place_fields(*names):
+        """
+        Получаем словарь с извлекаемыми "на месте" полями.
+        Если сюда передать одно или несколько имен полей, вернется словарь только с ними, иначе - со всеми.
+        """
+        if not names:
+            return {**in_place_fields}
+        return {name: in_place_fields.get(name) for name in names if in_place_fields.get(name) is not None}
+
+    @staticmethod
+    def get_engine_fields(*names):
+        """
+        Получаем словарь с извлекаемыми внутри движка полями.
+        Если сюда передать одно или несколько имен полей, вернется словарь только с ними, иначе - со всеми.
+        """
+        if not names:
+            return {**engine_fields}
+        return {name: engine_fields.get(name) for name in names if engine_fields.get(name) is not None}
+
+    @classmethod
+    def get_all_fields(cls, *names):
+        """
+        Метод возвращает вообще все ивлекаемые поля, то есть извлекаемые как внутри движка, так и "на месте".
+        В случае пересечения имен, результат будет идентичен порядку реального извлечения полей, то есть движковые поля "затрут" конкурентов.
+        """
+        result = {**cls.get_in_place_fields(*names)}
+        result.update(cls.get_engine_fields(*names))
+        return result

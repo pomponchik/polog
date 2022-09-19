@@ -13,7 +13,6 @@ def test_before(handler):
     @flog(message='base text', level=100)
     def function():
         pass
-    handler.clean()
     function()
     time.sleep(0.0001)
     assert len(handler.all) == 0
@@ -26,7 +25,6 @@ def test_after(handler):
     @logging_is_forbidden
     def function():
         pass
-    handler.clean()
     function()
     time.sleep(0.0001)
     assert len(handler.all) == 0
@@ -44,7 +42,6 @@ def test_multiple(handler):
     @flog(message='base text', level=100)
     def function():
         return True
-    handler.clean()
     function()
     time.sleep(0.0001)
     assert len(handler.all) == 0
@@ -73,7 +70,6 @@ def test_double_forbidden(handler):
     @flog(message='base text', level=100)
     def function():
         pass
-    handler.clean()
     function()
     time.sleep(0.0001)
     assert len(handler.all) == 0

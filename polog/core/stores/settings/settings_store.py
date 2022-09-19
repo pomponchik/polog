@@ -3,10 +3,11 @@ import inspect
 from threading import Lock
 
 from polog.core.utils.read_only_singleton import ReadOnlySingleton
-from polog.core.utils.reload_engine import reload_engine
 from polog.core.stores.settings.setting_point import SettingPoint
 from polog.core.stores.levels import Levels
 from polog.core.engine.real_engines.fabric import real_engine_fabric
+
+from polog.core.stores.settings.actions import reload_engine, fields_intersection_action, set_log_as_built_in
 
 
 class SettingsStore(ReadOnlySingleton):
@@ -21,7 +22,7 @@ class SettingsStore(ReadOnlySingleton):
     # По сути весь класс SettingsStore проксирует доступ к этому словарю.
     points = {
         'pool_size': SettingPoint(
-            2,
+            0,
             proves={
                 'the value must be an integer': lambda x: isinstance(x, int),
                 'the value must be greater than or equal to zero': lambda x: x >= 0,
@@ -29,7 +30,7 @@ class SettingsStore(ReadOnlySingleton):
             conflicts={
                 'max_queue_size': lambda new_value, old_value, other_field_value: new_value == 0 and other_field_value != 0,
             },
-            action=lambda old_value, new_value, store: reload_engine() if old_value != new_value else None,
+            action=reload_engine,
             read_lock=True,
             shared_lock_with=(
                 'max_queue_size',
@@ -45,7 +46,7 @@ class SettingsStore(ReadOnlySingleton):
             conflicts={
                 'pool_size': lambda new_value, old_value, other_field_value: new_value != 0 and other_field_value == 0,
             },
-            action=lambda old_value, new_value, store: reload_engine() if old_value != new_value else None,
+            action=reload_engine,
             read_lock=True,
             shared_lock_with=(
                 'pool_size',
@@ -65,20 +66,24 @@ class SettingsStore(ReadOnlySingleton):
                 'max_queue_size',
             ),
         ),
-        'original_exceptions': SettingPoint(
-            False,
-            proves={
-                'the value must be boolean': lambda x: isinstance(x, bool),
-            },
-        ),
         'level': SettingPoint(
-            1,
+            0,
             proves={
                 'the value can be a string or an integer greater than or equal to zero': lambda x: (isinstance(x, int) and x >= 0) or isinstance(x, str),
             },
             converter=Levels.get,
         ),
-        'errors_level': SettingPoint(
+        'default_level': SettingPoint(
+            1,
+            proves={
+                'the value can be a string or an integer greater than or equal to zero': lambda x: (isinstance(x, int) and x >= 0) or isinstance(x, str),
+            },
+            converter=Levels.get,
+            shared_lock_with=(
+                'default_error_level',
+            ),
+        ),
+        'default_error_level': SettingPoint(
             2,
             proves={
                 'the value can be a string or an integer greater than or equal to zero': lambda x: (isinstance(x, int) and x >= 0) or isinstance(x, str),
@@ -86,10 +91,10 @@ class SettingsStore(ReadOnlySingleton):
             converter=Levels.get,
         ),
         'service_name': SettingPoint(
-            'base',
+            None,
             proves={
-                'the value can only be a string': lambda x: isinstance(x, str),
-                'the value must follow the rules for formatting identifiers in Python': lambda x: x.isidentifier(),
+                'the value can only be a string or a None': lambda x: isinstance(x, str) or isinstance(x, type(None)),
+                'the value must follow the rules for formatting identifiers in Python': lambda x: x.isidentifier() if isinstance(x, str) else True,
             },
         ),
         'silent_internal_exceptions': SettingPoint(
@@ -102,7 +107,7 @@ class SettingsStore(ReadOnlySingleton):
             1.0,
             proves={
                 'the value must be a number (int or float)': lambda x: isinstance(x, int) or isinstance(x, float),
-                'the value must be greater than zero': lambda x: x > 0,
+                'the value must be greater than or equal to zero': lambda x: x >= 0,
             },
         ),
         'delay_on_exit_loop_iteration_in_quants': SettingPoint(
@@ -136,9 +141,52 @@ class SettingsStore(ReadOnlySingleton):
                 'the "dumps" attribute of the value must be called': lambda x: callable(getattr(x, 'dumps')),
             },
         ),
+        'smart_assert_politic': SettingPoint(
+            'if_debug',
+            proves={
+                'the value can only be a string': lambda x: isinstance(x, str),
+                'the value must be a name of the politic: "all" or "if_debug"': lambda x: x in ('all', 'if_debug'),
+            },
+            converter={
+                'all': lambda debug_mode, expression_result: not expression_result,
+                'if_debug': lambda debug_mode, expression_result: not debug_mode and not expression_result,
+            }.get,
+            convert_first_time=True,
+        ),
+        'debug_mode': SettingPoint(
+            __debug__,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
+        'fields_intersection': SettingPoint(
+            False,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+            action=fields_intersection_action,
+        ),
+        'unknown_fields_in_handle_logs': SettingPoint(
+            True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
+        'deduplicate_errors': SettingPoint(
+            True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
+        'log_is_built_in': SettingPoint(
+            False,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+            action=set_log_as_built_in,
+        ),
     }
     points_are_informed = False
-    extra_fields = {}
     lock = Lock()
 
     def __init__(self, **kwargs):
@@ -185,6 +233,18 @@ class SettingsStore(ReadOnlySingleton):
         Проверка того, что переданное название пункта настроек существует.
         """
         return key in self.points
+
+    def __str__(self):
+        """
+        Распечатываем текущее состояние настроек.
+        """
+        data = {key: self.force_get(key) for key in self.points}
+        strings = {key: f'"{value}"' for key, value in data.items()}
+        for key, value in strings.items():
+            data[key] == strings[key]
+        data = [f'{key} = {value}' for key, value in data.items()]
+        data = ', '.join(data)
+        return f'<SettingStore object with data: {data}>'
 
     def force_get(self, key):
         """

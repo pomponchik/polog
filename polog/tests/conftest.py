@@ -3,8 +3,10 @@ import shutil
 import uuid
 
 import pytest
+from termcolor import colored
 
 from polog import config
+from polog.core.stores.settings.settings_store import SettingsStore
 from polog.handlers.memory.saver import memory_saver
 
 
@@ -14,6 +16,7 @@ def handler():
     Получаем стандартный обработчик, сохраняющий логи в оперативную память.
     """
     new_handler = memory_saver()
+    new_handler.clean()
     try:
         config.add_handlers(new_handler)
     except ValueError as e:
@@ -101,3 +104,12 @@ def dirname_for_test(delete_files):
     shutil.rmtree(path, ignore_errors=True)
     os.makedirs(path)
     open(os.path.join(path, '.gitkeep'), 'w').close()
+
+@pytest.hookimpl
+def pytest_runtest_makereport(item, call):
+    """
+    Хук, добавляющий информацию о текущих настройках к каждому выводу об ошибке в тесте.
+    """
+    if call.when == 'call':
+        if call.excinfo:
+            item.add_report_section("call", "config", colored(str(SettingsStore()), 'cyan'))

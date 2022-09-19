@@ -1,10 +1,12 @@
 import time
 import datetime
+from multiprocessing import Process, Queue
 
 import pytest
 
 from polog.errors import RewritingLogError
 from polog.core.log_item import LogItem, FunctionInputData
+from polog import field, config, log
 
 
 def test_init_empty_log():
@@ -12,7 +14,7 @@ def test_init_empty_log():
     Проверяем, что инстанс лога без аргументов создается.
     """
     log = LogItem()
-
+    assert isinstance(log, LogItem)
 
 def test_set_field_to_log_error():
     """
@@ -21,7 +23,6 @@ def test_set_field_to_log_error():
     log = LogItem()
     with pytest.raises(RewritingLogError):
         log['kek'] = 'lol'
-
 
 def test_delete_field_from_log_error():
     """
@@ -37,7 +38,6 @@ def test_delete_field_from_log_error():
     # Когда ключ есть.
     with pytest.raises(RewritingLogError):
         del log['lol']
-
 
 def test_log_to_string_representstion():
     """
@@ -70,7 +70,6 @@ def test_log_to_string_representstion():
     log_4_id = id(log_4)
     assert str(log_4) == '<log item #' + str(log_4_id) + ' (empty)>'
 
-
 def test_get_field_content_from_log_with_brackets():
     """
     Извлекаем значение из лога с помощью квадратных скобок.
@@ -90,7 +89,6 @@ def test_get_field_content_from_log_with_brackets():
     log = LogItem()
     log.set_data({'lol': 'kek'})
     assert log['lol'] == 'kek'
-
 
 def test_get_field_content_from_log_with_method_get():
     """
@@ -114,7 +112,6 @@ def test_get_field_content_from_log_with_method_get():
     assert log.get('lol') == 'kek'
     assert log.get('lol', 'no_kek') == 'kek'
 
-
 def test_operator_in():
     """
     Проверяем, что оператор in по отношению к логу работает корректно.
@@ -132,7 +129,6 @@ def test_operator_in():
     log_3 = LogItem()
     log_3.set_data({'lol': 'kek'})
     assert ('lol' in log_3) == True
-
 
 def test_iteration_by_log():
     """
@@ -174,7 +170,6 @@ def test_iteration_by_log():
     assert count == 3
     assert keys == list(data.keys())
 
-
 def test_equal_logs():
     """
     Проверяем, что проверка логов на равенство работает.
@@ -213,7 +208,6 @@ def test_equal_logs():
     log_2.set_data(data)
     assert log_1 is not log_2
     assert log_1 == log_2
-
 
 def test_other_comparisons():
     """
@@ -258,7 +252,6 @@ def test_other_comparisons():
     with pytest.raises(TypeError):
         empty_log_1 <= empty_log_2
 
-
 def test_get_items():
     """
     Проверяем работу метода .items(). Должно работать по аналогии со словарем.
@@ -270,7 +263,6 @@ def test_get_items():
     log.set_data({'lol': 'kek'})
 
     assert tuple(log.items()) == (('lol', 'kek'), )
-
 
 def test_get_keys():
     """
@@ -284,7 +276,6 @@ def test_get_keys():
 
     assert tuple(log.keys()) == ('lol', )
 
-
 def test_get_values():
     """
     Проверяем работу метода .keys(). Должно работать по аналогии со словарем.
@@ -296,7 +287,6 @@ def test_get_values():
     log.set_data({'lol': 'kek'})
 
     assert tuple(log.values()) == ('kek', )
-
 
 def test_function_input_data_set_and_get():
     """
@@ -329,3 +319,231 @@ def test_handlers_set_and_get():
     log.set_handlers(lst)
 
     assert log.get_handlers() == lst
+
+def test_set_and_get_extra_fields_to_log_item():
+    """
+    Пробуем сохранить в логе дополнительные поля и потом получить их.
+    """
+    log = LogItem()
+
+    def extractor(item):
+        return 'kek'
+    fields = {'kek': field(extractor)}
+    log.set_extra_fields(fields)
+
+    assert log.get_extra_fields() is fields
+    assert log.get_extra_fields() == fields
+
+def test_not_set_and_get_extra_fields_to_log_item():
+    """
+    Пробуем получить дополнительные поля из лога, когда мы их в него ранее не передавали (исключение подниматься не должно).
+    """
+    log = LogItem()
+
+    assert log.get_extra_fields() == {}
+
+def test_set_and_call_handlers_in_log_item(handler):
+    """
+    Проверяем, что хендлеры сохраняются в объекте лога и вызываются.
+    """
+    log = LogItem()
+    log.set_handlers([handler])
+
+    log.call_handlers()
+
+    assert handler.last is log
+
+def test_not_set_and_call_handlers_in_log_item(handler):
+    """
+    Вызываем метод .call_handlers(), не передавая до этого список обработчиков.
+    Исключения быть не должно.
+    """
+    log = LogItem()
+    log.call_handlers()
+
+def test_set_and_call_one_handler_in_log_item(handler):
+    """
+    Проверяем, что хендлер вызывается от объекта лога.
+    """
+    log = LogItem()
+
+    log.call_one_handler(handler)
+
+    assert handler.last is log
+
+def test_set_and_call_one_wrong_handler_in_log_item():
+    """
+    Передаем вместо обработчика None. Исключение не должно "выбраться" из метода .call_one_handler().
+    Это необходимо для экранирования ошибок в отдельных обработчиках.
+    """
+    log = LogItem()
+    log.call_one_handler(None)
+
+def test_set_and_extract_extra_fields_in_log_item():
+    """
+    Проверяем, что экстракция полей работает.
+    """
+    log = LogItem()
+
+    def extractor(item):
+        return 'kek'
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log.set_extra_fields(fields)
+    log.set_data({})
+
+    log.extract_extra_fields()
+
+    assert log[field_name] == 'kek'
+
+def test_set_and_wrong_extract_extra_fields_in_log_item():
+    """
+    Проверяем, что, если при извлечении поля поднимается исключение, оно не выходит за пределы функции.
+    """
+    log = LogItem()
+
+    def extractor(item):
+        raise ValueError('test exception')
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log.set_extra_fields(fields)
+    log.set_data({})
+
+    log.extract_extra_fields()
+
+def test_set_and_extract_extra_fields_from_dict_in_log_item():
+    """
+    Передаем в метод .extract_extra_fields_from() словарь с полями и проверяем, что они извлекаются.
+    """
+    log = LogItem()
+
+    def extractor(item):
+        return 'kek'
+
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log.set_data({})
+
+    log.extract_extra_fields_from(fields)
+
+    assert log[field_name] == 'kek'
+
+def test_set_and_extract_extra_fields_other_type_without_converter():
+    """
+    Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, и конвертер не используется.
+    """
+    def extractor(item):
+        return 1
+
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log = LogItem()
+    log.set_data({})
+
+    log.extract_extra_fields_from(fields)
+
+    assert log[field_name] == 1
+
+def test_extract_extra_fields_other_type_with_converter():
+    """
+    Проверяем, что все работает, если экстрактор поля возвращает не строковый объект, но используется конвертер.
+    """
+    def extractor(log):
+        return 1
+
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor, converter=lambda x: str(x) + ' converted')}
+    log = LogItem()
+    log.set_data({})
+
+    log.extract_extra_fields_from(fields)
+
+    assert log[field_name] == '1 converted'
+
+def test_execute_log_item_call_handlers(handler):
+    """
+    Проверяем, что при вызове объекта лога у него вызываются обработчики.
+    """
+    log = LogItem()
+    log.set_data({})
+    log.set_handlers([handler])
+
+    log()
+
+    assert handler.last is log
+
+def test_execute_log_item_extract_fields(handler):
+    """
+    Проверяем, что при выполнении объекта лога извлекаются дополнительные поля.
+    """
+    log = LogItem()
+    log.set_data({})
+    log.set_handlers([handler])
+
+    def extractor(item):
+        return 'kek'
+    field_name = 'perekek_perekek_perekekoperekek'
+    fields = {field_name: field(extractor)}
+    log.set_extra_fields(fields)
+
+    log()
+
+    assert handler.last[field_name] == 'kek'
+
+def test_sorting_log_items(handler):
+    """
+    В документации сказано, что коллекции логов можно сортировать.
+    Проверяем, что это работает.
+    """
+    config.set(pool_size=0)
+
+    random_range_collection = set()
+
+    log('first')
+    random_range_collection.add(handler.last)
+    log('second')
+    random_range_collection.add(handler.last)
+    log('third')
+    random_range_collection.add(handler.last)
+
+    collection = list(random_range_collection)
+    collection.sort()
+
+    assert collection[0]['message'] == 'first'
+    assert collection[1]['message'] == 'second'
+    assert collection[2]['message'] == 'third'
+
+def first_generation_of_the_log(queue):
+    """
+    Вспомогательная функция для test_first_generation_of_log_object().
+    """
+    result = [hasattr(LogItem, '_fields_intersection'), hasattr(LogItem, 'store')]
+
+    first_new = LogItem.__new__
+
+    log_item = LogItem()
+
+    result.append(hasattr(LogItem, '_fields_intersection'))
+    result.append(hasattr(LogItem, 'store'))
+
+    second_new = LogItem.__new__
+    result.append(first_new is second_new)
+
+    log_item = LogItem()
+
+    third_new = LogItem.__new__
+    result.append(second_new is third_new)
+
+    queue.put(result)
+
+def test_first_generation_of_log_object():
+    """
+    Проверяем, что при создании первого лога происходит инициализация некоторых свойств класса и подмена метода .__new__().
+    """
+    queue = Queue()
+
+    process = Process(target=first_generation_of_the_log, args=(queue, ))
+    process.start()
+    process.join()
+
+    assert queue.get() == [False, False, True, True, False, True]

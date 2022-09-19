@@ -1,9 +1,10 @@
-ujson==3.0.0
+ujson==5.4.0
 wheel==0.33.1
-pip==19.2
+pip==21.1
 twine==1.13.0
 pyparsing>=2.0.2
-pytest==6.2.5
+pytest==7.1.2
 pytest-xdist==2.4.0
 coverage==5.5
 pygount==1.2.4
+termcolor==1.1.0

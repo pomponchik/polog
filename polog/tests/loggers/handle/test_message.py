@@ -10,7 +10,6 @@ def test_basic(handler):
     Проверяем, что дефолтное сообщение подменяется новым.
     """
     config.set(level=1)
-    handler.clean()
 
     @flog(message='base text')
     def normal_function():
@@ -18,7 +17,7 @@ def test_basic(handler):
         return True
 
     normal_function()
-    
+
     time.sleep(0.0001)
     assert handler.last['message'] == 'new text'
 
@@ -42,7 +41,6 @@ def test_basic_exception(handler):
     @flog(message='base text')
     def error_function_3():
         message(exception=ValueError('new message'))
-    handler.clean()
     error_function()
     time.sleep(0.01)
     assert handler.last['exception_type'] == 'ValueError'
@@ -62,8 +60,7 @@ def test_affects(handler):
     """
     Пробуем зааффектить одним вызовом message() другой.
     """
-    config.set(level=1)
-    handler.clean()
+    config.set(level=1, pool_size=0)
 
     def function_without_flog():
         message('lol', local_variables='kek')
@@ -75,15 +72,13 @@ def test_affects(handler):
     function_without_flog()
     function_with_flog()
 
-    time.sleep(0.0001)
     assert handler.last.get('local_variables') is None
 
 def test_another_field(handler):
     """
     Проверяем, что работает прописывание собственных значений для пользовательских полей.
     """
-    config.set(level=1)
-    handler.clean()
+    config.set(level=1, pool_size=0)
 
     def extractor(log_item):
         pass
@@ -94,20 +89,22 @@ def test_another_field(handler):
         message('lolkek', lolkek='lolkek')
 
     function()
-    time.sleep(0.0001)
+
     assert handler.last['lolkek'] == 'lolkek'
 
-def test_unknown_argument():
+def test_unknown_argument(handler):
     """
-    Проверяем, что функция поднимает исключение, если подать неизвестный именованный аргумент.
+    Проверяем, что в message можно передать неизвестный именной аргумент.
     """
     @flog
     def function():
         message('lolkek', unknown_argument='kek')
-    config.set(original_exceptions=True)
-    config.set(silent_internal_exceptions=False)
-    with pytest.raises(KeyError):
-        function()
+
+    config.set(silent_internal_exceptions=True, unknown_fields_in_handle_logs=True)
+
+    function()
+
+    assert handler.last['unknown_argument'] == 'kek'
 
 def test_wrong_type():
     """
@@ -116,7 +113,8 @@ def test_wrong_type():
     @flog
     def function():
         message('lolkek', success='kek')
-    config.set(original_exceptions=True)
-    config.set(silent_internal_exceptions=False)
+
+    config.set(silent_internal_exceptions=False, unknown_fields_in_handle_logs=True)
+
     with pytest.raises(ValueError):
         function()

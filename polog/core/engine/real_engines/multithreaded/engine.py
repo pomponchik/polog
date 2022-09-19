@@ -26,11 +26,11 @@ class MultiThreadedRealEngine(AbstractRealEngine):
         super().__init__(settings)
         self.pool = ThreadPool(settings)
 
-    def write(self, log):
+    def write(self, log_item):
         """
         Кладем аргументы оригинальной функции и извлеченные логгером данные в очередь на запись.
         """
-        self.pool.put(log)
+        self.pool.put(log_item)
 
     def stop(self):
         self.pool.stop()

@@ -2,6 +2,7 @@ import io
 import os
 import sys
 import time
+import asyncio
 from threading import Thread, get_ident
 from multiprocessing import Process
 
@@ -9,6 +10,8 @@ import pytest
 
 from polog import log, config
 from polog.handlers.file.writer import file_writer
+from polog.core.utils.exception_escaping import exception_escaping
+
 
 TIMEOUT = 3
 
@@ -23,7 +26,7 @@ def test_base_writer(number_of_strings_in_the_files, delete_files):
     path = 'polog/tests/data/data.log'
     handler = file_writer(path)
     config.add_handlers(handler)
-    config.set(pool_size=0)
+    config.set(pool_size=0, level=0)
 
     for iteration in range(iterations):
         log('kek')
@@ -42,7 +45,7 @@ def test_output_to_console_is_working_without_path_argument():
     sys.stdout = instead_of_file
     handler = file_writer()
     config.add_handlers(handler)
-    config.set(pool_size=0)
+    config.set(pool_size=0, level=0, default_level=5, default_error_level=5)
 
     log('kek')
 
@@ -70,15 +73,14 @@ def test_parameter_is_not_string_and_not_file_object(delete_files):
         file_writer(777)
     delete_files(path)
 
+
 def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test, dirname_for_test):
     """
     Запускаем много логов в нескольких потоках и проверяем, что они все успевают записаться в файл, и при этом в ничего не было потеряно при ротациях.
     """
     number_of_logs_per_thread = 2000
     number_of_threads = 20
-
-    config.set(pool_size=20, level=1)
-
+    config.set(pool_size=20, level=1, default_level=3, default_error_level=4)
     handler = file_writer(filename_for_test, rotation=f'3 kb >> {dirname_for_test}')
     config.add_handlers(handler)
 
@@ -243,3 +245,157 @@ def test_only_errors_for_file_handler(filename_for_test, number_of_strings_in_th
     log('kek', success=False)
 
     assert number_of_strings_in_the_files(filename_for_test) == 3
+
+def test_check_chunks_output(filename_for_test):
+    """
+    Проверяем, что вывод содержит некоторые ожидаемые кусочки.
+    """
+    file_handler = file_writer(filename_for_test)
+    config.add_handlers(kek=file_handler)
+    config.set(pool_size=0, level=1)
+
+    log('kek', level=10)
+
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+
+    assert 'MANUAL' in string
+    assert '"kek"' in string
+    assert 'UNKNOWN' in string
+
+    log('kek', level=10, success=True)
+
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+
+    assert 'SUCCESS' in string
+
+    log('kek', level=10, success=False)
+
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+
+    assert 'ERROR' in string
+
+    config.delete_handlers('kek')
+
+def test_check_full_string(handler, filename_for_test):
+    """
+    По сути сквозной тест.
+    Проверяем, что строка лога, выведенного в файл, полностью соответствует шаблону.
+    """
+    file_handler = file_writer(filename_for_test)
+    config.add_handlers(kek_test_check_full_string=file_handler)
+    config.set(pool_size=0, level=1, service_name='base', unknown_fields_in_handle_logs=True)
+    config.levels(test_check_full_string_level=10)
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
+    log('kek', level='test_check_full_string_level', success=True)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS | MANUAL | "kek" | where: base.?'
+
+    log('kek', level='test_check_full_string_level', success=False)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level |  ERROR  | MANUAL | "kek" | where: base.?'
+
+    log('kek', level='test_check_full_string_level')
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | UNKNOWN | MANUAL | "kek" | where: base.?'
+
+    log('kek', level='test_check_full_string_level', lol=10)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | UNKNOWN | MANUAL | "kek" | where: base.? | lol: 10'
+
+    log('kek', level='test_check_full_string_level', lol="kek")
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | UNKNOWN | MANUAL | "kek" | where: base.? | lol: "kek"'
+
+    @log(message='kek', level='test_check_full_string_level')
+    def function(a, b, c):
+        return a + b + c
+    function(1, 2, 3)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | result: 6 (int)'
+
+    class Kek:
+        @log(message='kek', level='test_check_full_string_level')
+        def method(self, a, b, c):
+            return a + b + c
+    Kek().method(1, 2, 3)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string.startswith(f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.Kek.method() | time of work: {time_of_work} sec. | input variables: ')
+    assert string.endswith(f'1 (int), 2 (int), 3 (int) | result: 6 (int)')
+
+    @log(message='kek', level='test_check_full_string_level')
+    class Kek:
+        def method(self, a, b, c):
+            return a + b + c
+    Kek().method(1, 2, 3)
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string.startswith(f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.Kek.method() | time of work: {time_of_work} sec. | input variables: ')
+    assert string.endswith(f'1 (int), 2 (int), 3 (int) | result: 6 (int)')
+
+    @log(message='kek', level='test_check_full_string_level')
+    class Kek:
+        async def method(self, a, b, c):
+            return a + b + c
+    asyncio.run(Kek().method(1, 2, 3))
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string.startswith(f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.Kek.method() | time of work: {time_of_work} sec. | input variables: ')
+    assert string.endswith(f'1 (int), 2 (int), 3 (int) | result: 6 (int)')
+
+    @log(message='kek', level='test_check_full_string_level')
+    async def function(a, b, c):
+        return a + b + c
+    asyncio.run(function(1, 2, 3))
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string == f'[{handler.last["time"]}] | test_check_full_string_level | SUCCESS |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | result: 6 (int)'
+
+    config.delete_handlers('kek_test_check_full_string')
+
+def test_check_full_string_errors(handler, filename_for_test):
+    """
+    По сути сквозной тест.
+    Проверяем, что строка лога, выведенного в файл, соответствует шаблону.
+    Только кейсы с ловлей ошибок.
+    """
+    file_handler = file_writer(filename_for_test)
+    config.add_handlers(kek_test_check_full_string_errors=file_handler)
+    config.set(pool_size=0, level=1, service_name='base')
+    config.levels(test_check_full_string_errors_level=10)
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
+    @exception_escaping
+    @log(message='kek', level='test_check_full_string_errors_level')
+    async def function(a, b, c):
+        raise ValueError('kek_message')
+    asyncio.run(function(1, 2, 3))
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+    time_of_work = f'{handler.last["time_of_work"]:.8f}'
+    time_of_work = time_of_work.rstrip('0.')
+    assert string.startswith(f'[{handler.last["time"]}] | test_check_full_string_errors_level |  ERROR  |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | local variables: a = 1 (int), b = 2 (int), c = 3 (int) | exception: ValueError("kek_message") | traceback: ')
+
+    config.delete_handlers('kek_test_check_full_string_errors')

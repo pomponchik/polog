@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from polog.errors import RewritingLogError
+from polog.core.utils.exception_escaping import exception_escaping
 
 
 @dataclass
@@ -16,7 +17,21 @@ class LogItem:
     Логи передаются в обработчики и уже там каким-то образом обрабатываются, например сохраняются в файл или отправляются на сторонний сервер. При этом коллекция обработчиков хранится в самом логе. Это нужно, поскольку с логами, полученными из разных мест программы, могут работать разные наборы обработчиков.
     """
 
-    __slots__ = ('_function_input_data', '_handlers', 'fields')
+    __slots__ = ('_function_input_data', '_handlers', 'fields', 'extra_fields')
+
+    def __new__(cls, **kwargs):
+        """
+
+        """
+        def __new__(cls, **kwargs):
+            return object.__new__(cls, **kwargs)
+
+        from polog.core.stores.settings.settings_store import SettingsStore
+        cls.store = SettingsStore()
+        cls._fields_intersection = cls.store['fields_intersection']
+
+        cls.__new__ = __new__
+        return __new__(cls, **kwargs)
 
     def __getitem__(self, key):
         """
@@ -119,6 +134,58 @@ class LogItem:
         Поведение при использовании оператора '>=' ("больше или равно").
         """
         return self.compare_or_raise(other, lambda a, b: a >= b, '>=')
+
+    def __hash__(self):
+        """
+        Получение хэша, хэш берется от поля "time".
+        Полезно, чтобы логи можно было складывать во множества, например.
+        """
+        return id(self.get('time'))
+
+    def __call__(self):
+        """
+        Метод, предназначенный для выполнения внутри движка.
+        В нем должны выполняться все действия, которые нужно сделать с логом - извлечение дополнительных полей, передача лога в обработчики и т. д.
+        """
+        self.extract_extra_fields()
+        self.call_handlers()
+
+    def call_handlers(self):
+        """
+        Вызов всех прикрепленных к логу обработчиков по очереди.
+        """
+        for handler in self.get_handlers():
+            self.call_one_handler(handler)
+
+    @exception_escaping
+    def call_one_handler(self, handler):
+        """
+        Вызов одного обработчика с экранированием ошибок.
+        """
+        handler(self)
+
+    def extract_extra_fields(self):
+        """
+        Обогащение лога дополнительными полями.
+        """
+        self.extract_extra_fields_from(self.get_extra_fields())
+
+    def extract_extra_fields_from(self, fields):
+        """
+        Обогащение лога дополнительными полями из переданного словаря.
+
+        Поле - это объект класса field, имеющий метод .get_data(), сигнатура которого аналогична обработчикам Polog.
+
+        fields - словарь, в котором ключи - строки с названиями полей, значения - поля.
+        """
+        data = self.fields
+        for name, field in fields.items():
+            if name not in data or self._fields_intersection:
+                try:
+                    value = field.get_data(self)
+                    data[name] = value
+                except:
+                    pass
 
     def compare(self, other, operation, if_not=False):
         """
@@ -237,6 +304,14 @@ class LogItem:
         """
         self._handlers = handlers
 
+    def set_extra_fields(self, fields):
+        """
+        Сохраняем словарь с дополнительными полями лога.
+
+        Необходимость хранить его в логе, опять же, связана с тем, что для разных событий набор полей может быть разным.
+        """
+        self.extra_fields = fields
+
     def get_handlers(self):
         """
         Получаем коллекцию обработчиков, в которую нужно передать данный объект лога.
@@ -245,3 +320,12 @@ class LogItem:
             return self._handlers
         except AttributeError:
             return ()
+
+    def get_extra_fields(self):
+        """
+        Получаем словарь дополнительных полей лога.
+        """
+        try:
+            return self.extra_fields
+        except AttributeError:
+            return {}

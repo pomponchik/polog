@@ -17,11 +17,11 @@ class ThreadPool:
         self.queue = Queue(maxsize=self.settings.force_get('max_queue_size'))
         self.workers = self.create_workers()
 
-    def put(self, log):
+    def put(self, log_item):
         """
         Помещение лога в очередь.
         """
-        self.queue.put(log)
+        self.queue.put(log_item)
 
     def stop(self):
         """

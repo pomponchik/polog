@@ -15,11 +15,14 @@ from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.utils.json_vars import json_vars, json_one_variable
 from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
-from polog.errors import LoggedError, IncorrectUseOfTheDecoratorError, HandlerNotFoundError
+from polog.errors import IncorrectUseOfTheDecoratorError, HandlerNotFoundError
 from polog.loggers.handle.message import message as _message
 from polog.core.log_item import LogItem
 from polog.data_structures.trees.named_tree.projector import TreeProjector
 from polog.core.utils.pony_names_generator import PonyNamesGenerator
+from polog.core.stores.fields import in_place_fields, engine_fields
+from polog.field import field as FieldClass
+from polog.data_structures.wrappers.fields_container.container import FieldsContainer
 
 
 class FunctionLogger:
@@ -27,23 +30,36 @@ class FunctionLogger:
     Экземпляры данного класса - декораторы, включающие автоматическое логирование для функций.
     """
 
-    def __init__(self, settings=SettingsStore(), handlers=global_handlers):
+    def __init__(self, settings=SettingsStore(), handlers=global_handlers, in_place_fields=in_place_fields, engine_fields=engine_fields):
         self.settings = settings
         self.engine = Engine()
         self.global_handlers = handlers
+        self.in_place_fields = in_place_fields
+        self.engine_fields = engine_fields
 
-    def __call__(self, *args, message=None, level=1, errors_level=None, is_method=False, handlers=None):
+    def __call__(self, *args, message=None, level=None, errors_level=None, is_method=False, handlers=None, extra_fields=None, extra_engine_fields=None):
         """
         Фабрика декораторов логирования для функций. Можно вызывать как со скобками, так и без.
         """
+        if message is not None and not isinstance(message, str):
+            raise ValueError('The message of the decorator must be an instance of the str type.')
+        if level is not None and not isinstance(level, int) and not isinstance(level, str):
+            raise ValueError('The level of the decorator must be an instance of the str or int.')
+        if errors_level is not None and not isinstance(errors_level, int) and not isinstance(errors_level, str):
+            raise ValueError('The errors_level of the decorator must be an instance of the str or int.')
+        if not isinstance(is_method, bool):
+            raise ValueError('The flag "is_method" of the decorator must be an instance of the bool.')
+        
         def error_logger(func):
             # Если функция уже ранее была задекорирована, мы декорируем ее саму, а не ее в уже задекорированном виде.
             func, before_change_func = RegisteringFunctions().get_original(func), func
             local_handlers = self.get_handlers(handlers)
+            in_place_fields = self.get_extra_fields(extra_fields, self.in_place_fields)
+            engine_fields = self.get_extra_fields(extra_engine_fields, self.engine_fields)
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 """
-                Обертка для корутин, вызов обернутой функции происходит через await.
+                Обертка для корутинных функций, вызов обернутой функции происходит через await.
                 """
                 _message._clean_context()
                 args_dict = self.get_base_args_dict(func, message)
@@ -53,10 +69,10 @@ class FunctionLogger:
                     result = await func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, *args, **kwargs)
-                    self.reraise_exception(e)
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
+                    raise e
                 finish = time.time()
-                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, *args, **kwargs)
+                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                 return result
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -71,17 +87,17 @@ class FunctionLogger:
                     result = func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, local_handlers, *args, **kwargs)
-                    self.reraise_exception(e)
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
+                    raise e
                 finish = time.time()
-                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, *args, **kwargs)
+                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                 return result
             if inspect.iscoroutinefunction(func):
                 result = async_wrapper
             else:
                 result = wrapper
             # Проверяем, что функцию не запрещено декорировать. Если запрещено - возвращаем оригинал, иначе - какой-то из wrapper'ов.
-            result = RegisteringFunctions().get_function_or_wrapper(func, before_change_func, wrapper, is_method)
+            result = RegisteringFunctions().get_function_or_wrapper(func, before_change_func, result, is_method)
             return result
         # Определяем, как вызван декоратор - как фабрика декораторов (т. е. без позиционных аргументов) или как непосредственный декоратор.
         if not len(args):
@@ -90,7 +106,7 @@ class FunctionLogger:
             return error_logger(args[0])
         raise IncorrectUseOfTheDecoratorError('You used the logging decorator incorrectly. Read the documentation.')
 
-    def get_base_args_dict(self, func, message):
+    def get_base_args_dict(self, function, message):
         """
         При каждом вызове функции с логирующим декоратором создается словарь с аргументами, которые будут переданы в очередь для обработчиков.
         В этой функции данный словарь инициализируется и заполняется значениями, которые уже известны еще до запуска задекорированной функции.
@@ -99,9 +115,24 @@ class FunctionLogger:
         args_dict['auto'] = True
         if message is not None:
             args_dict['message'] = str(message)
-        self.get_arg(func, args_dict, '__module__')
-        self.get_arg(func, args_dict, '__name__', key_name='function')
+        self.get_arg(function, args_dict, '__module__')
+        self.get_arg(function, args_dict, '__name__', key_name='function')
+        not_none_to_dict(args_dict, 'class', self.get_class_name(function))
         return args_dict
+
+    def get_class_name(self, function):
+        """
+        Получаем имя класса из объекта метода. Если функция не принадлежит к какому-то классу, возвращаем None.
+        """
+        try:
+            return function.__self__.__name__
+        except AttributeError:
+            try:
+                maybe_class_name = function.__qualname__.split('.')[-2]
+                if maybe_class_name.isidentifier():
+                    return maybe_class_name
+            except (AttributeError, IndexError):
+                pass
 
     @staticmethod
     def get_arg(obj, args, arg_name, key_name=None):
@@ -122,22 +153,14 @@ class FunctionLogger:
         arg = getattr(obj, arg_name, None)
         not_none_to_dict(args, key_name, arg)
 
-    def reraise_exception(self, exc):
-        """
-        Здесь решается, какое исключение поднять - оригинальное или встроенное в Polog, в зависимости от настроек.
-        """
-        if self.settings['original_exceptions']:
-            raise exc
-        raise LoggedError(str(exc)) from exc
-
-    def log_exception_info(self, exc, finish, start, args_dict, errors_level, handlers, *args, **kwargs):
+    def log_exception_info(self, exc, finish, start, args_dict, errors_level, simple_level, handlers, in_place_fields, engine_fields, *args, **kwargs):
         """
         Здесь происходит заполнение автоматически извлекаемых полей в случае исключения.
         В т. ч. извлекается вся информация об исключении - название, сообщение и т. д.
         """
-        exc_type = type(exc)
-        if not (exc_type is LoggedError):
-            errors_level = get_errors_level(errors_level)
+        if not hasattr(exc, 'checked_by_polog') or not self.settings['deduplicate_errors']:
+            exc.checked_by_polog = True
+            errors_level = get_errors_level(errors_level, simple_level)
             if errors_level >= self.settings['level']:
                 exception_to_dict(args_dict, exc)
                 args_dict['success'] = False
@@ -145,47 +168,49 @@ class FunctionLogger:
                 args_dict['local_variables'] = get_locals_from_traceback()
                 args_dict['time_of_work'] = finish - start
                 args_dict['level'] = errors_level
+                service_name = self.settings['service_name']
+                if service_name is not None:
+                    args_dict['service_name'] = service_name
                 input_variables = json_vars(*args, **kwargs)
                 _message._copy_context(args_dict)
                 if not (input_variables is None):
                     args_dict['input_variables'] = input_variables
-                log = self.create_log_item(args, kwargs, args_dict, handlers)
-                self.extract_extra_fields(log, args_dict)
+                log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
                 self.engine.write(log)
 
-    def log_normal_info(self, result, finish, start, args_dict, level, handlers, *args, **kwargs):
+    def log_normal_info(self, result, finish, start, args_dict, level, handlers, in_place_fields, engine_fields, *args, **kwargs):
         """
         Заполнение автоматических полей в случае, когда исключения не было.
         """
-        level = Levels.get(level)
+        level = self.resolve_normal_level(level)
+
         if level >= self.settings['level']:
             args_dict['success'] = True
             args_dict['result'] = json_one_variable(result)
             args_dict['time_of_work'] = finish - start
             args_dict['level'] = level
+            service_name = self.settings['service_name']
+            if service_name is not None:
+                args_dict['service_name'] = service_name
             _message._copy_context(args_dict)
             input_variables = json_vars(*args, **kwargs)
             if not (input_variables is None):
                 args_dict['input_variables'] = input_variables
-            log = self.create_log_item(args, kwargs, args_dict, handlers)
-            self.extract_extra_fields(log, args_dict)
+            log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
             self.engine.write(log)
 
-    def extract_extra_fields(self, log, args_dict):
+    def resolve_normal_level(self, level):
         """
-        Здесь происходит извлечение данных для дополнительных полей.
-        Если поле уже заполнено ранее, здесь оно не изменяется.
+        Определяем уровень события.
+        Если клиент определил его сам - используем эту оценку. Если нет - берем дефолтное значение из настроек.
         """
-        extra_fields = self.settings.extra_fields
-        for name, field in extra_fields.items():
-            if name not in args_dict:
-                try:
-                    value = field.get_data(log)
-                    args_dict[name] = value
-                except:
-                    pass
+        if level is not None:
+            level = Levels.get(level)
+        else:
+            level = self.settings['default_level']
+        return level
 
-    def create_log_item(self, args, kwargs, data, handlers):
+    def create_log_item(self, args, kwargs, data, handlers, engine_fields, in_place_fields):
         """
         Здесь порождается объект лога.
 
@@ -195,6 +220,8 @@ class FunctionLogger:
         log.set_data(data)
         log.set_function_input_data(args, kwargs)
         log.set_handlers(handlers)
+        log.set_extra_fields(engine_fields)
+        log.extract_extra_fields_from(in_place_fields)
         return log
 
     def get_handlers(self, handlers):
@@ -241,6 +268,48 @@ class FunctionLogger:
             local_scope_tree[new_name] = handler
 
         return local_scope_tree
+
+    def get_extra_fields(self, maybe_fields, default_fields):
+        """
+        Здесь определяется набор дополнительных полей, который будет извлекаться в данном декораторе.
+
+        maybe_fields - словарь с ключами-строками и значениями-полями (экземплярами класса field), либо список/кортеж с такими словарями и ellipsis'ами.
+        default_fields - словарь с дефолтными дополнительными полями. Поля отсюда будут браться, если в списке maybe_fields лежал ellipsis.
+        """
+        if maybe_fields is None:
+            return default_fields
+        if not isinstance(maybe_fields, dict) and not isinstance(maybe_fields, list) and not isinstance(maybe_fields, tuple):
+            raise ValueError(f'A dictionary containing log field extractors is expected. You can also pass a list or tuple containing such dictionaries and ellipsis. You passed "{maybe_fields}".')
+
+        all_fields = [maybe_fields] if isinstance(maybe_fields, dict) else maybe_fields
+
+        if Ellipsis in all_fields:
+            is_ellipsis = True
+            while Ellipsis in all_fields:
+                try:
+                    all_fields.pop(all_fields.index(Ellipsis))
+                except ValueError:
+                    break
+        else:
+            is_ellipsis = False
+
+        pre_result = {}
+
+        for fields in all_fields:
+            for name, field in fields.items():
+                if not isinstance(name, str):
+                    raise ValueError(f'Strings should be used as keys in the dictionary of additional log fields. You passed: "{name}".')
+                if not isinstance(field, FieldClass):
+                    raise ValueError(f'An object of the field class is expected as a field object. You passed: "{field}".')
+                if name in pre_result:
+                    raise ValueError(f'Field name conflict. You have used the name "{name}" more than once.')
+
+                pre_result[name] = field
+
+        if not is_ellipsis:
+            return FieldsContainer(pre_result, {})
+
+        return FieldsContainer(pre_result, default_fields)
 
 
 flog = FunctionLogger()

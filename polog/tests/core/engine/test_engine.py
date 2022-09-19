@@ -16,13 +16,17 @@ def test_singleton():
     """
     assert Engine() is Engine()
 
-def test_reload_threads_counting():
+def test_reload_threads_counting(handler):
     """
     Проверяем, что количество потоков увеличивается в соответствии с ожидаемым увеличением пула потоков при перезагрузке движка.
     """
+    log_item = LogItem()
+    log_item.set_handlers([handler])
+    log_item.set_data({'lol': 'kek'})
+
     engine = Engine()
     store = SettingsStore()
-    engine.write({'lol': 'kek'})
+    engine.write(log_item)
 
     before = active_count()
     store['pool_size'] = store['pool_size'] + 2

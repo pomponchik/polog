@@ -16,13 +16,12 @@ def test_do(handler):
     """
     Проверяем, что хендлер вызывается.
     """
-    handler.clean()
     log = LogItem()
     log.set_handlers([handler])
     log.set_data({'lol': 'kek'})
 
     worker.do_anything(log)
     assert handler.last is not None
-    
+
     worker.set_stop_flag()
     worker.stop()

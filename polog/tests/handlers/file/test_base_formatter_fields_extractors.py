@@ -69,16 +69,23 @@ def test_auto():
 def test_full_function():
     """
     Поля function и module визуально объединяются, также к ним конкатенируется имя сервиса.
-    Проверяем, что это происходит. Проверяем наличие префикса "where: ".
+    Проверяем, что это происходит. Также проверяем наличие префикса "where: ".
     """
-    assert Extractors.function({'function': 'lol'}) == f'where: {SettingsStore()["service_name"]}.lol()'
-    assert Extractors.function({'function': 'lol', 'module': 'kek'}) == f'where: {SettingsStore()["service_name"]}.kek.lol()'
+    config.set(service_name=None)
+    assert Extractors.function({}) == 'where: ?'
+    assert Extractors.function({'function': 'lol'}) == 'where: lol()'
+    assert Extractors.function({'function': 'lol', 'module': 'kek'}) == 'where: kek.lol()'
+    assert Extractors.function({'function': 'lol', 'module': 'kek', 'class': 'KekoClass'}) == 'where: kek.KekoClass.lol()'
+    assert Extractors.function({'module': 'kek', 'class': 'KekoClass'}) == 'where: kek.KekoClass.?'
+    assert Extractors.function({'class': 'KekoClass'}) == 'where: KekoClass.?'
+    assert Extractors.function({'module': 'kek'}) == 'where: kek.?'
 
-def test_empty_function():
-    """
-    Проверка, что при отсутствии поля function возвращается None.
-    """
-    assert Extractors.function({}) == f'where: {SettingsStore()["service_name"]}.?'
+    config.set(service_name='keko_service')
+    assert Extractors.function({}) == 'where: keko_service.?'
+    assert Extractors.function({'function': 'lol'}) == 'where: keko_service.lol()'
+    assert Extractors.function({'function': 'lol', 'module': 'kek'}) == 'where: keko_service.kek.lol()'
+    assert Extractors.function({'function': 'lol', 'module': 'kek', 'class': 'KekoClass'}) == 'where: keko_service.kek.KekoClass.lol()'
+    assert Extractors.function({'module': 'kek', 'class': 'KekoClass'}) == 'where: keko_service.kek.KekoClass.?'
 
 def test_full_input_variables():
     """

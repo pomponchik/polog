@@ -1,4 +1,5 @@
 import functools
+import inspect
 
 from polog.core.stores.levels import Levels
 from polog.core.engine.engine import Engine
@@ -6,6 +7,7 @@ from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.not_none_to_dict import not_none_to_dict
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
+from polog.core.stores.fields import in_place_fields, engine_fields
 
 
 class AbstractHandleLogger:
@@ -24,6 +26,7 @@ class AbstractHandleLogger:
     _allowed_types = {
         'function': lambda x: type(x) is str or callable(x), # Функция, событие в которой логируется. Ожидается либо сам объект функции, либо строка с ее названием.
         'module': lambda x: type(x) is str, # Модуль, событие в котором логируется. Ожидается только название.
+        'class': lambda x: type(x) is str or inspect.isclass(x), # Название класса, событие в котором логируется, либо сам этот класс.
         'message': lambda x: type(x) is str, # Сообщение лога, любая строка.
         'exception': lambda x: type(x) is str or isinstance(x, Exception), # Экземпляр перехваченного пользователем исключения или его название. Если передается экземпляр, поля с названием исключения и его сообщением будут заполнены автоматически.
         'vars': lambda x: type(x) is str, # Ожидается любая строка, но для совместимости формата с автоматическими логами рекомендуется передавать аргументы в функцию polog.utils.json_vars(), а уже то, что она вернет, передавать сюда в качестве аргумента.
@@ -34,28 +37,29 @@ class AbstractHandleLogger:
     # Функции, изменяющие исходные аргументы функций.
     _convert_values = {
         'level': Levels.get,
+        'class': lambda x: x if isinstance(x, str) else x.__name__,
     }
     # Сокращения аргументов и их полные формы.
     _convert_keys = {
         'vars': 'local_variables',
         'locals': 'local_variables',
         'e': 'exception',
+        'class_': 'class',
     }
     # Позиционные аргументы могут быть, а могут и не быть. Если они есть, будут проименованы по этой схеме.
     # Ключи - номера аргументов (отсчет идет с 0), значения - названия полей.
     _position_args = {
         0: 'message',
     }
-    # Ключи - названия полей, значения - функции.
-    # Каждая из этих функций должна принимать словарь с уже ранее извлеченными значениями полей и возвращать значение поля, название которого является ключом.
-    _default_values = {}
     # Множество названий полей, которые запрещено логировать.
     # Данное множество просматривается в приоритете по сравнению с разрешенными полями и блокирует запись в том числе запрещенных позиционных аргументов.
     _forbidden_fields = set()
 
-    def __init__(self, settings=SettingsStore()):
+    def __init__(self, settings=SettingsStore(), in_place_fields=in_place_fields, engine_fields=engine_fields):
         self._settings = settings
         self._engine = Engine()
+        self._in_place_fields = in_place_fields
+        self._engine_fields = engine_fields
 
     def __getattribute__(self, name):
         """
@@ -72,7 +76,7 @@ class AbstractHandleLogger:
 
         1. Извлечение данных из переданных пользователем аргументов (каких угодно) в словарь. Попутно данные проверяются на соответствие ожидаемым форматам, и, возможно, как-то еще дополнительно обрабатываются.
         2. Применение каких-то специфических методов к полученному словарю с данными для его преобразования. Набор этих методов определяется в классе-наследнике, их может вообще не быть.
-        3. Передача полученного словаря с данными куда-то, где с ним будет сделано что-то. Конкретное действие определяется в классе-наследнике.
+        4. Передача полученного словаря с данными куда-то, где с ним будет сделано что-то. Конкретное действие определяется в классе-наследнике.
         """
         fields = self._prepare_data(args, kwargs)
         self._specific_processing(fields)
@@ -107,17 +111,7 @@ class AbstractHandleLogger:
         fields = {}
         self._position_args_to_dict(args, fields, self._position_args)
         self._kwargs_to_dict(kwargs, fields)
-        self._defaults_to_dict(fields)
         return fields
-
-    def _defaults_to_dict(self, fields):
-        """
-        Некоторые значения являются обязательными, но от пользователя не поступили. В этом случае мы генерируем их автоматически.
-        В словаре self._default_values по ключам в виде названий полей лога хранятся функции. Каждая такая функция должна принимать словарь с ранее уже извлеченными полями лога и возвращать содержимое обязательного поля.
-        """
-        for key, get_default in self._default_values.items():
-            if key not in fields:
-                fields[key] = get_default(fields)
 
     def _kwargs_to_dict(self, kwargs, destination, raise_if_collision=True):
         """
@@ -141,11 +135,12 @@ class AbstractHandleLogger:
                 if not prove(value):
                     self._maybe_raise(ValueError, f'The "{key}" argument is in the wrong format.')
                     continue
-            elif key in self._settings.extra_fields:
-                value = str(value)
+            elif key in self._in_place_fields or key in self._engine_fields:
+                pass
             else:
-                self._maybe_raise(KeyError, f'Unknown argument name "{key}". Allowed arguments: {", ".join(self._allowed_types.keys())} and users fields.')
-                continue
+                if not self._settings['unknown_fields_in_handle_logs']:
+                    self._maybe_raise(KeyError, f'Unknown argument name "{key}". Allowed arguments: {", ".join(self._allowed_types.keys())} and users fields.')
+                    continue
             # При необходимости - конвертируем переданные значения.
             if key in self._convert_values:
                 value = self._convert_values.get(key)(value)
@@ -202,7 +197,7 @@ class AbstractHandleLogger:
             if change_success:
                 fields['success'] = False
             if change_level and not ('level' in fields):
-                fields['level'] = self._settings['errors_level']
+                fields['level'] = self._settings['default_error_level']
 
     @staticmethod
     def _maybe_raise(exception, message):

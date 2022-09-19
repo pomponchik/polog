@@ -6,16 +6,8 @@ class SingleThreadedRealEngine(AbstractRealEngine):
     """
     Однопоточная синхронная реализация движка.
     """
-    def write(self, log):
+    def write(self, log_item):
         """
-        Передаем данные о событии в обработчики.
+        "Выполняем" лог, то есть запускаем все привязанные к нему действия - извлечения полей, передачу лога в обработчики и т. д.
         """
-        for handler in log.get_handlers():
-            self.call_handler(handler, log)
-
-    @exception_escaping
-    def call_handler(self, handler, log):
-        """
-        Вызов одного обработчика.
-        """
-        handler(log)
+        log_item()
