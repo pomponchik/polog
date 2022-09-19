@@ -64,8 +64,8 @@ class Worker:
         """
         self.thread.join()
 
-    def do_anything(self, log):
+    def do_anything(self, log_item):
         """
         "Выполняем" лог, то есть запускаем все привязанные к нему действия - извлечения полей, передачу лога в обработчики и т. д.
         """
-        log()
+        log_item()
