@@ -140,7 +140,7 @@ class LogItem:
         Получение хэша, хэш берется от поля "time".
         Полезно, чтобы логи можно было складывать во множества, например.
         """
-        return id(self.get('time'))
+        return hash(self.get('time'))
 
     def __call__(self):
         """
