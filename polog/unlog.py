@@ -1,7 +1,7 @@
 from polog.core.stores.registering_functions import RegisteringFunctions
 
 
-def logging_is_forbidden(func):
+def unlog(func):
     """
     Декоратор, запрещающий логирование функции. Запрет достигается через внесение id функции в реестр функций, который запрещено декорировать, через класс RegisteringFunctions.
     Если функция уже была задекорирована логгером, возвращается ее оригинал, до декорирования. Класс RegisteringFunctions хранит ссылку на оригинальную версию каждой задекорированной функции и возвращает ее по запросу.
