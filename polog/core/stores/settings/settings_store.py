@@ -185,6 +185,12 @@ class SettingsStore(ReadOnlySingleton):
             },
             action=set_log_as_built_in,
         ),
+        'full_unlog': SettingPoint(
+            True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
     }
     points_are_informed = False
     lock = Lock()

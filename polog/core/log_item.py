@@ -71,6 +71,12 @@ class LogItem:
         content = ', '.join(content)
         return f'<log item #{id(self)} with content: {content}>'
 
+    def __repr__(self):
+        """
+        Преобразование данных лога в строковое представление.
+        """
+        return str(self)
+
     def __iter__(self):
         """
         Получаем итератор по ключам словаря, хранящего в себе поля лога.

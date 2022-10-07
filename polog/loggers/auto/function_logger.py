@@ -23,6 +23,7 @@ from polog.core.utils.pony_names_generator import PonyNamesGenerator
 from polog.core.stores.fields import in_place_fields, engine_fields
 from polog.field import field as FieldClass
 from polog.data_structures.wrappers.fields_container.container import FieldsContainer
+from polog.unlog import get_unlog_status
 
 
 class FunctionLogger:
@@ -49,7 +50,7 @@ class FunctionLogger:
             raise ValueError('The errors_level of the decorator must be an instance of the str or int.')
         if not isinstance(is_method, bool):
             raise ValueError('The flag "is_method" of the decorator must be an instance of the bool.')
-        
+
         def error_logger(func):
             # Если функция уже ранее была задекорирована, мы декорируем ее саму, а не ее в уже задекорированном виде.
             func, before_change_func = RegisteringFunctions().get_original(func), func
@@ -97,6 +98,7 @@ class FunctionLogger:
             else:
                 result = wrapper
             # Проверяем, что функцию не запрещено декорировать. Если запрещено - возвращаем оригинал, иначе - какой-то из wrapper'ов.
+            # Также на одну функцию может быть наложено несколько логирующих декораторов, здесь происходит разрешение конфликтов между ними.
             result = RegisteringFunctions().get_function_or_wrapper(func, before_change_func, result, is_method)
             return result
         # Определяем, как вызван декоратор - как фабрика декораторов (т. е. без позиционных аргументов) или как непосредственный декоратор.
@@ -158,46 +160,48 @@ class FunctionLogger:
         Здесь происходит заполнение автоматически извлекаемых полей в случае исключения.
         В т. ч. извлекается вся информация об исключении - название, сообщение и т. д.
         """
-        if not hasattr(exc, 'checked_by_polog') or not self.settings['deduplicate_errors']:
-            exc.checked_by_polog = True
-            errors_level = get_errors_level(errors_level, simple_level)
-            if errors_level >= self.settings['level']:
-                exception_to_dict(args_dict, exc)
-                args_dict['success'] = False
-                args_dict['traceback'] = get_traceback()
-                args_dict['local_variables'] = get_locals_from_traceback()
-                args_dict['time_of_work'] = finish - start
-                args_dict['level'] = errors_level
-                service_name = self.settings['service_name']
-                if service_name is not None:
-                    args_dict['service_name'] = service_name
-                input_variables = json_vars(*args, **kwargs)
-                _message._copy_context(args_dict)
-                if not (input_variables is None):
-                    args_dict['input_variables'] = input_variables
-                log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
-                self.engine.write(log)
+        if not get_unlog_status():
+            if not hasattr(exc, 'checked_by_polog') or not self.settings['deduplicate_errors']:
+                exc.checked_by_polog = True
+                errors_level = get_errors_level(errors_level, simple_level)
+                if errors_level >= self.settings['level']:
+                    exception_to_dict(args_dict, exc)
+                    args_dict['success'] = False
+                    args_dict['traceback'] = get_traceback()
+                    args_dict['local_variables'] = get_locals_from_traceback()
+                    args_dict['time_of_work'] = finish - start
+                    args_dict['level'] = errors_level
+                    service_name = self.settings['service_name']
+                    if service_name is not None:
+                        args_dict['service_name'] = service_name
+                    input_variables = json_vars(*args, **kwargs)
+                    _message._copy_context(args_dict)
+                    if not (input_variables is None):
+                        args_dict['input_variables'] = input_variables
+                    log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
+                    self.engine.write(log)
 
     def log_normal_info(self, result, finish, start, args_dict, level, handlers, in_place_fields, engine_fields, *args, **kwargs):
         """
         Заполнение автоматических полей в случае, когда исключения не было.
         """
-        level = self.resolve_normal_level(level)
+        if not get_unlog_status():
+            level = self.resolve_normal_level(level)
 
-        if level >= self.settings['level']:
-            args_dict['success'] = True
-            args_dict['result'] = json_one_variable(result)
-            args_dict['time_of_work'] = finish - start
-            args_dict['level'] = level
-            service_name = self.settings['service_name']
-            if service_name is not None:
-                args_dict['service_name'] = service_name
-            _message._copy_context(args_dict)
-            input_variables = json_vars(*args, **kwargs)
-            if not (input_variables is None):
-                args_dict['input_variables'] = input_variables
-            log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
-            self.engine.write(log)
+            if level >= self.settings['level']:
+                args_dict['success'] = True
+                args_dict['result'] = json_one_variable(result)
+                args_dict['time_of_work'] = finish - start
+                args_dict['level'] = level
+                service_name = self.settings['service_name']
+                if service_name is not None:
+                    args_dict['service_name'] = service_name
+                _message._copy_context(args_dict)
+                input_variables = json_vars(*args, **kwargs)
+                if not (input_variables is None):
+                    args_dict['input_variables'] = input_variables
+                log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
+                self.engine.write(log)
 
     def resolve_normal_level(self, level):
         """

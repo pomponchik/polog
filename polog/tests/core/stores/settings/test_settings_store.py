@@ -20,6 +20,7 @@ def test_set_and_get():
             'service_name': 'lol',
             'default_error_level': 7,
             'max_delay_before_exit': 5,
+            'full_unlog': False,
         },
         {
             'pool_size': 12,
@@ -28,6 +29,7 @@ def test_set_and_get():
             'service_name': 'kek',
             'default_error_level': 12,
             'max_delay_before_exit': 3,
+            'full_unlog': True,
         },
     ]
     store = SettingsStore()
@@ -58,6 +60,7 @@ def test_set_error_values():
         'debug_mode': [1, 2, 1.2, 'kek', [], lambda: 'kek'],
         'fields_intersection': [1, 2, 3, 'kek', 1.2, [], set(), int, lambda: 'kek'],
         'unknown_fields_in_handle_logs': [1, 2, 3, 'kek', 1.2, [], set(), int, lambda: 'kek'],
+        'full_unlog': ['kek', 1, lambda: 'kek'],
     }
     store = SettingsStore()
     for key, local_values in all_values.items():
@@ -139,6 +142,7 @@ def test_operator_in():
         'fields_intersection',
         'unknown_fields_in_handle_logs',
         'deduplicate_errors',
+        'full_unlog',
     ]
 
     for field_name in names:

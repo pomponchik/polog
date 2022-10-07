@@ -1,3 +1,5 @@
+import gc
+
 import pytest
 
 from polog.core.stores.registering_functions import RegisteringFunctions
@@ -71,18 +73,6 @@ def test_remove():
     assert register.is_decorator(decorated) == True
     register.remove(decorated)
 
-def test_forbid():
-    """
-    Проверяем, что после запрета на декорирование функции, @flog начинает возвращать оригинал.
-    """
-    def function():
-        pass
-    register = RegisteringFunctions()
-    register.forbid(function)
-    decorated = flog()(function)
-    assert decorated is function
-    register.remove(decorated)
-
 def test_is_forbidden():
     """
     Проверяем, что функция с запретом на декорирование успешно распознается как таковая, и наоборот.
@@ -103,22 +93,28 @@ def test_add():
     """
     def function():
         pass
+
     register = RegisteringFunctions()
     register.add(function, function)
-    assert id(function) in register.all_decorated_functions
+
+    assert function in register.all_decorated_functions
 
 def test_get_function_or_wrapper_forbidden():
     """
-    Проверяем, что для функций, декорирование которых запрещено, возвращается оригинал.
+    Проверяем, что для функций, декорирование которых запрещено, возвращается оригинал, обернутый в @unlog.
     """
     def function():
         pass
     def wrapper():
         pass
+
+    container = []
+
     register = RegisteringFunctions()
     register.forbid(function)
-    returned = register.get_function_or_wrapper(function, function, wrapper, False)
-    assert returned is function
+    register.get_function_or_wrapper(function, function, wrapper, False, unlog_decorator=container.append)
+
+    assert container[0] is function
 
 def test_get_function_or_wrapper_not_forbidden():
     """
@@ -145,3 +141,46 @@ def test_finalize():
     del function
     del abcde
     assert function_id not in register.all_decorated_functions
+
+def test_add_unlogged_finalizer():
+    """
+    Проверяем, что при уничтожении объектов задекорированных @unlog'ом функций, они стираются из реестра.
+    Много раз пересоздаем функцию с одним и тем же именем - предыдущие ее версии, соответственно, имеют 0 ссылок и должны уничтожаться механизмом подсчета ссылок. Из реестра она должна исчезнуть.
+    """
+    gc.collect()
+    number_of_attempts = 1000
+
+    size_before = len(RegisteringFunctions.unlogged_functions)
+
+    for _ in range(number_of_attempts):
+        def function():
+            pass
+        RegisteringFunctions().add_unlogged(function, function)
+        del function
+
+    gc.collect()
+
+    size_after = len(RegisteringFunctions.unlogged_functions)
+
+    assert size_after - size_before == 0
+
+def test_simple_add_finalizer():
+    """
+    Проверяем, что, при уничтожении функции, она удаляется из реестра.
+    """
+    gc.collect()
+    number_of_attempts = 1000
+
+    size_before = len(RegisteringFunctions.all_decorated_functions)
+
+    for _ in range(number_of_attempts):
+        def function():
+            pass
+        RegisteringFunctions().add(function, function)
+        del function
+
+    gc.collect()
+
+    size_after = len(RegisteringFunctions.all_decorated_functions)
+
+    assert size_after - size_before == 0
