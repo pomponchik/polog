@@ -629,8 +629,9 @@ some_function()
 
 ```python
 @unlog(full=False)
+@log # Это не будет работать.
 def some_function():
-  log('hello, kitty!') # Это будет работать.
+  log('hello, kitty!') # А это будет.
 ```
 
 Локальные аргументы имеют приоритет над выставленной глобально настройкой ```full_unlog```.
