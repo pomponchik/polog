@@ -80,7 +80,7 @@ class AbstractHandleLogger:
         """
         fields = self._prepare_data(args, kwargs)
         self._specific_processing(fields)
-        self._push(fields)
+        return self._push(fields)
 
     def _push(self, fields):
         """

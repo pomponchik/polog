@@ -143,7 +143,11 @@ def test_add_handlers():
     def new_handler(log):
         lst.append(log['level'])
     config.add_handlers(new_handler)
-    handle_log('lol')
+    log('lol')
+    import sys
+    import gc
+    #print(sys.getrefcount(item))
+    #print(gc.get_referrers(item))
     time.sleep(0.0001)
     assert len(lst) > 0
 
