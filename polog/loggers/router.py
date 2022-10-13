@@ -7,6 +7,7 @@ from polog.loggers.handle.message import message
 from polog.loggers.auto.class_logger import clog
 from polog.loggers.auto.function_logger import flog
 from polog.errors import IncorrectUseOfTheDecoratorError
+from polog.loggers.finalizer import LoggerRouteFinalizer
 
 
 class Router:
@@ -35,7 +36,7 @@ class Router:
         if len(args) == 1:
             item = args[0]
             if isinstance(item, str):
-                return handle_log(*args, **kwargs)
+                return LoggerRouteFinalizer(*args, **kwargs)
             elif callable(item):
                 return self._wrap(flog, item, *([*args][1:]), **kwargs)
             elif inspect.isclass(item):

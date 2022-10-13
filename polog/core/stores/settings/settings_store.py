@@ -191,6 +191,18 @@ class SettingsStore(ReadOnlySingleton):
                 'the value must be boolean': lambda x: isinstance(x, bool),
             },
         ),
+        'suppress_by_default': SettingPoint(
+            False,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
+        'suppress_exception_subclasses': SettingPoint(
+            True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
     }
     points_are_informed = False
     lock = Lock()

@@ -1,5 +1,4 @@
 import datetime
-import weakref
 
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.handlers import global_handlers
@@ -7,23 +6,6 @@ from polog.loggers.handle.abstract import AbstractHandleLogger
 from polog.core.log_item import LogItem
 from polog.core.stores.fields import in_place_fields
 from polog.unlog import get_unlog_status
-
-
-class HandlerLoggerFinalizer:
-    def __init__(self, log_item, engine):
-        self.log_item = log_item
-        self.finalizer = weakref.finalize(self, self.get_finalizer(engine, log_item))
-
-    def __str__(self):
-        return f'{type(self).__name__}({self.log_item}, {self.engine})'
-
-    @staticmethod
-    def get_finalizer(engine, log_item):
-        def finalizer():
-            engine.write(log_item)
-        return finalizer
-
-
 
 
 class BaseLogger(AbstractHandleLogger):
@@ -75,16 +57,16 @@ class BaseLogger(AbstractHandleLogger):
 
     def _push(self, fields):
         """
-        Передаем словарь fields в общую очередь логов.
-        Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать.
+        Создаем объект лога и передаем его в движок.
+        Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать, и нет ли запрета на логирование.
         """
         if fields.get('level') >= self._settings['level']:
             if not get_unlog_status():
-                log = LogItem()
-                log.set_data(fields)
-                log.set_handlers(global_handlers)
-                log.extract_extra_fields_from(in_place_fields)
-                return HandlerLoggerFinalizer(log, self._engine)
+                log_item = LogItem()
+                log_item.set_data(fields)
+                log_item.set_handlers(global_handlers)
+                log_item.extract_extra_fields_from(in_place_fields)
+                self._engine.write(log_item)
 
 
 handle_log = BaseLogger()

@@ -21,6 +21,7 @@ def test_set_and_get():
             'default_error_level': 7,
             'max_delay_before_exit': 5,
             'full_unlog': False,
+            'suppress_by_default': False,
         },
         {
             'pool_size': 12,
@@ -30,6 +31,7 @@ def test_set_and_get():
             'default_error_level': 12,
             'max_delay_before_exit': 3,
             'full_unlog': True,
+            'suppress_by_default': True,
         },
     ]
     store = SettingsStore()
@@ -61,6 +63,7 @@ def test_set_error_values():
         'fields_intersection': [1, 2, 3, 'kek', 1.2, [], set(), int, lambda: 'kek'],
         'unknown_fields_in_handle_logs': [1, 2, 3, 'kek', 1.2, [], set(), int, lambda: 'kek'],
         'full_unlog': ['kek', 1, lambda: 'kek'],
+        'suppress_by_default': ['kek', 1, lambda: 'kek'],
     }
     store = SettingsStore()
     for key, local_values in all_values.items():
@@ -143,6 +146,7 @@ def test_operator_in():
         'unknown_fields_in_handle_logs',
         'deduplicate_errors',
         'full_unlog',
+        'suppress_by_default',
     ]
 
     for field_name in names:

@@ -444,3 +444,37 @@ def test_handle_log_not_default_level(handler):
 
     log('lol', level=7)
     assert handler.last['level'] == 7
+
+def test_handle_log_intersection_of_messages_silent_internal_exceptions_on(handler):
+    """
+    Пробуем передать конкурирующие (разные) сообщения ручной логгер в виде позиционного и именованного аргументов.
+    При значении настройки silent_internal_exceptions, равном True, лог должен записаться с сообщением из позиционного аргумента.
+    """
+    config.set(pool_size=0, default_level=5, silent_internal_exceptions=True)
+
+    log('lol', message='kek')
+
+    assert handler.last['message'] == 'lol'
+
+def test_handle_log_intersection_of_same_messages_silent_internal_exceptions_off(handler):
+    """
+    Пробуем передать конкурирующие (одинаковые) сообщения ручной логгер в виде позиционного и именованного аргументов.
+    Даже при значении настройки silent_internal_exceptions, равном False, лог должен записаться, поскольку реального конфликта нет.
+    """
+    config.set(pool_size=0, default_level=5, silent_internal_exceptions=False)
+
+    log('lol', message='lol')
+
+    assert handler.last['message'] == 'lol'
+
+def test_handle_log_intersection_of_messages_silent_internal_exceptions_off(handler):
+    """
+    Пробуем передать конкурирующие (разные) сообщения ручной логгер в виде позиционного и именованного аргументов.
+    При значении настройки silent_internal_exceptions, равном False, должно подняться исключение, а лог записаться не должен.
+    """
+    config.set(pool_size=0, default_level=5, silent_internal_exceptions=False)
+
+    with pytest.raises(ValueError):
+        log('lol', message='kek')
+
+    assert handler.last is None

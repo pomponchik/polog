@@ -146,8 +146,9 @@ class AbstractHandleLogger:
                 value = self._convert_values.get(key)(value)
             # Проверяем на коллизии.
             if key in destination and raise_if_collision:
-                self._maybe_raise(ValueError, f'Duplicate information in the "{key}" field.')
-                continue
+                if destination[key] != kwargs[key]:
+                    self._maybe_raise(ValueError, f'Duplicate information in the "{key}" field.')
+                    continue
             # Все проверки пройдены - сохраняем результат.
             not_none_to_dict(destination, key, value)
 

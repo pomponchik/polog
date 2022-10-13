@@ -82,6 +82,11 @@ def test_set_valid_key_delay_before_exit():
     config.set(deduplicate_errors=False)
     assert SettingsStore()['deduplicate_errors'] == False
     config.set(deduplicate_errors=True)
+    # suppress_by_default
+    config.set(suppress_by_default=True)
+    assert SettingsStore()['suppress_by_default'] == True
+    config.set(suppress_by_default=False)
+    assert SettingsStore()['suppress_by_default'] == False
 
 def test_set_invalid_key():
     """
