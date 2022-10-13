@@ -836,6 +836,13 @@ with log('Some exception!').suppress():
 config.set(suppress_by_default=True)
 ```
 
+Также контекстный менеджер позволяет редактировать создаваемую запись лога прямо изнутри контекста:
+```python
+with log('The message before change.') as context:
+  context('The message after change.', some_variable='some text')
+```
+
+В примере выше мы изменили сообщение лога, а также добавили в него новое поле - ```some_variable```.
 
 ### Умные ассерты
 
