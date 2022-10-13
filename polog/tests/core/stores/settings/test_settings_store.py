@@ -22,6 +22,7 @@ def test_set_and_get():
             'max_delay_before_exit': 5,
             'full_unlog': False,
             'suppress_by_default': False,
+            'suppress_exception_subclasses': False,
         },
         {
             'pool_size': 12,
@@ -32,6 +33,7 @@ def test_set_and_get():
             'max_delay_before_exit': 3,
             'full_unlog': True,
             'suppress_by_default': True,
+            'suppress_exception_subclasses': True,
         },
     ]
     store = SettingsStore()
@@ -64,6 +66,7 @@ def test_set_error_values():
         'unknown_fields_in_handle_logs': [1, 2, 3, 'kek', 1.2, [], set(), int, lambda: 'kek'],
         'full_unlog': ['kek', 1, lambda: 'kek'],
         'suppress_by_default': ['kek', 1, lambda: 'kek'],
+        'suppress_exception_subclasses': ['kek', 1, lambda: 'kek'],
     }
     store = SettingsStore()
     for key, local_values in all_values.items():
@@ -147,6 +150,7 @@ def test_operator_in():
         'deduplicate_errors',
         'full_unlog',
         'suppress_by_default',
+        'suppress_exception_subclasses',
     ]
 
     for field_name in names:
