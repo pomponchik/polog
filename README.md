@@ -826,7 +826,7 @@ except SomeException:
   logging.exception('Error in some operation!')
 ```
 
-При использовании контекстного менеджера Polog то же самое будет выглядеть гораздо компактнее:
+При использовании контекстного менеджера Polog то же самое будет выглядеть компактнее:
 
 ```python
 with log('Some operation!').suppress(SomeException):
