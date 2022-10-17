@@ -57,7 +57,7 @@ class AbstractToken(metaclass=MetaToken):
 
         Возвращается bool по результатам проверки.
         """
-        raise NotImplementedError()
+        raise NotImplementedError() # pragma: no cover
 
     def parse(self):
         """
@@ -66,7 +66,7 @@ class AbstractToken(metaclass=MetaToken):
 
         Возвращаемое значение может быть произвольного типа, в зависимости от природы токена. Скажем, для числа это может быть int, а для строки - str.
         """
-        raise NotImplementedError()
+        raise NotImplementedError() # pragma: no cover
 
     def equal(self, other_string):
         """
