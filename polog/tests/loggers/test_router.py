@@ -1037,7 +1037,7 @@ def test_router_method_decorator_with_empty_brackets_when_exception(handler):
 
 def test_router_method_decorator_with_positional_message_when_exception(handler):
     """
-    Пробуем навесить log как декоратор на обычный метод класса, без скобок.
+    Пробуем навесить log как декоратор на обычный метод класса, передав туда в виде позиционного аргумента сообщение лога.
     """
     default_level = 555
     default_error_level = 777
