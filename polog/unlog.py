@@ -77,6 +77,9 @@ class UnlogDecorator:
         return wrapped_result
 
     def get_unlog_status(self):
+        """
+        В этом методе решается, позволительно ли в данный момент логирование.
+        """
         status = context.get(None)
 
         if status is None:
