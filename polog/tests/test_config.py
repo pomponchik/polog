@@ -195,7 +195,7 @@ def test_config_add_handlers_dict_wrong():
     Пробуем передать словарь с неправильным содержимым.
     """
     with pytest.raises(ValueError):
-        config.add_handlers({'new_handler': 'new_handler'})
+        config.add_handlers({'kekoperekek': 'kekoperekek'})
     with pytest.raises(KeyError):
         config.add_handlers({'1': 'new_handler'})
     with pytest.raises(KeyError):
@@ -359,6 +359,13 @@ def test_delete_fields_not_str():
     """
     with pytest.raises(KeyError):
         handlers = config.delete_fields(1)
+
+def test_delete_engine_fields_not_str():
+    """
+    Проверяем, что поднимается исключение, когда мы вместо имени поля (то есть строки) используем любой другой объект.
+    """
+    with pytest.raises(KeyError):
+        handlers = config.delete_engine_fields(1)
 
 def test_delete_not_existed_handler():
     """
@@ -655,3 +662,38 @@ def test_set_base_field_name():
         config.add_fields(result=field(lambda x: 'kek'))
     with pytest.raises(NameError):
         config.add_fields(time_of_work=field(lambda x: 'kek'))
+
+def test_set_base_engine_field_name():
+    """
+    При попытке заменить встроенные поля внешними извлекаемыми должно подниматься исключение.
+    """
+    with pytest.raises(NameError):
+        config.add_engine_fields(level=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(auto=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(time=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(service_name=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(success=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(function=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(module=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(message=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(exception_type=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(exception_message=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(traceback=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(input_variables=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(local_variables=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(result=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(time_of_work=field(lambda x: 'kek'))
