@@ -27,3 +27,14 @@ def test_content_extraction_for_size_token():
     assert SizeToken('gigabytes').content == 1024 * 1024 * 1024
     assert SizeToken('terabytes').content == 1024 * 1024 * 1024 * 1024
     assert SizeToken('petabytes').content == 1024 * 1024 * 1024 * 1024 * 1024
+
+def test_creating_size_token_with_error():
+    """
+    Проверяем, что, если строка не является размерностью в байтах, токен не создастся.
+    """
+    with pytest.raises(ValueError):
+        SizeToken('kek')
+    with pytest.raises(ValueError):
+        SizeToken('5')
+    with pytest.raises(ValueError):
+        SizeToken('kek')
