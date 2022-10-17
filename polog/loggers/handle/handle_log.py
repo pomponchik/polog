@@ -70,3 +70,4 @@ class BaseLogger(AbstractHandleLogger):
 
 
 handle_log = BaseLogger()
+simple_handle_log = BaseLogger(all_fields_allowed=True)

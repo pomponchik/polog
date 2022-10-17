@@ -14,7 +14,6 @@ def test_integration_with_logging_on_simple_error(handler):
     logging.error('kek')
     after = datetime.now()
 
-
     assert handler.last is not None
     assert len(handler.all) == 1
 
@@ -37,7 +36,7 @@ def test_integration_with_logging_on_simple_error(handler):
     assert handler.last['from_logging'] == True
 
     assert handler.last['function'] == 'test_integration_with_logging_on_simple_error'
-    assert handler.last['line_number'] == 11
+    assert handler.last['line_number'] == 14
     assert handler.last['module'] == 'test_integration_with_logging'
     assert handler.last['path_to_code'].endswith('/actions/test_integration_with_logging.py')
 
@@ -72,11 +71,10 @@ def test_integration_with_logging_on_simple_exception(handler):
 
     before = datetime.now()
     try:
-        raise ValueError
+        raise ValueError('kekokek')
     except:
         logging.exception('kek')
     after = datetime.now()
-
 
     assert handler.last is not None
     assert len(handler.all) == 1
@@ -99,8 +97,8 @@ def test_integration_with_logging_on_simple_exception(handler):
 
     assert handler.last['from_logging'] == True
 
-    assert handler.last['function'] == 'test_integration_with_logging_on_simple_error'
-    assert handler.last['line_number'] == 11
+    assert handler.last['function'] == 'test_integration_with_logging_on_simple_exception'
+    assert handler.last['line_number'] == 76
     assert handler.last['module'] == 'test_integration_with_logging'
     assert handler.last['path_to_code'].endswith('/actions/test_integration_with_logging.py')
 
@@ -108,4 +106,4 @@ def test_integration_with_logging_on_simple_exception(handler):
     assert handler.last['success'] == False
 
     assert handler.last['exception_type'] == 'ValueError'
-    assert handler.last['exception_message'] == 'kek'
+    assert handler.last['exception_message'] == 'kekokek'

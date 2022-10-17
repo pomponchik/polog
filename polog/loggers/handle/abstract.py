@@ -55,11 +55,12 @@ class AbstractHandleLogger:
     # Данное множество просматривается в приоритете по сравнению с разрешенными полями и блокирует запись в том числе запрещенных позиционных аргументов.
     _forbidden_fields = set()
 
-    def __init__(self, settings=SettingsStore(), in_place_fields=in_place_fields, engine_fields=engine_fields):
+    def __init__(self, settings=SettingsStore(), in_place_fields=in_place_fields, engine_fields=engine_fields, all_fields_allowed=False):
         self._settings = settings
         self._engine = Engine()
         self._in_place_fields = in_place_fields
         self._engine_fields = engine_fields
+        self._all_fields_allowed = all_fields_allowed
 
     def __getattribute__(self, name):
         """
@@ -138,7 +139,7 @@ class AbstractHandleLogger:
             elif key in self._in_place_fields or key in self._engine_fields:
                 pass
             else:
-                if not self._settings['unknown_fields_in_handle_logs']:
+                if not self._all_fields_allowed and not self._settings['unknown_fields_in_handle_logs']:
                     self._maybe_raise(KeyError, f'Unknown argument name "{key}". Allowed arguments: {", ".join(self._allowed_types.keys())} and users fields.')
                     continue
             # При необходимости - конвертируем переданные значения.

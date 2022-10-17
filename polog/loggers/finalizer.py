@@ -5,7 +5,7 @@ from time import time
 import json
 from datetime import datetime
 
-from polog.loggers.handle.handle_log import handle_log
+from polog.loggers.handle.handle_log import simple_handle_log
 from polog.loggers.auto.class_logger import clog
 from polog.loggers.auto.function_logger import flog
 from polog.errors import IncorrectUseLoggerError, IncorrectUseOfTheDecoratorError, IncorrectUseOfTheContextManagerError
@@ -95,7 +95,7 @@ class LoggerRouteFinalizer:
 
         self.data['time_of_work'] = time() - self.start_time
 
-        handle_log(**(self.data))
+        simple_handle_log(**(self.data))
 
         if exception_value is not None:
             if self.suppress_all:
@@ -139,7 +139,7 @@ class LoggerRouteFinalizer:
 
         if len(args) == 1:
             if 'message' in kwargs and args[0] != kwargs['message']:
-                handle_log._maybe_raise(IncorrectUseLoggerError, 'You have specified the message both as an ordinal argument to the decorator and as a named argument.')
+                simple_handle_log._maybe_raise(IncorrectUseLoggerError, 'You have specified the message both as an ordinal argument to the decorator and as a named argument.')
             result['message'] = args[0]
 
         return result
@@ -174,7 +174,7 @@ class LoggerRouteFinalizer:
 
         for exception in exceptions:
             if not inspect.isclass(exception) or not issubclass(exception, Exception):
-                handle_log._maybe_raise(ValueError, 'Only exceptions can be passed to the .suppress() method.')
+                simple_handle_log._maybe_raise(ValueError, 'Only exceptions can be passed to the .suppress() method.')
             else:
                 exceptions_to_use.append(exception)
 
@@ -188,5 +188,5 @@ class LoggerRouteFinalizer:
         Здесь происходит создание объекта функции, который будет вызван в случае, если по контексту будет ясно, что функция log() вызвана для обычного ручного логирования.
         """
         def finalizer():
-            handle_log(*args, **kwargs)
+            simple_handle_log(*args, **kwargs)
         return finalizer

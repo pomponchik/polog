@@ -9,7 +9,7 @@ def from_logging_filter_to_polog(record):
     """
     Здесь копируется информация из объекта записи logging и передается логгеру Polog.
     """
-    from polog.loggers.handle.handle_log import handle_log
+    from polog.loggers.handle.handle_log import simple_handle_log
     from polog.core.stores.settings.settings_store import SettingsStore
 
 
@@ -31,14 +31,13 @@ def from_logging_filter_to_polog(record):
     if record.exc_info is not None:
         data['exception_type'] = record.exc_info[0].__name__
         data['traceback'] = SettingsStore()['json_module'].dumps(traceback.format_tb(record.exc_info[2]))
-    if record.exc_text is not None:
-        data['exception_message'] = record.exc_text
+        data['exception_message'] = str(record.exc_info[1])
     data['thread'] = f'{record.threadName} ({record.thread})'
     data['process'] = f'{record.processName} ({record.process})'
 
     data['from_logging'] = True
 
-    handle_log(**data)
+    simple_handle_log(**data)
     return True
 
 @is_action
