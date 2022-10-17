@@ -8,6 +8,7 @@ from polog.loggers.auto.class_logger import clog
 from polog.loggers.auto.function_logger import flog
 from polog.errors import IncorrectUseOfTheDecoratorError
 from polog.loggers.finalizer import LoggerRouteFinalizer
+from polog.unlog import unlog
 
 
 class Router:
@@ -89,6 +90,12 @@ class Router:
             return object.__getattribute__(self, name)
         except AttributeError:
             return functools.partial(self, level=name)
+
+    def __neg__(self):
+        """
+        При отрицании объекта роутера он возвращает @unlog.
+        """
+        return unlog
 
 
 log = Router()

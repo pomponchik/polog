@@ -7,6 +7,7 @@ import pytest
 from polog import log, config
 from polog.core.utils.is_json import is_json
 from polog.errors import IncorrectUseOfTheContextManagerError
+from polog.unlog import unlog
 
 
 def test_base_use(handler):
@@ -746,3 +747,6 @@ def test_context_manager_without_arguments_and_suppress_exception_subclasses_fal
         raise ValueError
 
     assert handler.last is not None
+
+def test_minus_log_is_unlog():
+    assert -log is unlog
