@@ -258,7 +258,7 @@ from polog import log, config
 # Присваиваем уровню 5 имя 'ERROR', а уровню 1 - 'ALL'.
 config.levels(ERROR=5, ALL=1)
 
-# Исьзуем присвоенное имя вместо номера уровня.
+# Используем присвоенное имя вместо номера уровня.
 @log(level='ERROR')
 def sum(a, b):
   return a + b
