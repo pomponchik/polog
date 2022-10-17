@@ -19,7 +19,7 @@ class AbstractRealEngine:
 
         Ожидается, что здесь будет логика, ответственная за вызов всех обработчиков.
         """
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
 
     def stop(self):
         """
