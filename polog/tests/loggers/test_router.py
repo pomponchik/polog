@@ -868,7 +868,7 @@ def test_router_class_decorator_with_empty_brackets(handler):
 
 def test_router_method_decorator_with_empty_brackets(handler):
     """
-    Пробуем навесить log как декоратор на обычный метод класса, без скобок.
+    Пробуем навесить log как декоратор на обычный метод класса, с пустыми скобками.
     """
     default_level = 555
     config.set(pool_size=0, default_level=default_level)
@@ -976,7 +976,7 @@ def test_router_class_decorator_with_level(handler):
 
 def test_router_class_decorator_with_positional_message(handler):
     """
-    Проверяем, что, если в декоратор класса передать уровень логирования, все будет работать.
+    Пробуем в декоратор класса подать сообщение в виде первого неименованного аргумента.
     """
     default_level = 555
     config.set(pool_size=0, default_level=default_level)
@@ -1006,7 +1006,7 @@ def test_router_class_decorator_with_positional_message(handler):
 
 def test_router_method_decorator_with_empty_brackets_when_exception(handler):
     """
-    Пробуем навесить log как декоратор на обычный метод класса, без скобок.
+    Пробуем навесить log как декоратор на обычный метод класса, с пустыми скобками.
     """
     default_level = 555
     default_error_level = 777
