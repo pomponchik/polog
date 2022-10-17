@@ -371,3 +371,10 @@ def test_unlog_over_other_decorator(handler):
     function()
 
     assert handler.last is None
+
+def test_minus_unlog_is_log():
+    """
+    Отрицание объекта unlog должно давать log.
+    Это нужно для симметрии синтаксиса (чтобы двойное отрицание log давало снова log).
+    """
+    assert -unlog is log
