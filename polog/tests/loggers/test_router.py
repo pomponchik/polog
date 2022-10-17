@@ -773,3 +773,295 @@ def test_router_two_positional_arguments():
     """
     with pytest.raises(IncorrectUseLoggerError):
         log('1', '2')
+
+def test_router_incorrect_positional_argument():
+    """
+    В log() в качестве позиционного аргумента можно передать только строку. Проверяем, что в ином случае поднимется исключение.
+    """
+    with pytest.raises(IncorrectUseLoggerError):
+        log(1)
+
+def test_router_class_decorator_without_brackets(handler):
+    """
+    Пробуем навесить log как декоратор на класс, без скобок.
+    """
+    default_level = 555
+    config.set(pool_size=0, default_level=default_level)
+
+    @log
+    class SomeClass:
+        def method(self):
+            pass
+
+    SomeClass().method()
+
+    assert handler.last is not None
+
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'method'
+    assert handler.last['success'] == True
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == default_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+    assert 'message' not in handler.last
+
+def test_router_method_decorator_without_brackets(handler):
+    """
+    Пробуем навесить log как декоратор на обычный метод класса, без скобок.
+    """
+    default_level = 555
+    config.set(pool_size=0, default_level=default_level)
+
+    class SomeClass:
+        @log
+        def method(self):
+            pass
+
+    SomeClass().method()
+
+    assert handler.last is not None
+
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'method'
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['success'] == True
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == default_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+    assert 'message' not in handler.last
+
+def test_router_class_decorator_with_empty_brackets(handler):
+    """
+    Пробуем навесить log как декоратор на класс, с пустыми скобками.
+    """
+    default_level = 555
+    config.set(pool_size=0, default_level=default_level)
+
+    @log()
+    class SomeClass:
+        def method(self):
+            pass
+
+    SomeClass().method()
+
+    assert handler.last is not None
+
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'method'
+    assert handler.last['success'] == True
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == default_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+    assert 'message' not in handler.last
+
+def test_router_method_decorator_with_empty_brackets(handler):
+    """
+    Пробуем навесить log как декоратор на обычный метод класса, без скобок.
+    """
+    default_level = 555
+    config.set(pool_size=0, default_level=default_level)
+
+    class SomeClass:
+        @log()
+        def method(self):
+            pass
+
+    SomeClass().method()
+
+    assert handler.last is not None
+
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'method'
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['success'] == True
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == default_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+    assert 'message' not in handler.last
+
+def test_router_class_decorator_with_wrong_list_of_methods():
+    """
+    Пробуем вместо списка имен методов передать что-то другое. Должны подниматься исключения.
+    """
+    with pytest.raises(TypeError):
+        @log(methods=1)
+        class SomeClass:
+            pass
+    with pytest.raises(TypeError):
+        @log(methods=[1, 2, 3])
+        class SomeClass:
+            pass
+
+def test_router_class_decorator_with_list_of_methods(handler):
+    """
+    Пробуем передать в декоратор класса список имен методов, которые нужно залогировать.
+    Проверяем, что методы с переданным набором имен логируются, а остальные нет.
+    """
+    default_level = 555
+    config.set(pool_size=0, default_level=default_level)
+
+    @log(methods=['important_method'])
+    class SomeClass:
+        def important_method(self):
+            pass
+        def not_important_method(self):
+            pass
+
+    SomeClass().not_important_method()
+
+    assert handler.last is None
+
+    SomeClass().important_method()
+
+    assert handler.last is not None
+
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'important_method'
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['success'] == True
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == default_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+    assert 'message' not in handler.last
+
+def test_router_class_decorator_with_level(handler):
+    """
+    Проверяем, что, если в декоратор класса передать уровень логирования, все будет работать.
+    """
+    default_level = 555
+    real_level = 5
+    config.set(pool_size=0, default_level=default_level)
+
+    @log(level=real_level)
+    class SomeClass:
+        def method(self):
+            pass
+
+    SomeClass().method()
+
+    assert handler.last is not None
+
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'method'
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['success'] == True
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == real_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+    assert 'message' not in handler.last
+
+def test_router_class_decorator_with_positional_message(handler):
+    """
+    Проверяем, что, если в декоратор класса передать уровень логирования, все будет работать.
+    """
+    default_level = 555
+    config.set(pool_size=0, default_level=default_level)
+
+    @log("kek")
+    class SomeClass:
+        def method(self):
+            pass
+
+    SomeClass().method()
+
+    assert handler.last is not None
+
+    assert handler.last['message'] == 'kek'
+
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'method'
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['success'] == True
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == default_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+
+def test_router_method_decorator_with_empty_brackets_when_exception(handler):
+    """
+    Пробуем навесить log как декоратор на обычный метод класса, без скобок.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, default_level=default_level, default_error_level=default_error_level)
+
+    class SomeClass:
+        @log()
+        def method(self):
+            raise ValueError('kekokek')
+
+    with pytest.raises(ValueError):
+        SomeClass().method()
+
+    assert handler.last is not None
+
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'method'
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == default_error_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kekokek'
+    assert 'message' not in handler.last
+
+def test_router_method_decorator_with_positional_message_when_exception(handler):
+    """
+    Пробуем навесить log как декоратор на обычный метод класса, без скобок.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, default_level=default_level, default_error_level=default_error_level)
+
+    class SomeClass:
+        @log('kek')
+        def method(self):
+            raise ValueError('kekokek')
+
+    with pytest.raises(ValueError):
+        SomeClass().method()
+
+    assert handler.last is not None
+
+    assert handler.last['message'] == 'kek'
+    assert handler.last['class'] == 'SomeClass'
+    assert handler.last['function'] == 'method'
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['level'] == default_error_level
+
+    assert isinstance(handler.last['time_of_work'], float)
+
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kekokek'

@@ -10,7 +10,7 @@ class ClassLogger:
     Экземпляры данного класса - готовые декораторы для других классов.
     """
 
-    def __call__(self, *args, methods=(), message=None, level=1, errors_level=None):
+    def __call__(self, *args, methods=(), message=None, level=None, errors_level=None):
         """
         Фабрика декораторов классов. Можно вызывать как со скобками, так и без.
         В задекорированном классе @flog() применяется ко всем методам, кроме тех, чье название начинается с '__'.

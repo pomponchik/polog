@@ -39,10 +39,10 @@ class Router:
             item = args[0]
             if isinstance(item, str):
                 return LoggerRouteFinalizer(*args, **kwargs)
-            elif callable(item):
-                return self._wrap(flog, item, *([*args][1:]), **kwargs)
             elif inspect.isclass(item):
                 return self._wrap(clog, item, *([*args][1:]), **kwargs)
+            elif callable(item):
+                return self._wrap(flog, item, *([*args][1:]), **kwargs)
             else:
                 raise IncorrectUseLoggerError(f'The first argument of class {type(item).__name__} is not recognized.')
         elif len(args) == 0:
