@@ -749,4 +749,20 @@ def test_context_manager_without_arguments_and_suppress_exception_subclasses_fal
     assert handler.last is not None
 
 def test_minus_log_is_unlog():
+    """
+    Отрицание объекта log должно давать unlog.
+    """
     assert -log is unlog
+
+def test_context_manager_simple_call_with_silent_internal_exceptions_off(handler):
+    """
+    Проверяем, что при настройке 'silent_internal_exceptions', равной Falsе, неизвестные поля лога записываются через контекстный менеджер.
+    """
+    config.set(pool_size=0, silent_internal_exceptions=False)
+
+    with log('kek', llelel=600, knijbn='lol'):
+        pass
+
+    assert handler.last is not None
+    assert handler.last['llelel'] == 600
+    assert handler.last['knijbn'] == 'lol'
