@@ -3,7 +3,7 @@ from contextvars import ContextVar
 from polog.loggers.handle.abstract import AbstractHandleLogger
 
 
-context = ContextVar('context')
+context = ContextVar('message')
 
 
 class Message(AbstractHandleLogger):

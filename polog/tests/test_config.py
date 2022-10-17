@@ -82,6 +82,11 @@ def test_set_valid_key_delay_before_exit():
     config.set(deduplicate_errors=False)
     assert SettingsStore()['deduplicate_errors'] == False
     config.set(deduplicate_errors=True)
+    # suppress_by_default
+    config.set(suppress_by_default=True)
+    assert SettingsStore()['suppress_by_default'] == True
+    config.set(suppress_by_default=False)
+    assert SettingsStore()['suppress_by_default'] == False
 
 def test_set_invalid_key():
     """
@@ -139,12 +144,16 @@ def test_add_handlers():
     """
     Проверяем, что новый обработчик добавляется и работает.
     """
+    config.set(pool_size=0)
+
     lst = []
     def new_handler(log):
         lst.append(log['level'])
+
     config.add_handlers(new_handler)
-    handle_log('lol')
-    time.sleep(0.0001)
+
+    log('lol')
+
     assert len(lst) > 0
 
 def test_add_handlers_wrong():
@@ -162,6 +171,43 @@ def test_add_handlers_wrong_function():
         pass
     with pytest.raises(ValueError):
         config.add_handlers(new_handler)
+
+def test_config_add_handlers_dict_log_and_get():
+    """
+    Пробуем добавить обработчик через словарь.
+    Должен добавиться и начать работать при регистрации логов.
+    """
+    config.set(pool_size=0)
+
+    lst = []
+    def new_handler(log):
+        lst.append(log['level'])
+
+    config.add_handlers({'new_handler': new_handler})
+
+    log('lol')
+
+    assert len(lst) > 0
+    assert config.get_handlers()['new_handler'] is new_handler
+
+def test_config_add_handlers_dict_wrong():
+    """
+    Пробуем передать словарь с неправильным содержимым.
+    """
+    with pytest.raises(ValueError):
+        config.add_handlers({'kekoperekek': 'kekoperekek'})
+    with pytest.raises(KeyError):
+        config.add_handlers({'1': 'new_handler'})
+    with pytest.raises(KeyError):
+        config.add_handlers({1: 'new_handler'})
+    with pytest.raises(KeyError):
+        def kek(log_item):
+            pass
+        config.add_handlers({1: kek})
+    with pytest.raises(ValueError):
+        def kek_2(a, b):
+            pass
+        config.add_handlers({'kek': kek_2})
 
 def test_add_similar_handlers():
     """
@@ -313,6 +359,13 @@ def test_delete_fields_not_str():
     """
     with pytest.raises(KeyError):
         handlers = config.delete_fields(1)
+
+def test_delete_engine_fields_not_str():
+    """
+    Проверяем, что поднимается исключение, когда мы вместо имени поля (то есть строки) используем любой другой объект.
+    """
+    with pytest.raises(KeyError):
+        handlers = config.delete_engine_fields(1)
 
 def test_delete_not_existed_handler():
     """
@@ -609,3 +662,38 @@ def test_set_base_field_name():
         config.add_fields(result=field(lambda x: 'kek'))
     with pytest.raises(NameError):
         config.add_fields(time_of_work=field(lambda x: 'kek'))
+
+def test_set_base_engine_field_name():
+    """
+    При попытке заменить встроенные поля внешними извлекаемыми должно подниматься исключение.
+    """
+    with pytest.raises(NameError):
+        config.add_engine_fields(level=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(auto=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(time=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(service_name=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(success=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(function=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(module=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(message=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(exception_type=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(exception_message=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(traceback=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(input_variables=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(local_variables=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(result=field(lambda x: 'kek'))
+    with pytest.raises(NameError):
+        config.add_engine_fields(time_of_work=field(lambda x: 'kek'))

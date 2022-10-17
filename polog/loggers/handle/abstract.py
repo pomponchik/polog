@@ -55,11 +55,12 @@ class AbstractHandleLogger:
     # Данное множество просматривается в приоритете по сравнению с разрешенными полями и блокирует запись в том числе запрещенных позиционных аргументов.
     _forbidden_fields = set()
 
-    def __init__(self, settings=SettingsStore(), in_place_fields=in_place_fields, engine_fields=engine_fields):
+    def __init__(self, settings=SettingsStore(), in_place_fields=in_place_fields, engine_fields=engine_fields, all_fields_allowed=False):
         self._settings = settings
         self._engine = Engine()
         self._in_place_fields = in_place_fields
         self._engine_fields = engine_fields
+        self._all_fields_allowed = all_fields_allowed
 
     def __getattribute__(self, name):
         """
@@ -80,7 +81,7 @@ class AbstractHandleLogger:
         """
         fields = self._prepare_data(args, kwargs)
         self._specific_processing(fields)
-        self._push(fields)
+        return self._push(fields)
 
     def _push(self, fields):
         """
@@ -138,7 +139,7 @@ class AbstractHandleLogger:
             elif key in self._in_place_fields or key in self._engine_fields:
                 pass
             else:
-                if not self._settings['unknown_fields_in_handle_logs']:
+                if not self._all_fields_allowed and not self._settings['unknown_fields_in_handle_logs']:
                     self._maybe_raise(KeyError, f'Unknown argument name "{key}". Allowed arguments: {", ".join(self._allowed_types.keys())} and users fields.')
                     continue
             # При необходимости - конвертируем переданные значения.
@@ -146,8 +147,9 @@ class AbstractHandleLogger:
                 value = self._convert_values.get(key)(value)
             # Проверяем на коллизии.
             if key in destination and raise_if_collision:
-                self._maybe_raise(ValueError, f'Duplicate information in the "{key}" field.')
-                continue
+                if destination[key] != kwargs[key]:
+                    self._maybe_raise(ValueError, f'Duplicate information in the "{key}" field.')
+                    continue
             # Все проверки пройдены - сохраняем результат.
             not_none_to_dict(destination, key, value)
 

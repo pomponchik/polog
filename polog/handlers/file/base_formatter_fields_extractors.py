@@ -91,7 +91,7 @@ class BaseFormatterFieldsExtractors:
         if function_name is not None:
             result = '.'.join([x for x in (service_name, module_name, class_name, function_name) if x is not None])
             return f'where: {result}()'
-        
+
         result = '.'.join([x for x in (service_name, module_name, class_name) if x is not None])
         if result:
             return f'where: {result}.?'
@@ -225,8 +225,10 @@ class BaseFormatterFieldsExtractors:
         """
         exception_type = log.get('exception_type')
         exception_message = log.get('exception_message')
-        if exception_type is not None and exception_message is not None:
-            return f'exception: {exception_type}("{exception_message}")'
+        if exception_type is not None:
+            if exception_message is not None:
+                return f'exception: {exception_type}("{exception_message}")'
+            return f'exception: {exception_type}()'
 
     @classmethod
     def traceback(cls, log):

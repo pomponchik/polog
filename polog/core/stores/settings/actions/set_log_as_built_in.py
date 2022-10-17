@@ -9,7 +9,7 @@ def set_log_as_built_in(old_value, new_value, store):
     Устанавливаем функцию log() в качестве системной.
     После этого ее можно будет использовать из любого места программы без дополнительного импорта.
     """
-    if new_value is True:
+    if new_value == True:
         from polog import log
         builtins.log = log
     else:

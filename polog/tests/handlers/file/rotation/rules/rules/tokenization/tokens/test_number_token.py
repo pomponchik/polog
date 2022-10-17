@@ -23,3 +23,16 @@ def test_equal_to_number_token():
 
     assert NumberToken('20') != NumberToken('21')
     assert NumberToken('20') != NumberToken('-20')
+
+def test_str_representation_of_number_token():
+    """
+    Пробуем преобразовать токен в строку при помощи str(), должно срабатывать.
+    """
+    assert str(NumberToken('20')) == 'NumberToken(20)'
+
+def test_creating_number_token_with_error():
+    """
+    Проверяем, что, если строка не является числом, токен не создастся.
+    """
+    with pytest.raises(ValueError):
+        NumberToken('kek')

@@ -6,7 +6,9 @@ from polog.loggers.handle.handle_log import handle_log
 from polog.loggers.handle.message import message
 from polog.loggers.auto.class_logger import clog
 from polog.loggers.auto.function_logger import flog
-from polog.errors import IncorrectUseOfTheDecoratorError
+from polog.errors import IncorrectUseLoggerError
+from polog.loggers.finalizer import LoggerRouteFinalizer
+from polog.unlog import unlog
 
 
 class Router:
@@ -18,7 +20,7 @@ class Router:
         """
         При вызове объекта класса, мы смотрим на аргументы и перенаправляем вызов к соответствующему объекту.
 
-        Существует 8 способов вызвать объект роутера:
+        Существует 9 способов вызвать объект роутера:
 
         1. Как обычный ручной логгер. При этом строка с сообщением должна идти первым неименованным аргументом.
         2. Как обычный ручной логгер, но не напрямую, а через имя уровня логирования. Скажем, если мы хотим вручную создать запись уровня "kek" (при условии, что данный уровень логирования ранее был зарегистрирован), мы вызовем объект вот так: log.kek('hello').
@@ -28,6 +30,7 @@ class Router:
         6. В качестве декоратора классов без скобок.
         7. В качестве декоратора классов с аргументами в скобках.
         8. В качестве декоратора классов с указанием уровня логирования через точку, по аналогии с декорированием функций.
+        9. В качестве контекстного менеджера.
 
         Неправильный вызов объекта может привести к поднятию исключения, которое нельзя отключить, управляя настройкой "silent_internal_exceptions".
         Это связано с тем, что иногда невозможно определить, был вызов осуществлен как функции или как декоратора, в то время как настройка "silent_internal_exceptions" не должна гасить исключения, возникающие при инициализации декораторов.
@@ -35,17 +38,17 @@ class Router:
         if len(args) == 1:
             item = args[0]
             if isinstance(item, str):
-                return handle_log(*args, **kwargs)
-            elif callable(item):
-                return self._wrap(flog, item, *([*args][1:]), **kwargs)
+                return LoggerRouteFinalizer(*args, **kwargs)
             elif inspect.isclass(item):
                 return self._wrap(clog, item, *([*args][1:]), **kwargs)
+            elif callable(item):
+                return self._wrap(flog, item, *([*args][1:]), **kwargs)
             else:
-                raise IncorrectUseOfTheDecoratorError(f'The first argument of class {str(type(item))} is not recognized.')
+                raise IncorrectUseLoggerError(f'The first argument of class {type(item).__name__} is not recognized.')
         elif len(args) == 0:
             return self._route_wrapper(*args, **kwargs)
         else:
-            raise IncorrectUseOfTheDecoratorError('Passing more than one positional argument to the logger.')
+            raise IncorrectUseLoggerError('Passing more than one positional argument to the logger.')
 
     def _route_wrapper(self, *args, **kwargs):
         """
@@ -88,6 +91,12 @@ class Router:
             return object.__getattribute__(self, name)
         except AttributeError:
             return functools.partial(self, level=name)
+
+    def __neg__(self):
+        """
+        При отрицании объекта роутера он возвращает @unlog.
+        """
+        return unlog
 
 
 log = Router()

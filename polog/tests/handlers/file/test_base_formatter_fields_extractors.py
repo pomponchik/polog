@@ -152,6 +152,12 @@ def test_exception_empty():
     """
     assert Extractors.exception({}) is None
 
+def test_exception_only_name():
+    """
+    Проверка, что корректно возвращается None при незаполненных полях об исключении.
+    """
+    assert Extractors.exception({'exception_type': 'ValueError'}) == 'exception: ValueError()'
+
 def test_traceback_empty():
     """
     Проверка, что при отсутствии поля traceback возвращается None.

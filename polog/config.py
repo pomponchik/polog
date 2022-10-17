@@ -73,10 +73,12 @@ class config:
         """
         Добавляем обработчики для логов.
         Сюда можно передать несколько обработчиков через запятую. Если их передавать как именованные переменные, они будут сохранены под соответствующими именами. Если как неименованные - имена будут сгенерированы автоматически.
+        Также сюда можно передавать словари в качестве неименованных параметров. Ключи должны быть именами обработчиков (вернее, путями к ним), а значения - самими обработчиками.
 
         Каждый обработчик должен быть вызываеым объектом, имеющим следующую сигнатуру (названия параметров соблюдать не обязательно):
 
-        handler(log_item)
+        >>> def handler(log_item):
+        >>> ... pass
 
         При несовпадении сигнатуры, будет поднято исключение.
 
@@ -86,8 +88,8 @@ class config:
             if isinstance(handler, dict):
                 for name, value in handler.items():
                     if not isinstance(name, str):
-                        raise ValueError('Only strings can be used as the handler name.')
-                    cls.set_handler(name, handler)
+                        raise KeyError('Only strings can be used as the handler name.')
+                    cls.set_handler(name, value)
             else:
                 if id(handler) in {id(node.value) for node in global_handlers.childs.values()}:
                     raise ValueError('An attempt to store the same handler object in a global namespace.')
@@ -108,7 +110,7 @@ class config:
     @staticmethod
     def get_handlers(*names):
         """
-        Получаем словарь, где ключи - имена обработчиков, а значения - сами зарегистрированные в Polog обработчики.
+        Получаем словаре-подобный объект, где ключи - имена обработчиков, а значения - сами зарегистрированные в Polog обработчики.
 
         Если метод вызвать без аргументов, будет возвращен полный набор зарегистрированных обработчиков.
         В качестве аргументов можно передать имена нужных обработчиков, тогда в полученном словаре будут только они.

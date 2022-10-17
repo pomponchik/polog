@@ -1,6 +1,18 @@
-class IncorrectUseOfTheDecoratorError(ValueError):
+class IncorrectUseLoggerError(ValueError):
+    """
+    Когда логгер используется неправильно, но пока точно невозможно сказать, в каком контексте.
+    """
+    pass
+
+class IncorrectUseOfTheDecoratorError(IncorrectUseLoggerError):
     """
     Когда в декоратор передали что-то не то.
+    """
+    pass
+
+class IncorrectUseOfTheContextManagerError(IncorrectUseLoggerError):
+    """
+    Когда неправильно используется контекстный менеджер.
     """
     pass
 

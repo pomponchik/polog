@@ -82,7 +82,6 @@ def test_check_regexp_base_behavior():
     assert not group.check_regexp('.....')
     assert not group.check_regexp('nsdn.')
 
-
 def test_no_content_to_wildcard():
     """
     Проверяем, что для символа звездочки нельзя указать точное значение.

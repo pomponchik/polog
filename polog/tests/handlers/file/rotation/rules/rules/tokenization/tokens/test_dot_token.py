@@ -12,3 +12,10 @@ def test_equal_to_dot_token():
     assert DotToken('lol') != DotToken('kek')
     assert DotToken('lol') != NumberToken('20')
     assert DotToken('lol') != True
+
+def test_str_representation_of_dot_token():
+    """
+    Пробуем преобразовать токен в строку при помощи str(), должно срабатывать.
+    """
+    assert str(DotToken('.')) == 'DotToken(".")'
+    assert str(DotToken('kek')) == 'DotToken("kek")'

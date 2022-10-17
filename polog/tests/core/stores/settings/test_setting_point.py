@@ -1,6 +1,7 @@
 import pytest
 
 from polog.core.stores.settings.setting_point import SettingPoint
+from polog.core.stores.settings.settings_store import SettingsStore
 from polog.errors import DoubleSettingError, AfterStartSettingError
 
 
@@ -268,3 +269,63 @@ def test_run_callback_when_setting_no_changes():
         point.set('kek')
 
     assert kek == 0
+
+def test_store_do_action_first_time_on():
+    """
+    Проверяем, что настройка 'do_action_first_time' в положении True действительно приводит к вызову коллбека при инициализации SettingsStore.
+    """
+    crumbs = []
+    def action(a, b, c):
+        crumbs.append('+1')
+    class NotSingleton:
+        def __new__(cls):
+            return object.__new__(cls)
+    class LocalSettingsStore(NotSingleton, SettingsStore):
+        points = {
+            'kek': SettingPoint('kek', action=action, do_action_first_time=True)
+        }
+        points_are_informed = False
+
+    LocalSettingsStore()
+
+    assert len(crumbs) == 1
+
+def test_store_do_action_first_time_off():
+    """
+    Проверяем, что настройка 'do_action_first_time' в положении False не приводит к вызову коллбека при инициализации объекта SettingsStore.
+    """
+    crumbs = []
+    def action(a, b, c):
+        crumbs.append('+1')
+    class NotSingleton:
+        def __new__(cls):
+            return object.__new__(cls)
+    class LocalSettingsStore(NotSingleton, SettingsStore):
+        points = {
+            'kek': SettingPoint('kek', action=action, do_action_first_time=False)
+        }
+        points_are_informed = False
+
+    LocalSettingsStore()
+
+    assert len(crumbs) == 0
+
+def test_store_do_action_first_time_default():
+    """
+    Проверяем, что, если настройку 'do_action_first_time' не задавать, по дефолту будет False.
+    """
+    crumbs = []
+    def action(a, b, c):
+        crumbs.append('+1')
+    class NotSingleton:
+        def __new__(cls):
+            return object.__new__(cls)
+    class LocalSettingsStore(NotSingleton, SettingsStore):
+        points = {
+            'kek': SettingPoint('kek', action=action)
+        }
+        points_are_informed = False
+
+    LocalSettingsStore()
+
+    assert len(crumbs) == 0
