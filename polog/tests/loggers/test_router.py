@@ -6,7 +6,7 @@ import pytest
 
 from polog import log, config
 from polog.core.utils.is_json import is_json
-from polog.errors import IncorrectUseOfTheContextManagerError
+from polog.errors import IncorrectUseOfTheContextManagerError, IncorrectUseLoggerError
 from polog.unlog import unlog
 
 
@@ -766,3 +766,10 @@ def test_context_manager_simple_call_with_silent_internal_exceptions_off(handler
     assert handler.last is not None
     assert handler.last['llelel'] == 600
     assert handler.last['knijbn'] == 'lol'
+
+def test_router_two_positional_arguments():
+    """
+    Нельзя передавать в log() два и более позиционных аргумента, можно строго один. Проверяем, что при попытке это сделать поднимается исключение.
+    """
+    with pytest.raises(IncorrectUseLoggerError):
+        log('1', '2')

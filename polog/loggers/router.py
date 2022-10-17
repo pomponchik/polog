@@ -6,7 +6,7 @@ from polog.loggers.handle.handle_log import handle_log
 from polog.loggers.handle.message import message
 from polog.loggers.auto.class_logger import clog
 from polog.loggers.auto.function_logger import flog
-from polog.errors import IncorrectUseOfTheDecoratorError
+from polog.errors import IncorrectUseLoggerError
 from polog.loggers.finalizer import LoggerRouteFinalizer
 from polog.unlog import unlog
 
@@ -43,11 +43,11 @@ class Router:
             elif inspect.isclass(item):
                 return self._wrap(clog, item, *([*args][1:]), **kwargs)
             else:
-                raise IncorrectUseOfTheDecoratorError(f'The first argument of class {str(type(item))} is not recognized.')
+                raise IncorrectUseLoggerError(f'The first argument of class {type(item).__name__} is not recognized.')
         elif len(args) == 0:
             return self._route_wrapper(*args, **kwargs)
         else:
-            raise IncorrectUseOfTheDecoratorError('Passing more than one positional argument to the logger.')
+            raise IncorrectUseLoggerError('Passing more than one positional argument to the logger.')
 
     def _route_wrapper(self, *args, **kwargs):
         """
