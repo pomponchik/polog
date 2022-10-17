@@ -39,7 +39,7 @@ class AbstractRule:
 
         Он ничего не должен возвращать.
         """
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
 
     def prove_source(self):
         """
@@ -47,7 +47,7 @@ class AbstractRule:
 
         Метод должен возвращать True или False в зависимости от результата проверки.
         """
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
 
     def check(self):
         """
@@ -56,4 +56,4 @@ class AbstractRule:
 
         Метод должен возвращать True или False в зависимости от результата проверки.
         """
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
