@@ -151,8 +151,6 @@ def test_add_handlers():
     log('lol')
     import sys
     import gc
-    #print(sys.getrefcount(item))
-    #print(gc.get_referrers(item))
     time.sleep(0.0001)
     assert len(lst) > 0
 

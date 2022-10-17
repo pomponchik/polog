@@ -30,12 +30,10 @@ def get_unlog_status():
     return status.full
 
 def set_unlogged(function, full):
-    print('input:', function)
     @wraps(function)
     def wrapper(*args, **kwargs):
         context.set(UnlogOrder(full=full))
         try:
-            print('in the wrapper:', function)
             return function(*args, **kwargs)
         finally:
             context.set(None)
@@ -47,9 +45,7 @@ def set_unlogged(function, full):
         finally:
             context.set(None)
     if iscoroutinefunction(function):
-        print('return 1')
         return async_wrapper
-    print('return 2', wrapper)
     return wrapper
 
 def unlog_function(function, full):
@@ -59,24 +55,17 @@ def unlog_function(function, full):
     Он достигается через внесение id функции в реестр функций, который запрещено декорировать, через класс RegisteringFunctions.
     Если функция уже была задекорирована логгером, возвращается ее оригинал, до декорирования. Класс RegisteringFunctions хранит ссылку на оригинальную версию каждой задекорированной функции и возвращает ее по запросу.
     """
-    print('function:', function)
     if not RegisteringFunctions().is_decorator(function):
-        print('path 1')
         RegisteringFunctions().forbid(function)
         result = function
     else:
-        print('path 2')
         original_function = RegisteringFunctions().get_original(function)
         RegisteringFunctions().remove(function)
         RegisteringFunctions().forbid(original_function)
         result = original_function
-    print('function after:', function)
-    print('after all result:', result)
 
     wrapped_result = set_unlogged(result, full)
-    print('function after 2:', function, wrapped_result)
     RegisteringFunctions().add_unlogged(wrapped_result, result)
-    print('function after 3:', function, wrapped_result)
     return wrapped_result
 
 def unlog(*args, full=None):

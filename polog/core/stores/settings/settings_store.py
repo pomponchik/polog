@@ -7,7 +7,7 @@ from polog.core.stores.settings.setting_point import SettingPoint
 from polog.core.stores.levels import Levels
 from polog.core.engine.real_engines.fabric import real_engine_fabric
 
-from polog.core.stores.settings.actions import reload_engine, fields_intersection_action, set_log_as_built_in
+from polog.core.stores.settings.actions import reload_engine, fields_intersection_action, set_log_as_built_in, integration_with_logging
 
 
 class SettingsStore(ReadOnlySingleton):
@@ -203,6 +203,14 @@ class SettingsStore(ReadOnlySingleton):
                 'the value must be boolean': lambda x: isinstance(x, bool),
             },
         ),
+        'integration_with_logging': SettingPoint(
+            True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+            action=integration_with_logging,
+            do_action_first_time=True,
+        ),
     }
     points_are_informed = False
     lock = Lock()
@@ -221,6 +229,9 @@ class SettingsStore(ReadOnlySingleton):
                     point.set_name(name)
                 for name, point in self.points.items():
                     point.share_lock_object()
+                for name, point in self.points.items():
+                    if point.do_action_first_time:
+                        point.do_action(None, point.value)
                 self.points_are_informed = True
 
     def __getitem__(self, key):

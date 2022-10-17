@@ -23,6 +23,7 @@ def test_set_and_get():
             'full_unlog': False,
             'suppress_by_default': False,
             'suppress_exception_subclasses': False,
+            'integration_with_logging': False,
         },
         {
             'pool_size': 12,
@@ -34,6 +35,7 @@ def test_set_and_get():
             'full_unlog': True,
             'suppress_by_default': True,
             'suppress_exception_subclasses': True,
+            'integration_with_logging': True,
         },
     ]
     store = SettingsStore()
@@ -67,6 +69,7 @@ def test_set_error_values():
         'full_unlog': ['kek', 1, lambda: 'kek'],
         'suppress_by_default': ['kek', 1, lambda: 'kek'],
         'suppress_exception_subclasses': ['kek', 1, lambda: 'kek'],
+        'integration_with_logging': ['kek', 1, lambda: 'kek'],
     }
     store = SettingsStore()
     for key, local_values in all_values.items():
@@ -151,6 +154,7 @@ def test_operator_in():
         'full_unlog',
         'suppress_by_default',
         'suppress_exception_subclasses',
+        'integration_with_logging',
     ]
 
     for field_name in names:

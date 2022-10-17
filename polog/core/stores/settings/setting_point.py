@@ -10,7 +10,7 @@ class SettingPoint:
     В глобальном классе настроек имени каждой отдельной настройки соответствует экземпляр данного класса.
     Вся логика, связанная с проверкой возможности сохранить новое значение для конкретной настройки, находится здесь. Таким образом, в основном классе остается только функциональность агрегации.
     """
-    def __init__(self, default, change_once=False, change_only_before_start=False, proves=None, converter=None, convert_first_time=False, no_check_first_time=False, action=None, conflicts=None, read_lock=False, shared_lock_with=()):
+    def __init__(self, default, change_once=False, change_only_before_start=False, proves=None, converter=None, convert_first_time=False, no_check_first_time=False, do_action_first_time=False, action=None, conflicts=None, read_lock=False, shared_lock_with=()):
         """
         Значения параметров:
 
@@ -21,6 +21,7 @@ class SettingPoint:
         converter (callable, 1 аргумент) - функция, которая применяется к каждому сохраняемому значению непосредственно перед сохранением, если она была передана в конструктор, возвращает новое значение. Используется в случаях, когда пользователь может передавать значения в некотором произвольном формате, а внутри программы используется единый формат. Важно: проверка валидности значения осуществляется до применения данной функции, т. е. к вводу в произвольном формате.
         convert_first_time (bool) - проверять дефолтное значение. False (по умолчанию) - не проверять.
         no_check_first_time (bool) - не проверять дефолтное значение. False (по умолчанию) - проверять.
+        do_action_first_time (bool) - выполнять ли коллбек (см. action) для дефолтного значения. False (по умолчанию) - не выполнять.
         action (callable, 3 аргумента) - действие, которое необходимо произвести сразу после присвоения нового значения. Принимает 3 аргумента: старое значение настройки, новое значение и экземпляр класса-агрегатора, чтобы была возможность обратиться к смежным полям.
         conflicts (dict, в котором каждый ключ - строка с названием другого поля настроек, а каждое значение - callable на 3 аргумента) - набор функций, каждая из которых возвращает True или False, в зависимости от того, соответственно, есть конфликт с данным полем или нет. Каждая из функций в словаре принимает 3 аргумента: старое значение настройки, новое значение и текущее значение поля, конфликт с которым проверяется.
         read_lock (bool) - блокировка на чтение (т. е. не только на запись).
@@ -34,6 +35,7 @@ class SettingPoint:
         self.convert_first_time = convert_first_time
         self.no_check_first_time = no_check_first_time
         self.change_only_before_start = change_only_before_start
+        self.do_action_first_time = do_action_first_time
         self.changed = False
         self.shared_lock_with = shared_lock_with
         self.lock = Lock()
