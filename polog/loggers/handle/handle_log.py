@@ -5,7 +5,7 @@ from polog.core.stores.handlers import global_handlers
 from polog.loggers.handle.abstract import AbstractHandleLogger
 from polog.core.log_item import LogItem
 from polog.core.stores.fields import in_place_fields
-from polog.unlog import get_unlog_status
+from polog.unlog import unlog
 
 
 class BaseLogger(AbstractHandleLogger):
@@ -61,7 +61,7 @@ class BaseLogger(AbstractHandleLogger):
         Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать, и нет ли запрета на логирование.
         """
         if fields.get('level') >= self._settings['level']:
-            if not get_unlog_status():
+            if not unlog.get_unlog_status():
                 log_item = LogItem()
                 log_item.set_data(fields)
                 log_item.set_handlers(global_handlers)

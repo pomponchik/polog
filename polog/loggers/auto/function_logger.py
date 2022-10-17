@@ -23,7 +23,7 @@ from polog.core.utils.pony_names_generator import PonyNamesGenerator
 from polog.core.stores.fields import in_place_fields, engine_fields
 from polog.field import field as FieldClass
 from polog.data_structures.wrappers.fields_container.container import FieldsContainer
-from polog.unlog import get_unlog_status
+from polog.unlog import unlog
 
 
 class FunctionLogger:
@@ -160,7 +160,7 @@ class FunctionLogger:
         Здесь происходит заполнение автоматически извлекаемых полей в случае исключения.
         В т. ч. извлекается вся информация об исключении - название, сообщение и т. д.
         """
-        if not get_unlog_status():
+        if not unlog.get_unlog_status():
             if not hasattr(exc, 'checked_by_polog') or not self.settings['deduplicate_errors']:
                 exc.checked_by_polog = True
                 errors_level = get_errors_level(errors_level, simple_level)
@@ -185,7 +185,7 @@ class FunctionLogger:
         """
         Заполнение автоматических полей в случае, когда исключения не было.
         """
-        if not get_unlog_status():
+        if not unlog.get_unlog_status():
             level = self.resolve_normal_level(level)
 
             if level >= self.settings['level']:
