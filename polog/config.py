@@ -87,7 +87,7 @@ class config:
                 for name, value in handler.items():
                     if not isinstance(name, str):
                         raise ValueError('Only strings can be used as the handler name.')
-                    cls.set_handler(name, handler)
+                    cls.set_handler(name, value)
             else:
                 if id(handler) in {id(node.value) for node in global_handlers.childs.values()}:
                     raise ValueError('An attempt to store the same handler object in a global namespace.')

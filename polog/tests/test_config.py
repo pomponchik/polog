@@ -144,14 +144,16 @@ def test_add_handlers():
     """
     Проверяем, что новый обработчик добавляется и работает.
     """
+    config.set(pool_size=0)
+
     lst = []
     def new_handler(log):
         lst.append(log['level'])
+
     config.add_handlers(new_handler)
+
     log('lol')
-    import sys
-    import gc
-    time.sleep(0.0001)
+
     assert len(lst) > 0
 
 def test_add_handlers_wrong():
@@ -169,6 +171,24 @@ def test_add_handlers_wrong_function():
         pass
     with pytest.raises(ValueError):
         config.add_handlers(new_handler)
+
+def test_config_add_handlers_dict_log_and_get():
+    """
+    Пробуем добавить обработчик через словарь.
+    Должен добавиться и начать работать при регистрации логов.
+    """
+    config.set(pool_size=0)
+
+    lst = []
+    def new_handler(log):
+        lst.append(log['level'])
+
+    config.add_handlers({'new_handler': new_handler})
+
+    log('lol')
+
+    assert len(lst) > 0
+    assert config.get_handlers()['new_handler'] is new_handler
 
 def test_add_similar_handlers():
     """
