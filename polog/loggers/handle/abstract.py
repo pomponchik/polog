@@ -90,7 +90,7 @@ class AbstractHandleLogger:
 
         fields - словарь с извлеченными полями лога.
         """
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
 
     def _specific_processing(self, fields):
         """
@@ -100,7 +100,7 @@ class AbstractHandleLogger:
 
         fields - словарь с извлеченными полями лога.
         """
-        pass
+        pass # pragma: no cover
 
     def _prepare_data(self, args, kwargs):
         """
