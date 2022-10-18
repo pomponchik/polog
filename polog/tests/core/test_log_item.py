@@ -252,6 +252,12 @@ def test_other_comparisons():
     with pytest.raises(TypeError):
         empty_log_1 <= empty_log_2
 
+    with pytest.raises(TypeError):
+        log_1 < LogItem()
+
+    with pytest.raises(TypeError):
+        LogItem() < log_1
+
 def test_get_items():
     """
     Проверяем работу метода .items(). Должно работать по аналогии со словарем.
@@ -547,3 +553,32 @@ def test_first_generation_of_log_object():
     process.join()
 
     assert queue.get() == [False, False, True, True, False, True]
+
+def test_log_item_len():
+    """
+    Проверяем, количество полей в логе возвращается корректно.
+    """
+    log_item = LogItem()
+
+    assert len(log_item) == 0
+
+    data = {}
+    log_item.set_data(data)
+
+    assert len(log_item) == 0
+
+    data['lol'] = 'kek'
+
+    assert len(log_item) == 1
+
+def test_log_item_repr_is_str():
+    """
+    В качестве исключения для объекта лога вывод из str() и repr() не отличается. Это так, поскольку иначе корректно содержащиеся в логе данные не отобразить, т.к. они были переданы через отдельный метод, а не через __init__().
+    """
+    log_item = LogItem()
+
+    assert str(log_item) == repr(log_item)
+
+    log_item.set_data({'lol': 'kek'})
+
+    assert str(log_item) == repr(log_item)
