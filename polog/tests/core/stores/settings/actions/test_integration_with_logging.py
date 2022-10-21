@@ -107,3 +107,35 @@ def test_integration_with_logging_on_simple_exception(handler):
 
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kekokek'
+
+def test_integration_on_logging_off_on_and_off(handler):
+    """
+    Проверяем, что настройка 'logging_off', выставленная в режим True, действительно останавливает работу logging, не затрагивая при этом Polog.
+    """
+    # Взято отсюда: https://stackoverflow.com/a/36408692/14522393
+    class ListHandler(logging.Handler):
+        def __init__(self, log_list):
+            logging.Handler.__init__(self)
+            self.lst = log_list
+        def emit(self, record):
+            self.lst.append(record)
+
+    lst = []
+    logging_handler = ListHandler(lst)
+    logging.root.addHandler(logging_handler)
+
+    config.set(integration_with_logging=True, logging_off=True)
+
+    logging.error('kek')
+
+    assert len(lst) == 0
+    assert len(handler.all) == 1
+
+    config.set(integration_with_logging=True, logging_off=False)
+
+    logging.error('kek')
+
+    assert len(lst) == 1
+    assert len(handler.all) == 2
+
+    logging.root.removeHandler(logging_handler)
