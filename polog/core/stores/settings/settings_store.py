@@ -210,6 +210,24 @@ class SettingsStore(ReadOnlySingleton):
             },
             action=integration_with_logging,
             do_action_first_time=True,
+            conflicts={
+                'logging_off': lambda new_value, old_value, other_field_value: new_value == False and other_field_value == True,
+            },
+            shared_lock_with=(
+                'logging_off',
+            ),
+        ),
+        'logging_off': SettingPoint(
+            True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+            conflicts={
+                'integration_with_logging': lambda new_value, old_value, other_field_value: new_value == True and other_field_value == False,
+            },
+            shared_lock_with=(
+                'integration_with_logging',
+            ),
         ),
     }
     points_are_informed = False

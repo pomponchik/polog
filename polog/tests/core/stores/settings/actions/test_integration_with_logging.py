@@ -8,7 +8,7 @@ def test_integration_with_logging_on_simple_error(handler):
     """
     Проверяем, что интеграция с logging с уровнем error работает.
     """
-    config.set(pool_size=0, integration_with_logging=True)
+    config.set(pool_size=0, logging_off=False, integration_with_logging=True)
 
     before = datetime.now()
     logging.error('kek')
@@ -47,7 +47,7 @@ def test_integration_with_logging_on_off_on(handler):
     """
     Проверяем, что, если интеграцию с logging включить, выключить, а потом снова включить, сообщения, соответственно, будут, не будут, и опять будут попадать в Polog.
     """
-    config.set(pool_size=0, integration_with_logging=True)
+    config.set(pool_size=0, logging_off=False, integration_with_logging=True)
 
     logging.error('kek')
     assert handler.last is not None
@@ -67,7 +67,7 @@ def test_integration_with_logging_on_simple_exception(handler):
     """
     Проверяем, что интеграция с logging работает, когда лог пишется через функцию exception().
     """
-    config.set(pool_size=0, integration_with_logging=True)
+    config.set(pool_size=0, logging_off=False, integration_with_logging=True)
 
     before = datetime.now()
     try:

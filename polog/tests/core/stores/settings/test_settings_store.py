@@ -23,7 +23,7 @@ def test_set_and_get():
             'full_unlog': False,
             'suppress_by_default': False,
             'suppress_exception_subclasses': False,
-            'integration_with_logging': False,
+            'logging_off': False,
         },
         {
             'pool_size': 12,
@@ -35,7 +35,7 @@ def test_set_and_get():
             'full_unlog': True,
             'suppress_by_default': True,
             'suppress_exception_subclasses': True,
-            'integration_with_logging': True,
+            'logging_off': True,
         },
     ]
     store = SettingsStore()
@@ -236,3 +236,39 @@ def test_started_flag_is_not_affected_by_engine_reloading():
     process.join()
 
     assert queue.get() == [False, False]
+
+def test_conflict_integration_with_logging_and_logging_off():
+    """
+    Проверяем, что настройка 'integration_with_logging' не может перейти в положение False, если 'logging_off' == True.
+    Это невозможно с точки зрения семантики, поскольку отключение логгинга работает только при наличии фильтра на root логгере из logging, который устанавливается при 'integration_with_logging' == True.
+    """
+    config.set(integration_with_logging=True, logging_off=True)
+    store = SettingsStore()
+
+    with pytest.raises(ValueError):
+        store['integration_with_logging'] = False
+
+    config.set(logging_off=False)
+
+    store['integration_with_logging'] = False
+
+    assert store['integration_with_logging'] == False
+
+def test_conflict_logging_off_and_integration_with_logging():
+    """
+
+    """
+    config.set(integration_with_logging=True, logging_off=True)
+    store = SettingsStore()
+
+    config.set(logging_off=False)
+    config.set(integration_with_logging=False)
+
+    with pytest.raises(ValueError):
+        store['logging_off'] = True
+
+    config.set(integration_with_logging=True)
+    config.set(logging_off=True)
+
+    assert store['logging_off'] == True
+    assert store['integration_with_logging'] == True
