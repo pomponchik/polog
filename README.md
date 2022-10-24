@@ -1052,10 +1052,19 @@ logger = logging.getLogger(__name__)
 ```python
 from polog.core.stores.settings.actions import from_logging_filter_to_polog
 
-logger.addFilter(from_logging_filter_to_polog) # Не нравится, когда камелкейсом в глаза тычут? Переходите на Polog.
+logger.addFilter(from_logging_filter_to_polog) # Не нравится, когда тычут в глаза камелкейсом? Переходите на Polog.
 ```
 
-Еще один аспект синхронизации ```logging``` и Polog - уровни логгирования.
+Еще один аспект синхронизации ```logging``` и Polog - имена [уровней логирования](#уровни-логирования). Дело в том, что Polog вам никак не предписывает, какие имена вы должны присваивать разным уровням. В ```logging``` же имена уже [придуманы](https://docs.python.org/3.8/library/logging.html#logging-levels) за вас:
+
+| Числовое значение | Имя  |
+|:------------- |:---------------:|
+| 50 | CRITICAL |
+| 40 | ERROR |
+| 30 | WARNING |
+| 20 | INFO |
+| 10 | DEBUG |
+| 0 | NOTSET |
 
 
 
