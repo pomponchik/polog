@@ -1036,13 +1036,26 @@ logging.warning('oops!')
 Представленный выше код должен вывести что-то вроде:
 
 ```
-[2022-10-24 18:52:12.856087] |   30    |  ERROR  | MANUAL | "oops!" | where: main.? | line_number: 10 | path_to_code: ".../main.py" | thread: "MainThread (8628192768)" | process: "MainProcess (10281)" | from_logging: True
+[2015-10-21 18:52:12.856087] |   30    |  ERROR  | MANUAL | "oops!" | where: main.? | line_number: 10 | path_to_code: ".../main.py" | thread: "MainThread (8628192768)" | process: "MainProcess (10281)" | from_logging: True
 ```
 
 Как видите, это не потребовало вообще никаких доработок или настроек на стороне ```logging```. Но как это работает? В процессе участвуют две пункта [настроек](#общие-настройки) Polog, которые по умолчанию обе возведены в положение ```True```: ```integration_with_logging``` и ```logging_off```. В них нет никакой магии. Первая в значении ```True``` добавляет фильтр в [```root logger```](https://docs.python.org/3/library/logging.html#logger-objects) библиотеки ```logging```, который перерегистрирует содержимое записи в уже внутри Polog. То есть фильтр в данном случае используется по сути как [коллбек](https://en.wikipedia.org/wiki/Callback_(computer_programming)). Вторая - это то значение, которое данный фильтр возвращает: ```True``` или ```False```.
 
-Если вы знакомы с устройством ```logging```, вы можете предвидеть, что данный метод перехвата не сработает, если
+Если вы знакомы с устройством ```logging```, вы можете предвидеть, что данный метод перехвата не сработает, если используется не ```root logger```. То есть если, к примеру, он был создан как-то вот [так](https://stackoverflow.com/questions/50714316/how-to-use-logging-getlogger-name-in-multiple-modules):
 
+```python
+logger = logging.getLogger(__name__)
+```
+
+В таком случае красиво уже не сделать, придется добавлять каждому логгеру фильтр самостоятельно:
+
+```python
+from polog.core.stores.settings.actions import from_logging_filter_to_polog
+
+logger.addFilter(from_logging_filter_to_polog) # Не нравится, когда камелкейсом в глаза тычут? Переходите на Polog.
+```
+
+Еще один аспект синхронизации ```logging``` и Polog - уровни логгирования.
 
 
 
