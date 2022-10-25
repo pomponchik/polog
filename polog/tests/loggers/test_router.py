@@ -1065,3 +1065,129 @@ def test_router_method_decorator_with_positional_message_when_exception(handler)
 
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kekokek'
+
+def test_context_manager_without_brackets_and_attributes(handler):
+    """
+    Пробуем использовать log как контекстный менеджер без скобок.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, default_level=default_level, default_error_level=default_error_level)
+
+    with log:
+        pass
+
+    assert handler.last is not None
+
+    assert 'message' not in handler.last
+    assert 'traceback' not in handler.last
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+
+    assert isinstance(handler.last['time'], datetime)
+    assert handler.last['auto'] == False
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['success'] == True
+    assert handler.last['level'] == default_level
+
+def test_context_manager_without_brackets_and_attributes_with_context_addind(handler):
+    """
+    Пробуем при использовании log как контекстного менеджера без скобок отредактировать записываемый лог изнутри контекста.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, default_level=default_level, default_error_level=default_error_level)
+
+    with log as context:
+        context('kek', some_variable='some text')
+
+    assert handler.last is not None
+
+    assert 'traceback' not in handler.last
+    assert 'exception_type' not in handler.last
+    assert 'exception_message' not in handler.last
+
+    assert handler.last['message'] == 'kek'
+    assert isinstance(handler.last['time'], datetime)
+    assert handler.last['auto'] == False
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['success'] == True
+    assert handler.last['level'] == default_level
+
+    assert handler.last['some_variable'] == 'some text'
+
+def test_exception_in_context_manager_without_brackets_and_attributes(handler):
+    """
+    Пробуем использовать log как контекстный менеджер без скобок для исключения.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, default_level=default_level, default_error_level=default_error_level, suppress_by_default=False)
+
+    with pytest.raises(ValueError):
+        with log:
+            raise ValueError('kek')
+
+    assert handler.last is not None
+
+    assert 'message' not in handler.last
+
+    assert isinstance(handler.last['time'], datetime)
+    assert handler.last['auto'] == False
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['success'] == False
+    assert handler.last['level'] == default_error_level
+
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+
+def test_exception_in_context_manager_without_brackets_and_attributes_suppress_by_default_on(handler):
+    """
+    Пробуем использовать log как контекстный менеджер без скобок для ловли исключения.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, default_level=default_level, default_error_level=default_error_level, suppress_by_default=True)
+
+    with log:
+        raise ValueError('kek')
+
+    assert handler.last is not None
+
+    assert 'message' not in handler.last
+
+    assert isinstance(handler.last['time'], datetime)
+    assert handler.last['auto'] == False
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['success'] == False
+    assert handler.last['level'] == default_error_level
+
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+
+def test_multiple_context_managers_without_brackets_and_attributes(handler):
+    """
+    Пробуем вложить друг в друга контекстные менеджеры. Проверяем, что они записываются в нужном порядке.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, default_level=default_level, default_error_level=default_error_level, suppress_by_default=True)
+
+    with log:
+        with log:
+            raise ValueError('kek')
+
+    assert len(handler.all) == 2
+
+    assert handler.all[0]['level'] == default_error_level
+    assert handler.all[1]['level'] == default_level

@@ -1,15 +1,18 @@
 import inspect
 import functools
+from contextvars import ContextVar
 
 from polog.core.stores.levels import Levels
 from polog.loggers.handle.handle_log import handle_log
 from polog.loggers.handle.message import message
 from polog.loggers.auto.class_logger import clog
 from polog.loggers.auto.function_logger import flog
-from polog.errors import IncorrectUseLoggerError
+from polog.errors import IncorrectUseLoggerError, IncorrectUseOfTheContextManagerError
 from polog.loggers.finalizer import LoggerRouteFinalizer
 from polog.unlog import unlog
 
+
+contexts = ContextVar('router_contexts')
 
 class Router:
     """
@@ -97,6 +100,38 @@ class Router:
         При отрицании объекта роутера он возвращает @unlog.
         """
         return unlog
+
+    def __enter__(self):
+        """
+        Вход в объект роутера как в контекстный менеджер.
+
+        Поскольку сам по себе роутер не может хранить состояние (он общий на всю программу и допускает параллельный доступ из нескольких потоков / корутин), оно хранится в контекстной переменной в виде стека. Это также позволяет вкладывать контексты друг в друга.
+        """
+        finalizer = LoggerRouteFinalizer()
+
+        context_stack = contexts.get(None)
+        if context_stack is None:
+            contexts.set([finalizer])
+        else:
+            context_stack.append(finalizer)
+
+        return finalizer.__enter__()
+
+    def __exit__(self, exception_type, exception_value, traceback_instance):
+        """
+        Выход из контекста.
+        """
+        finalizers = contexts.get(None)
+
+        if finalizers is None:
+            raise IncorrectUseOfTheContextManagerError()
+
+        finalizer = finalizers.pop()
+
+        if not finalizers:
+            contexts.set(None)
+
+        return finalizer.__exit__(exception_type, exception_value, traceback_instance)
 
 
 log = Router()
