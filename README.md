@@ -462,17 +462,17 @@ log('plain text')
 ... или в качестве декоратора [для функций](#декорируем-функции) (в том числе корутинных) и [классов](#декорируем-классы), [контекстного менеджера](#контекстный-менеджер):
 
 ```python
-                             @log('plain text')      @log('plain text')
-with log('plain text'):      def function():         class SimpleClass:
-  ...                           ...                     ...
+                             @log('plain text')         @log('plain text')
+with log('plain text'):      def function():            class SimpleClass:
+  ...                           ...                        ...
 ```
 
 Во всех примерах выше сообщение лога передается первым неименованным аргументом. Если вам нечего сказать, можно использовать ```log``` и без скобок:
 
 ```python
-                             @log                    @log
-with log:                    def function():         class SimpleClass:
-  ...                           ...                     ...
+                             @log                       @log
+with log:                    def function():            class SimpleClass:
+  ...                           ...                        ...
 ```
 
 При необходимости вы можете передать [уровень логирования](#уровни-логирования) в качестве аргумента ```level```:
