@@ -1,5 +1,4 @@
 import inspect
-import functools
 from contextvars import ContextVar
 
 from polog.core.stores.levels import Levels
@@ -9,10 +8,12 @@ from polog.loggers.auto.class_logger import clog
 from polog.loggers.auto.function_logger import flog
 from polog.errors import IncorrectUseLoggerError, IncorrectUseOfTheContextManagerError
 from polog.loggers.finalizer import LoggerRouteFinalizer
+from polog.loggers.partial import RouterPartial
 from polog.unlog import unlog
 
 
 contexts = ContextVar('router_contexts')
+
 
 class Router:
     """
@@ -84,6 +85,11 @@ class Router:
         """
         message(*args, **kwargs)
 
+    def suppress(self, *exceptions):
+        context = RouterPartial(self)
+        context.aware_calling_method('suppress', *exceptions)
+        return context
+
     def __getattribute__(self, name):
         """
         Объект данного класса можно вызывать как непосредственно, так и через "виртуальные" методы, имена которых соответствуют именам зарегистрированных пользователем уровней логирования.
@@ -93,7 +99,7 @@ class Router:
         try:
             return object.__getattribute__(self, name)
         except AttributeError:
-            return functools.partial(self, level=name)
+            return RouterPartial(self, level=name)
 
     def __neg__(self):
         """
@@ -131,7 +137,8 @@ class Router:
         if not finalizers:
             contexts.set(None)
 
-        return finalizer.__exit__(exception_type, exception_value, traceback_instance)
+        result = finalizer.__exit__(exception_type, exception_value, traceback_instance)
+        return result
 
 
 log = Router()

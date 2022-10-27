@@ -15,7 +15,9 @@ def test_base_use(handler):
     Проверка, что в базовом варианте использования (в виде обычной функции, без доп аргументов кроме сообщения лога) все работает.
     """
     log('kek')
+
     time.sleep(0.0001)
+
     assert handler.last['message'] == 'kek'
 
 def test_base_use_dotlevel(handler):
@@ -147,6 +149,9 @@ def test_function_decorator_without_breacks_and_message_and_dotlevel_async(handl
     assert handler.last['level'] == 43
 
 def test_define_level_name_after_using_in_the_decorator(handler):
+    """
+    Проверяем, что можно задать имя уровню уже после использования в декораторе.
+    """
     config.set(level=0, pool_size=0)
 
     @log.test_define_level_name_after_using_in_the_decorator
@@ -1191,3 +1196,186 @@ def test_multiple_context_managers_without_brackets_and_attributes(handler):
 
     assert handler.all[0]['level'] == default_error_level
     assert handler.all[1]['level'] == default_level
+
+def test_context_manager_without_brackets_with_dotlevel_defined_before(handler):
+    """
+    Проверяем, что указание имени уровня логирования через точку в контекстном менеджере без скобок - работает.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, default_level=default_level, default_error_level=default_error_level, suppress_by_default=True)
+    config.levels(test_context_manager_without_brackets_with_dotlevel_defined_before=55)
+
+    with log.test_context_manager_without_brackets_with_dotlevel_defined_before:
+        pass
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert handler.last['level'] == 55
+
+def test_context_manager_without_brackets_with_empty_supppress_only(handler):
+    """
+    Проверяем, что метод .suppress() без скобок в контекстном менеджере - работает.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, suppress_by_default=False, default_level=default_level, default_error_level=default_error_level)
+
+    with log.suppress():
+        raise ValueError
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == False
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['level'] == default_error_level
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == ''
+    assert is_json(handler.last['traceback'])
+
+def test_context_manager_without_brackets_with_empty_supppress_and_one_another_arg(handler):
+    """
+    Проверяем, что метод .suppress() без скобок в контекстном менеджере - работает, если передать туда исключение.
+    Мы пробуем туда передать исключение, которое отличается от того, которое мы хотим подавить - оно должно пройти сквозь контекстный менеджер.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, suppress_by_default=False, default_level=default_level, default_error_level=default_error_level)
+
+    with pytest.raises(ValueError):
+        with log.suppress(TypeError):
+            raise ValueError
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == False
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['level'] == default_error_level
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == ''
+    assert is_json(handler.last['traceback'])
+
+def test_context_manager_without_brackets_with_empty_supppress_and_one_exactly_arg(handler):
+    """
+    Проверяем, что метод .suppress() без скобок в контекстном менеджере - работает, если передать туда исключение.
+    Мы пробуем туда передать такое же исключение, как и то, которое мы хотим подавить - оно должно быть подавлено.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, suppress_by_default=False, default_level=default_level, default_error_level=default_error_level)
+
+    with log.suppress(ValueError):
+        raise ValueError
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == False
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['level'] == default_error_level
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == ''
+    assert is_json(handler.last['traceback'])
+
+def test_context_manager_without_brackets_with_exceptions_in_supppress_and_dotlevel(handler):
+    """
+    Проверяем, что метод .suppress() без скобок в контекстном менеджере - работает.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, suppress_by_default=False, default_level=default_level, default_error_level=default_error_level)
+
+    config.levels(test_context_manager_without_brackets_with_exceptions_in_supppress_and_dotlevel=55)
+
+    with log.test_context_manager_without_brackets_with_exceptions_in_supppress_and_dotlevel.suppress():
+        raise ValueError
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == False
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['level'] == 55
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == ''
+    assert is_json(handler.last['traceback'])
+
+def test_context_manager_without_brackets_with_exceptions_in_supppress_and_one_another_arg_and_dotlevel(handler):
+    """
+    Проверяем, что метод .suppress() без скобок в контекстном менеджере - работает, если передать туда исключение, когда мы ловим другое.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, suppress_by_default=False, default_level=default_level, default_error_level=default_error_level)
+
+    config.levels(test_context_manager_without_brackets_with_exceptions_in_supppress_and_one_another_arg_and_dotlevel=55)
+
+    with pytest.raises(ValueError):
+        with log.test_context_manager_without_brackets_with_exceptions_in_supppress_and_one_another_arg_and_dotlevel.suppress(TypeError):
+            raise ValueError
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == False
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['level'] == 55
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == ''
+    assert is_json(handler.last['traceback'])
+
+def test_context_manager_without_brackets_with_exceptions_in_supppress_and_one_exactly_arg_and_dotlevel(handler):
+    """
+    Проверяем, что метод .suppress() без скобок в контекстном менеджере - работает, если передать туда исключение, когда мы ловим другое.
+    """
+    default_level = 555
+    default_error_level = 777
+    config.set(pool_size=0, suppress_by_default=False, default_level=default_level, default_error_level=default_error_level)
+
+    config.levels(test_context_manager_without_brackets_with_exceptions_in_supppress_and_one_another_arg_and_dotlevel=55)
+
+    with log.test_context_manager_without_brackets_with_exceptions_in_supppress_and_one_another_arg_and_dotlevel.suppress(ValueError):
+        raise ValueError
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == False
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+    assert handler.last['level'] == 55
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == ''
+    assert is_json(handler.last['traceback'])
