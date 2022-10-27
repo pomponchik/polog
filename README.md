@@ -485,25 +485,9 @@ with log('plain text'):
 Контекстный менеджер и декоратор можно использовать и без скобок:
 
 ```python
-with log:          @log
-  ...                 def function():
-                         ...
-```
-
-
-
-
-```python
-with log:
-  ...
-
-@log
-def function():
-  ...
-
-@log
-class SimpleClass:
-  ...
+                  @log                    @log
+with log:         def function():         class SimpleClass:
+  ...                ...                     ...
 ```
 
 Во всех примерах выше сообщение лога передается первым неименованным аргументом.
