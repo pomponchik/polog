@@ -1379,3 +1379,15 @@ def test_context_manager_without_brackets_with_exceptions_in_supppress_and_one_e
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == ''
     assert is_json(handler.last['traceback'])
+
+def test_local_vars_if_no_exception_escaping(handler):
+    """
+    Проверяем, что, если при ручном логировании передать экземпляр исключения, не находясь при этом в блоке except, то поле 'local_variables' не заполняется.
+    """
+    config.set(pool_size=0)
+
+    log("It's bad.", exception=ValueError("Example of an exception."))
+
+    assert handler.last is not None
+
+    assert 'local_variables' not in handler.last

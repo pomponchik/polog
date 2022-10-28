@@ -129,7 +129,7 @@ log("It's bad.", exception=ValueError("Example of an exception."))
 
 ```
 [2022-10-28 16:11:27.704617] |    1    | UNKNOWN | MANUAL | "All right!" | where: ?
-[2022-10-28 16:11:27.704997] |    2    |  ERROR  | MANUAL | "It's bad." | where: ? | exception: ValueError("Example of an exception.") | no traceback | local_variables: ""
+[2022-10-28 16:11:27.704997] |    2    |  ERROR  | MANUAL | "It's bad." | where: ? | exception: ValueError("Example of an exception.") | no traceback
 ```
 
 Наконец, блок кода можно обернуть в логирующий контекстный менеджер:

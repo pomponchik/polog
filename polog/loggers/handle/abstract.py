@@ -192,7 +192,9 @@ class AbstractHandleLogger:
             if isinstance(fields['exception'], Exception):
                 exception_to_dict(fields, fields['exception'])
                 fields['traceback'] = get_traceback()
-                fields['local_variables'] = get_locals_from_traceback()
+                traceback = get_locals_from_traceback()
+                if traceback:
+                    fields['local_variables'] = traceback
             elif isinstance(fields['exception'], str):
                 fields['exception_type'] = fields['exception']
             fields.pop('exception')
