@@ -95,7 +95,7 @@ division(2, 0)
 Результат:
 
 ```
-[2022-10-28 16:05:42.119996] |    2    |  ERROR  |  AUTO  | where: __main__.division() | time of work: 0.00001287 sec. | input variables: 2 (int), 0 (int) | local variables: a = 2 (int), b = 0 (int) | exception: ZeroDivisionError("division by zero") | traceback: result = func(*args, **kwargs) (".../function_logger.py", line 88, in wrapper); return a / b (".../main.py", line 11, in division)
+[2022-10-29 00:23:20.699334] |    2    |  ERROR  |  AUTO  | where: __main__.division() | time of work: 0.00001097 sec. | input variables: 2 (int), 0 (int) | local variables: a = 2 (int), b = 0 (int) | exception: ZeroDivisionError("division by zero") | traceback: return a / b (".../main.py", line 9, in division)
 ```
 
 Что, если мы хотим залогировать все методы целого класса? Обязательно ли проходиться ним вручную и на каждый вешать по декоратору? Нет! Классы тоже можно [декорировать](#декорируем-классы):
@@ -115,7 +115,7 @@ OneOperation().operation(2, 0)
 Результат:
 
 ```
-[2022-10-28 16:08:33.214873] |    2    |  ERROR  |  AUTO  | where: __main__.OneOperation.division() | time of work: 0.00000286 sec. | input variables: <__main__.OneOperation object at 0x7fef405b4130> (OneOperation), 2 (int), 0 (int) | local variables: self = <__main__.OneOperation object at 0x7fef405b4130> (OneOperation), a = 2 (int), b = 0 (int) | exception: ZeroDivisionError("division by zero") | traceback: result = func(*args, **kwargs) (".../function_logger.py", line 88, in wrapper); return a / b (".../tests.py", line 12, in division)
+[2022-10-29 00:24:53.348855] |    2    |  ERROR  |  AUTO  | where: __main__.OneOperation.division() | time of work: 0.0000031 sec. | input variables: <__main__.OneOperation object at 0x7fd1805a4100> (OneOperation), 2 (int), 0 (int) | local variables: self = <__main__.OneOperation object at 0x7fd1805a4100> (OneOperation), a = 2 (int), b = 0 (int) | exception: ZeroDivisionError("division by zero") | traceback: return a / b (".../main.py", line 10, in division)
 ```
 
 Если вам все же не хватило автоматического логирования, вы можете писать логи вручную, вызывая ```log()``` [как функцию](#ручное-логирование) из своего кода:
