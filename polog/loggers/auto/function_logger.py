@@ -167,7 +167,7 @@ class FunctionLogger:
                 if errors_level >= self.settings['level']:
                     exception_to_dict(args_dict, exc)
                     args_dict['success'] = False
-                    args_dict['traceback'] = get_traceback()
+                    args_dict['traceback'] = get_traceback(cut_string_at_begin=1)
                     args_dict['local_variables'] = get_locals_from_traceback()
                     args_dict['time_of_work'] = finish - start
                     args_dict['level'] = errors_level

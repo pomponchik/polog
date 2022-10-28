@@ -399,3 +399,30 @@ def test_check_full_string_errors(handler, filename_for_test):
     assert string.startswith(f'[{handler.last["time"]}] | test_check_full_string_errors_level |  ERROR  |  AUTO  | "kek" | where: base.file.test_writer.function() | time of work: {time_of_work} sec. | input variables: 1 (int), 2 (int), 3 (int) | local variables: a = 1 (int), b = 2 (int), c = 3 (int) | exception: ValueError("kek_message") | traceback: ')
 
     config.delete_handlers('kek_test_check_full_string_errors')
+
+def test_lenth_of_one_line_traceback_in_file_writer(filename_for_test):
+    """
+    Проверяем, что трейсбек не содержит лишних данных о внутренних структурах декоратора.
+    """
+    file_handler = file_writer(filename_for_test)
+    config.add_handlers(test_lenth_of_one_line_traceback_in_file_writer=file_handler)
+    config.set(pool_size=0, level=1, service_name='base')
+    config.levels(test_lenth_of_one_line_traceback_in_file_writer=10)
+    config.delete_engine_fields(*(config.get_engine_fields().keys()))
+    config.delete_fields(*(config.get_in_place_fields().keys()))
+
+    @exception_escaping
+    @log('kek')
+    def function(a, b, c):
+        raise ValueError('kek_message')
+
+    function(1, 2, 3)
+
+    with open(filename_for_test, 'r') as file:
+        string = [string for string in file.read().split('\n') if string][-1]
+        print(string)
+
+    assert "traceback: raise ValueError('kek_message') (\"" in string
+    assert '", line 417, in function)' in string
+
+    config.delete_handlers('test_lenth_of_one_line_traceback_in_file_writer')
