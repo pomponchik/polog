@@ -253,9 +253,9 @@ log('plain text')
 Или в качестве [контекстного менеджера](#контекстный-менеджер) / декоратора для [функций](#декорируем-функции) (в том числе корутинных) и [классов](#декорируем-классы):
 
 ```python
-                           @log('plain text')         @log('plain text')
-with log('plain text'):    def function():            class SimpleClass:
-   ...                        ...                        ...
+                         @log('plain text')       @log('plain text')             @log('plain text')
+with log('plain text'):  def function():          async def function():          class SimpleClass:
+   ...                      ...                      ...                            ...
 ```
 
 Функция **сама понимает контекст**, в котором она была вызвана! И подстраивает свое поведение соответственно.
@@ -263,9 +263,9 @@ with log('plain text'):    def function():            class SimpleClass:
 Во всех примерах выше сообщение лога передается первым неименованным аргументом. Если вам нечего сказать, можно использовать ```log``` и без скобок:
 
 ```python
-                           @log                       @log
-with log:                  def function():            class SimpleClass:
-   ...                        ...                        ...
+                         @log                     @log                           @log
+with log:                def function():          async def function():          class SimpleClass:
+   ...                      ...                      ...                            ...
 ```
 
 Имя уровня логирования можно указывать через точку, предварительно [зарегистрировав](#уровни-логирования) его через настройки. Посмотрим, как это работает, предварительно зарегистрировав новое имя:
