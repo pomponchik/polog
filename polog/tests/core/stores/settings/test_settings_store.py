@@ -24,6 +24,7 @@ def test_set_and_get():
             'suppress_by_default': False,
             'suppress_exception_subclasses': False,
             'logging_off': False,
+            'traceback_cutting': False,
         },
         {
             'pool_size': 12,
@@ -36,6 +37,7 @@ def test_set_and_get():
             'suppress_by_default': True,
             'suppress_exception_subclasses': True,
             'logging_off': True,
+            'traceback_cutting': True,
         },
     ]
     store = SettingsStore()
@@ -70,6 +72,7 @@ def test_set_error_values():
         'suppress_by_default': ['kek', 1, lambda: 'kek'],
         'suppress_exception_subclasses': ['kek', 1, lambda: 'kek'],
         'integration_with_logging': ['kek', 1, lambda: 'kek'],
+        'traceback_cutting': ['kek', 1, lambda: 'kek'],
     }
     store = SettingsStore()
     for key, local_values in all_values.items():
@@ -155,6 +158,8 @@ def test_operator_in():
         'suppress_by_default',
         'suppress_exception_subclasses',
         'integration_with_logging',
+        'logging_off',
+        'traceback_cutting',
     ]
 
     for field_name in names:
@@ -256,7 +261,7 @@ def test_conflict_integration_with_logging_and_logging_off():
 
 def test_conflict_logging_off_and_integration_with_logging():
     """
-
+    Проверяем, что настройка 'logging_off' не может перейти в положение True, если 'integration_with_logging' в положении False.
     """
     config.set(integration_with_logging=True, logging_off=True)
     store = SettingsStore()

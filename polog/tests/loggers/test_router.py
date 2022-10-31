@@ -1,5 +1,8 @@
+import sys
 import time
+import json
 import asyncio
+import traceback
 from datetime import datetime
 
 import pytest
@@ -8,6 +11,7 @@ from polog import log, config
 from polog.core.utils.is_json import is_json
 from polog.errors import IncorrectUseOfTheContextManagerError, IncorrectUseLoggerError
 from polog.unlog import unlog
+from polog.core.utils.exception_escaping import exception_escaping
 
 
 def test_base_use(handler):
@@ -1391,3 +1395,147 @@ def test_local_vars_if_no_exception_escaping(handler):
     assert handler.last is not None
 
     assert 'local_variables' not in handler.last
+
+def test_number_of_traceback_strings_in_log_item_data(handler):
+    """
+    Проверяем, что в данных о трейсбеке нет лишних строк.
+    """
+    config.set(pool_size=0)
+
+    @exception_escaping
+    @log
+    def function():
+        raise ValueError
+
+    function()
+
+    assert len(json.loads(handler.last['traceback'])) == 1
+
+    assert 'in function' in json.loads(handler.last['traceback'])[0]
+    assert 'test_router.py' in json.loads(handler.last['traceback'])[0]
+    assert 'raise ValueError' in json.loads(handler.last['traceback'])[0]
+
+def test_number_of_traceback_strings_in_raised_exception(handler):
+    """
+    Проверяем, что количество строк трейсбека соответствует ожидаемому в случае, если бы трейсбек был обрезан.
+    """
+    config.set(pool_size=0, traceback_cutting=True)
+
+    @log
+    def function():
+        raise ValueError
+
+    try:
+        function()
+    except ValueError as e:
+        _, _, tb = sys.exc_info()
+        counter = 0
+        while tb:
+            counter += 1
+            tb = tb.tb_next
+
+    assert counter == 2
+
+def test_number_of_traceback_strings_in_raised_exception_async(handler):
+    """
+    Проверяем, что количество строк трейсбека в случае с декоратором над корутинной функцией соответствует ожидаемому в случае, если бы трейсбек был обрезан.
+    """
+    config.set(pool_size=0, traceback_cutting=True)
+
+    @log
+    async def function():
+        raise ValueError
+
+    try:
+        asyncio.run(function())
+    except ValueError as e:
+        _, _, tb = sys.exc_info()
+        counter = 0
+        while tb:
+            counter += 1
+            tb = tb.tb_next
+
+    assert counter == 4
+
+def test_number_of_traceback_strings_in_raised_exception_traceback_cutting_off(handler):
+    """
+    Проверяем, что количество строк трейсбека соответствует ожидаемому в случае, если бы трейсбек не был обрезан, когда настройка 'traceback_cutting' выставлена в False.
+    """
+    config.set(pool_size=0, traceback_cutting=False)
+
+    @log
+    def function():
+        raise ValueError
+
+    try:
+        function()
+    except ValueError as e:
+        _, _, tb = sys.exc_info()
+        counter = 0
+        while tb:
+            counter += 1
+            tb = tb.tb_next
+
+    assert counter == 3
+
+def test_number_of_traceback_strings_in_raised_exception_async_traceback_cutting_off(handler):
+    """
+    Проверяем, что количество строк трейсбека в случае с декоратором над корутинной функцией соответствует ожидаемому в случае, если бы трейсбек не был обрезан из-а настройки 'traceback_cutting' в положении False.
+    """
+    config.set(pool_size=0, traceback_cutting=False)
+
+    @log
+    async def function():
+        raise ValueError
+
+    try:
+        asyncio.run(function())
+    except ValueError as e:
+        _, _, tb = sys.exc_info()
+        counter = 0
+        while tb:
+            counter += 1
+            tb = tb.tb_next
+
+    assert counter == 5
+
+def test_text_in_cut_traceback_strings():
+    """
+    Проверяем, что включенном обрезании трейсбека, в нем отсутствует строка про данные внутренние структуры Polog, а при выключенном - присутствует.
+    """
+    config.set(pool_size=0, traceback_cutting=False)
+
+    @log
+    def function():
+        raise ValueError
+
+    try:
+        function()
+    except ValueError:
+        trace = json.dumps(traceback.format_tb(sys.exc_info()[2]))
+
+    assert 'function_logger.py' in trace
+
+    config.set(traceback_cutting=True)
+
+    try:
+        function()
+    except ValueError:
+        trace = json.dumps(traceback.format_tb(sys.exc_info()[2]))
+
+    assert 'function_logger.py' not in trace
+
+def test_text_in_log_item_traceback(handler):
+    """
+    Проверяем, что в итоговом записываемом в лог трейсбеке не содержится упоминаний внутренних структур Polog.
+    """
+    config.set(pool_size=0)
+
+    @exception_escaping
+    @log
+    def function():
+        raise ValueError
+
+    function()
+
+    assert 'function_logger.py' not in handler.last['traceback']

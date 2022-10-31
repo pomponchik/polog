@@ -229,6 +229,13 @@ class SettingsStore(ReadOnlySingleton):
                 'integration_with_logging',
             ),
         ),
+        'traceback_cutting': SettingPoint(
+            True,
+            proves={
+                'the value must be boolean': lambda x: isinstance(x, bool),
+            },
+        ),
+
     }
     points_are_informed = False
     lock = Lock()

@@ -12,6 +12,7 @@ from polog.core.stores.registering_functions import RegisteringFunctions
 from polog.core.utils.not_none_to_dict import not_none_to_dict
 from polog.core.utils.get_errors_level import get_errors_level
 from polog.core.utils.exception_to_dict import exception_to_dict
+from polog.core.utils.cut_traceback import cut_traceback
 from polog.utils.json_vars import json_vars, json_one_variable
 from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
@@ -71,7 +72,8 @@ class FunctionLogger:
                 except Exception as e:
                     finish = time.time()
                     self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
-                    raise e
+                    cut_traceback(self.settings)
+                    raise
                 finish = time.time()
                 self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                 return result
@@ -89,7 +91,8 @@ class FunctionLogger:
                 except Exception as e:
                     finish = time.time()
                     self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
-                    raise e
+                    cut_traceback(self.settings)
+                    raise
                 finish = time.time()
                 self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
                 return result
