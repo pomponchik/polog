@@ -7,15 +7,19 @@ from polog.utils.json_vars import json_vars
 
 store = SettingsStore()
 
-def get_traceback():
+def get_traceback(cut_string_at_begin=0):
     """
     Получаем последний фрейм трейсбека в виде списка строк и сразу сериализуем этот список в json.
     """
-    json = store['json_module']
-    trace = sys.exc_info()[2]
-    trace_list = traceback.format_tb(trace)
-    trace_json = json.dumps(trace_list)
-    return trace_json
+    try:
+        json = store['json_module']
+        trace = sys.exc_info()[2]
+        trace_list = traceback.format_tb(trace)
+        trace_list = trace_list[cut_string_at_begin:]
+        trace_json = json.dumps(trace_list)
+        return trace_json
+    except Exception:
+        return json.dumps([])
 
 def get_locals_from_traceback():
     """

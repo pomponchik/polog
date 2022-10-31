@@ -13,6 +13,7 @@ def from_logging_filter_to_polog(record):
     from polog.core.stores.settings.settings_store import SettingsStore
 
 
+    store = SettingsStore()
     data = {}
 
     data['time'] = datetime.fromtimestamp(record.created)
@@ -30,7 +31,7 @@ def from_logging_filter_to_polog(record):
     data['path_to_code'] = record.pathname
     if record.exc_info is not None:
         data['exception_type'] = record.exc_info[0].__name__
-        data['traceback'] = SettingsStore()['json_module'].dumps(traceback.format_tb(record.exc_info[2]))
+        data['traceback'] = store['json_module'].dumps(traceback.format_tb(record.exc_info[2]))
         data['exception_message'] = str(record.exc_info[1])
     data['thread'] = f'{record.threadName} ({record.thread})'
     data['process'] = f'{record.processName} ({record.process})'
@@ -38,7 +39,7 @@ def from_logging_filter_to_polog(record):
     data['from_logging'] = True
 
     simple_handle_log(**data)
-    return True
+    return not store['logging_off']
 
 @is_action
 def integration_with_logging(old_value, new_value, store):

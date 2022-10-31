@@ -55,3 +55,19 @@ def test_wrong_rule_to_rotation():
     """
     with pytest.raises(ValueError):
         rotator = Rotator(f'lol >> kek', FileDependencyWrapper((), lock_type='thread+file'))
+
+def test_wrong_number_of_rules_to_rotation():
+    """
+    Проверяем, что, при неправильном числе элементов в выражении, поднимается исключение. Должно быть 2: справа и слева от '>>'.
+    """
+    with pytest.raises(ValueError):
+        rotator = Rotator(f'lol >>', FileDependencyWrapper((), lock_type='thread+file'))
+
+    with pytest.raises(ValueError):
+        rotator = Rotator(f'>>', FileDependencyWrapper((), lock_type='thread+file'))
+
+    with pytest.raises(ValueError):
+        rotator = Rotator(f' >> ', FileDependencyWrapper((), lock_type='thread+file'))
+
+    with pytest.raises(ValueError):
+        rotator = Rotator(f'3 kilobyte >> logs.log >> kek.log', FileDependencyWrapper((), lock_type='thread+file'))

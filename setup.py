@@ -7,7 +7,7 @@ requirements = []
 
 setup(
     name="polog",
-    version="0.0.15",
+    version="0.0.16",
     author="Evgeniy Blinov",
     author_email="zheni-b@yandex.ru",
     description="Логирование должно быть красивым",

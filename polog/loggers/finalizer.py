@@ -106,7 +106,7 @@ class LoggerRouteFinalizer:
                         return True
                     return False
                 else:
-                    if any(exception_value is suppressed_exception for suppressed_exception in self.suppressed_exceptions):
+                    if any(exception_type is suppressed_exception for suppressed_exception in self.suppressed_exceptions):
                         return True
                     return False
             else:
