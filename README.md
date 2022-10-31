@@ -280,33 +280,24 @@ config.levels(some_level=5)
 # Обычная функция.
 log.some_level('plain text')
 
-# Контекстный менеджер со скобками.
-with log.some_level('plain text'):
-  ...
+# Контекстный менеджер.
+with log.some_level:                     with log.some_level('plain text'):
+   ...                                      ...
 
-# Контекстный менеджер без скобок.
-with log.some_level:
-  ...
+# Декоратор функций.
+@log.some_level                          @log.some_level('plain text')
+def function():                          def function():
+   ...                                      ...
 
-# Декоратор для функций со скобками.
-@log.some_level('plain text')
-def function():
-  ...
+# Декоратор корутинных функций.
+@log.some_level                          @log.some_level('plain text')
+async def function():                    async def function():
+   ...                                      ...
 
-# Декоратор для функций без скобок.
-@log.some_level
-def function():
-  ...
-
-# Декоратор для классов со скобками.
-@log.some_level('plain text')
-class SimpleClass:
-  ...
-
-# Декоратор для классов без скобок.
-@log.some_level
-class SimpleClass:
-  ...
+# Декоратор классов.
+@log.some_level                          @log.some_level('plain text')
+class SimpleClass:                       class SimpleClass:
+   ...                                      ...
 ```
 
 Но можно передать уровень логирования и в качестве аргумента, также будет работать при любом способе сбора логов:
