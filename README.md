@@ -282,7 +282,7 @@ log.some_level('plain text')
 
 # Контекстный менеджер.
 with log.some_level:                   | with log.some_level('plain text'):
-   ...                                      ...
+   ...                                 |    ...
 
 # Декоратор функций.
 @log.some_level                        | @log.some_level('plain text')
