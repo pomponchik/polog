@@ -281,23 +281,23 @@ config.levels(some_level=5)
 log.some_level('plain text')
 
 # Контекстный менеджер.
-with log.some_level:                     with log.some_level('plain text'):
+with log.some_level:                   | with log.some_level('plain text'):
    ...                                      ...
 
 # Декоратор функций.
-@log.some_level                          @log.some_level('plain text')
-def function():                          def function():
-   ...                                      ...
+@log.some_level                        | @log.some_level('plain text')
+def function():                        | def function():
+   ...                                 |    ...
 
 # Декоратор корутинных функций.
-@log.some_level                          @log.some_level('plain text')
-async def function():                    async def function():
-   ...                                      ...
+@log.some_level                        | @log.some_level('plain text')
+async def function():                  | async def function():
+   ...                                 |    ...
 
 # Декоратор классов.
-@log.some_level                          @log.some_level('plain text')
-class SimpleClass:                       class SimpleClass:
-   ...                                      ...
+@log.some_level                        | @log.some_level('plain text')
+class SimpleClass:                     | class SimpleClass:
+   ...                                 |    ...
 ```
 
 Но можно передать уровень логирования и в качестве аргумента, также будет работать при любом способе сбора логов:
