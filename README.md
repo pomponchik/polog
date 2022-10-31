@@ -253,9 +253,9 @@ log('plain text')
 Или в качестве [контекстного менеджера](#контекстный-менеджер) / декоратора для [функций](#декорируем-функции) (в том числе корутинных) и [классов](#декорируем-классы):
 
 ```python
-                         @log('plain text')       @log('plain text')             @log('plain text')
-with log('plain text'):  def function():          async def function():          class SimpleClass:
-   ...                      ...                      ...                            ...
+                        | @log('plain text')      | @log('plain text')            | @log('plain text')
+with log('plain text'): | def function():         | async def function():         | class SimpleClass:
+   ...                  |    ...                  |    ...                        |    ...
 ```
 
 Функция **сама понимает контекст**, в котором она была вызвана! И подстраивает свое поведение соответственно.
