@@ -10,7 +10,7 @@ setup(
     version="0.0.16",
     author="Evgeniy Blinov",
     author_email="zheni-b@yandex.ru",
-    description="Логирование должно быть красивым",
+    description="The new generation logger",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/pomponchik/polog",
