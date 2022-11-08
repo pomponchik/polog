@@ -5,7 +5,7 @@ from multiprocessing import Process
 import pytest
 import ujson
 
-from polog import config, handle_log, field, flog, log
+from polog import config, handle_log, field, log
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
 from polog.data_structures.trees.named_tree.tree import NamedTree
@@ -281,13 +281,16 @@ def test_add_field(handler):
     """
     def extractor(log):
         return 'lol'
-    @flog
+    @log
     def function():
         pass
     config.add_fields(new_field=field(extractor))
+
     function()
     time.sleep(0.0001)
+
     assert handler.last['new_field'] == 'lol'
+
     config.delete_fields('new_field')
 
 def test_add_engine_field(handler):

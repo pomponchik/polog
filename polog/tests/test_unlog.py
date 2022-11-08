@@ -3,7 +3,7 @@ import asyncio
 
 import pytest
 
-from polog import log, flog, unlog, config
+from polog import log, unlog, config
 from polog.errors import IncorrectUseOfTheDecoratorError
 
 
@@ -12,7 +12,7 @@ def test_unlog_before(handler):
     Проверяем ситуацию, когда @unlog стоит до логирующего декоратора.
     """
     @unlog
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
     def function():
         pass
 
@@ -26,7 +26,7 @@ def test_unlog_with_empty_brackets(handler):
     Проверяем, что с пустыми скобками декоратор работает точно так же, как без них (то есть по аналогии с тестом test_unlog_before).
     """
     @unlog()
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
     def function():
         pass
 
@@ -40,7 +40,7 @@ def test_unlog_before_async(handler):
     Тест аналогичен обычному test_unlog_before, но оборачиваем мы на этот раз корутинную функцию.
     """
     @unlog
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
     async def function():
         pass
 
@@ -53,7 +53,7 @@ def test_unlog_after(handler):
     """
     Когда @unlog после логирующего декоратора.
     """
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
     @unlog
     def function():
         pass
@@ -67,13 +67,13 @@ def test_unlog_multiple(handler):
     """
     Когда логирующие декораторы по нескольку штук с обеих сторон от @unlog.
     """
-    @flog(message='base text', level=100)
-    @flog(message='base text', level=100)
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
+    @log(message='base text', level=100)
+    @log(message='base text', level=100)
     @unlog
-    @flog(message='base text', level=100)
-    @flog(message='base text', level=100)
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
+    @log(message='base text', level=100)
+    @log(message='base text', level=100)
     def function():
         return True
 
@@ -86,13 +86,13 @@ def test_working():
     """
     Проверяем, что декоратор не ломает поведение функции.
     """
-    @flog(message='base text', level=100)
-    @flog(message='base text', level=100)
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
+    @log(message='base text', level=100)
+    @log(message='base text', level=100)
     @unlog
-    @flog(message='base text', level=100)
-    @flog(message='base text', level=100)
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
+    @log(message='base text', level=100)
+    @log(message='base text', level=100)
     def function():
         return True
 
@@ -104,7 +104,7 @@ def test_double_forbidden(handler):
     """
     @unlog
     @unlog
-    @flog(message='base text', level=100)
+    @log(message='base text', level=100)
     def function():
         pass
 
@@ -122,7 +122,7 @@ def test_unlog_class(handler):
 
     @unlog
     class Lol:
-        @flog
+        @log
         def kek(self, a, b):
             return a + b
 

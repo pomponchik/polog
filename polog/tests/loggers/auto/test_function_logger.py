@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from polog import flog, config, field
+from polog import log, flog, config, field
 from polog.loggers.auto.function_logger import FunctionLogger
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.data_structures.trees.named_tree.tree import NamedTree
@@ -18,7 +18,7 @@ def test_empty(handler):
     """
     Проверяем, что лог через flog записывается.
     """
-    @flog(message='base text')
+    @log(message='base text')
     def function():
         return True
 
@@ -35,7 +35,7 @@ def test_empty_async(handler):
     """
     Проверяем, что лог через flog записывается (для корутин).
     """
-    @flog(message='base text')
+    @log(message='base text')
     async def function():
         return True
 
@@ -52,7 +52,7 @@ def test_message(handler):
     """
     Проверяем, что сообщение по умолчанию записывается.
     """
-    @flog(message='base text')
+    @log(message='base text')
     def function():
         return True
     config.set(level=1)
@@ -64,8 +64,8 @@ def test_double(handler):
     """
     Проверка, что при двойном декорировании запись генерится только одна.
     """
-    @flog(message='base text 2')
-    @flog(message='base text')
+    @log(message='base text 2')
+    @log(message='base text')
     def function():
         time.sleep(0.0001)
         return True
@@ -82,7 +82,7 @@ def test_working():
     """
     Проверяем, что декоратор не ломает поведение функции.
     """
-    @flog(message='base text')
+    @log(message='base text')
     def function():
         return True
     assert function() == True
@@ -91,7 +91,7 @@ def test_working_without_brackets():
     """
     Проверяем, что декоратор можно вызывать без скобок и функция остается рабочей.
     """
-    @flog
+    @log
     def function():
         return True
     assert function() == True
@@ -100,7 +100,7 @@ def test_level(handler):
     """
     Проверяем, что установка уровня логирования работает.
     """
-    @flog(level=7)
+    @log(level=7)
     def function():
         pass
     function()
@@ -111,7 +111,7 @@ def test_level_async(handler):
     """
     Проверяем, что установка уровня логирования работает.
     """
-    @flog(level=7)
+    @log(level=7)
     async def function():
         pass
 
@@ -125,7 +125,7 @@ def test_level_name(handler):
     Проверяем, что установка уровня логирования идентификатором в виде строки работает.
     """
     config.set(level=1)
-    @flog(level='lolkeklolkeklol')
+    @log(level='lolkeklolkeklol')
     def function():
         pass
 
@@ -197,10 +197,10 @@ def test_raise_deduplicate_errors(handler):
     """
     config.set(deduplicate_errors=True, pool_size=0)
 
-    @flog
+    @log
     def b():
         raise ValueError
-    @flog
+    @log
     def a():
         return b()
 
@@ -215,10 +215,10 @@ def test_raise_deduplicate_errors_async(handler):
     """
     config.set(deduplicate_errors=True, pool_size=0)
 
-    @flog
+    @log
     async def b():
         raise ValueError
-    @flog
+    @log
     async def a():
         return await b()
 
@@ -233,10 +233,10 @@ def test_raise_not_deduplicate_errors(handler):
     """
     config.set(deduplicate_errors=False, pool_size=0)
 
-    @flog
+    @log
     def b():
         raise ValueError
-    @flog
+    @log
     def a():
         return b()
 
@@ -251,10 +251,10 @@ def test_raise_not_deduplicate_errors_async(handler):
     """
     config.set(deduplicate_errors=False, pool_size=0)
 
-    @flog
+    @log
     async def b():
         raise ValueError
-    @flog
+    @log
     async def a():
         return await b()
 
@@ -271,7 +271,7 @@ def test_log_exception_info():
     try:
         raise ValueError('lol')
     except Exception as e:
-        flog.log_exception_info(e, 1.0, 0.5, data, 7, 5,[], {}, {})
+        flog.log_exception_info(e, 1.0, 0.5, data, 7, 5,[], {}, {}, (), {})
     assert data['exception_type'] == 'ValueError'
     assert data['exception_message'] == 'lol'
     assert data['time_of_work'] == 0.5
@@ -290,7 +290,7 @@ def test_log_normal_info():
     Проверяем, что базовая информация извлекается.
     """
     data = {}
-    flog.log_normal_info('kek', 1.0, 0.5, data, 7, [], {}, {})
+    flog.log_normal_info('kek', 1.0, 0.5, data, 7, [], {}, {}, (), {})
     assert data.get('exception_type') is None
     assert data.get('exception_message') is None
     assert data['time_of_work'] == 0.5
@@ -352,7 +352,7 @@ def test_local_handlers_is_working():
     logs = []
     def local_handlers(log):
         logs.append(log)
-    @flog(handlers=[local_handlers])
+    @log(handlers=[local_handlers])
     def function(a, b):
         return a + b
 
@@ -367,7 +367,7 @@ def test_local_handlers_is_working_async():
     logs = []
     def local_handlers(log):
         logs.append(log)
-    @flog(handlers=[local_handlers])
+    @log(handlers=[local_handlers])
     async def function(a, b):
         return a + b
 
@@ -389,7 +389,7 @@ def test_local_handlers_wrong_handlers():
     ]
     for handlers in handlers_collection:
         with pytest.raises(ValueError):
-            @flog(handlers=handlers)
+            @log(handlers=handlers)
             def function(a, b):
                 return a + b
 
@@ -417,7 +417,7 @@ def test_extract_extra_fields_locally_in_the_function_decorator(handler):
     """
     def exctractor(log_item):
         return 'lol'
-    @flog(extra_fields={'lolkek': field(exctractor)})
+    @log(extra_fields={'lolkek': field(exctractor)})
     def function():
         pass
 
@@ -433,7 +433,7 @@ def test_extract_extra_fields_locally_in_the_function_decorator_async(handler):
     """
     def exctractor(log_item):
         return 'lol'
-    @flog(extra_fields={'lolkek': field(exctractor)})
+    @log(extra_fields={'lolkek': field(exctractor)})
     async def function():
         pass
 
@@ -450,7 +450,7 @@ def test_extract_extra_engine_fields_in_the_function_decorator(handler):
     def exctractor(log_item):
         return 'lol'
 
-    @flog(extra_engine_fields={'lolkek': field(exctractor)})
+    @log(extra_engine_fields={'lolkek': field(exctractor)})
     def function():
         pass
 
@@ -468,7 +468,7 @@ def test_compare_engine_thread_native_id_and_local(handler):
     def exctractor(log_item):
         return get_native_id()
 
-    @flog(extra_engine_fields={'lol': field(exctractor)}, extra_fields={'kek': field(exctractor)})
+    @log(extra_engine_fields={'lol': field(exctractor)}, extra_fields={'kek': field(exctractor)})
     def function():
         pass
 
@@ -507,7 +507,7 @@ def test_multiple_extra_fields_dicts(handler):
             name: [{'lol': field(exctractor_1)}, {'kek': field(exctractor_2)}],
         }
 
-        @flog(**kwargs)
+        @log(**kwargs)
         def function():
             pass
 
@@ -546,7 +546,7 @@ def test_multiple_extra_fields_dicts_and_ellipsis(handler):
                 name: dicts,
             }
 
-            @flog(**kwargs)
+            @log(**kwargs)
             def function():
                 pass
 
@@ -575,11 +575,11 @@ def test_affects_to_global_fields_stores(handler):
             name: {'lol': field(exctractor)},
         }
 
-        @flog(**kwargs)
+        @log(**kwargs)
         def function():
             pass
 
-        @flog
+        @log
         def function_2():
             pass
 
@@ -603,7 +603,7 @@ def test_base_behavior_with_ellipsis(handler):
 
     config.add_fields(global_item=field(global_exctractor))
 
-    @flog(extra_fields=[{'local': field(local_exctractor)}, ...])
+    @log(extra_fields=[{'local': field(local_exctractor)}, ...])
     def function():
         pass
 
@@ -628,7 +628,7 @@ def test_base_behavior_without_ellipsis(handler):
 
     config.add_fields(global_item=field(global_exctractor))
 
-    @flog(extra_fields=[{'local': field(local_exctractor)}])
+    @log(extra_fields=[{'local': field(local_exctractor)}])
     def function():
         pass
 
@@ -643,7 +643,7 @@ def test_auto_flag(handler):
     """
     Проверяем, что флаг "auto" для логов, записанных через декоратор, проставляется в True.
     """
-    @flog
+    @log
     def function():
         pass
 
@@ -655,7 +655,7 @@ def test_auto_flag_async(handler):
     """
     Проверяем, что флаг "auto" для логов, записанных через декоратор, проставляется в True.
     """
-    @flog
+    @log
     async def function():
         pass
 
@@ -667,7 +667,7 @@ def test_success_flag_when_success(handler):
     """
     Флаг "success" должен проставляться в значение True, если обернутая функция отработала без исключений.
     """
-    @flog
+    @log
     def function():
         pass
 
@@ -679,7 +679,7 @@ def test_success_flag_when_error(handler):
     """
     Флаг "success" должен проставляться в значение False, если внутри обернутой функции поднято исключение.
     """
-    @flog
+    @log
     def function():
         raise ValueError
 
@@ -692,7 +692,7 @@ def test_result_is_json(handler):
     """
     Проверяем, что поле "result" содержит json с результатами работы обернутой декоратором функции.
     """
-    @flog
+    @log
     def function():
         return 1
 
@@ -705,7 +705,7 @@ def test_local_variables_is_json(handler):
     Проверяем, что поле "local_variables" содержит json с локальными переменными обернутой декоратором функции, когда в той поднимается исключение.
     """
     @exception_escaping
-    @flog
+    @log
     def function():
         a = 'kek'
         raise ValueError('kek')
@@ -719,7 +719,7 @@ def test_traceback_is_json(handler):
     Проверяем, что поле "traceback" содержит json со списком строк трейсбека обернутой декоратором функции, когда в той поднимается исключение.
     """
     @exception_escaping
-    @flog
+    @log
     def function():
         a = 'kek'
         raise ValueError('kek')
@@ -736,10 +736,10 @@ def test_setting_and_not_setting_of_service_name(handler):
     """
     config.set(pool_size=0, service_name=None)
 
-    @flog
+    @log
     def function():
         pass
-    @flog
+    @log
     def error_function():
         raise ValueError
 
@@ -778,7 +778,7 @@ def test_all_requirement_fields_are_of_expected_classes(handler):
 
     number_of_tries = 10000
 
-    @flog
+    @log
     def function():
         pass
 
@@ -810,7 +810,7 @@ def test_all_requirement_fields_are_of_expected_classes_when_error(handler):
     number_of_tries = 10000
 
     @exception_escaping
-    @flog
+    @log
     def function():
         a = 'kek'
         raise ValueError('kek')
@@ -844,7 +844,7 @@ def test_normal_log_from_decorator_does_not_contain_fields(handler):
 
     number_of_tries = 10000
 
-    @flog
+    @log
     def function():
         pass
 
@@ -867,7 +867,7 @@ def test_level_name_converting_to_int_decorator(handler):
     """
     config.levels(kek=5)
 
-    @flog(message='kek', level='kek')
+    @log(message='kek', level='kek')
     def function():
         pass
 
@@ -883,7 +883,7 @@ def test_level_name_converting_to_int_decorator_error(handler):
     config.levels(kek=5)
 
     @exception_escaping
-    @flog(message='kek', level='kek')
+    @log(message='kek', level='kek')
     def function():
         raise ValueError
 
@@ -891,7 +891,7 @@ def test_level_name_converting_to_int_decorator_error(handler):
 
     assert handler.last['level'] == 5
 
-@flog
+@log
 def simple_function():
     pass
 
@@ -911,7 +911,7 @@ def test_get_class_name_from_simple_local_function(handler):
     """
     config.set(pool_size=0)
 
-    @flog
+    @log
     def function():
         pass
 
@@ -926,7 +926,7 @@ def test_get_class_name_from_method(handler):
     config.set(pool_size=0)
 
     class KekClass:
-        @flog
+        @log
         def function(self):
             pass
 
@@ -942,7 +942,7 @@ def test_get_class_name_from_classmethod(handler):
 
     class KekClass:
         @classmethod
-        @flog
+        @log
         def function(self):
             pass
 
@@ -957,7 +957,7 @@ def test_get_class_name_from_coroutine(handler):
     config.set(pool_size=0)
 
     class KekClass:
-        @flog
+        @log
         async def function(self):
             pass
 
@@ -971,7 +971,7 @@ def test_asyncio_result(handler):
     """
     config.set(pool_size=0)
 
-    @flog
+    @log
     async def function(a, b):
         return a + b
 
@@ -989,7 +989,7 @@ def test_asyncio_exception(handler):
     message = 'kek message'
 
     @exception_escaping
-    @flog
+    @log
     async def function(a, b):
         raise ValueError(message)
 
@@ -1020,11 +1020,11 @@ def test_default_level_in_decorator(handler):
     """
     config.set(pool_size=0, level=0, default_level=5)
 
-    @flog(level=10)
+    @log(level=10)
     def function_1():
         pass
 
-    @flog
+    @log
     def function_2():
         pass
 
@@ -1046,26 +1046,26 @@ def test_set_arguments_not_allowed_types():
     3. В качестве флага is_method не-булевое значение.
     """
     with pytest.raises(ValueError):
-        @flog(message=10)
+        @log(message=10)
         def function():
             pass
 
     with pytest.raises(ValueError):
-        @flog(level=1.5)
+        @log(level=1.5)
         def function():
             pass
 
     with pytest.raises(ValueError):
-        @flog(errors_level=1.5)
+        @log(errors_level=1.5)
         def function():
             pass
 
     with pytest.raises(ValueError):
-        @flog(is_method=12)
+        @log(is_method=12)
         def function():
             pass
 
     with pytest.raises(ValueError):
-        @flog(is_method='True')
+        @log(is_method='True')
         def function():
             pass

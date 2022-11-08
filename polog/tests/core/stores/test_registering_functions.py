@@ -3,7 +3,7 @@ import gc
 import pytest
 
 from polog.core.stores.registering_functions import RegisteringFunctions
-from polog import flog
+from polog import log
 
 
 def function_for_forbidden_test():
@@ -18,7 +18,7 @@ def test_is_decorator():
         pass
     register = RegisteringFunctions()
     assert register.is_decorator(function) == False
-    function = flog()(function)
+    function = log()(function)
     assert register.is_decorator(function) == True
     register.remove(function)
 
@@ -30,7 +30,7 @@ def test_get_original():
         pass
     register = RegisteringFunctions()
     assert id(register.get_original(function)) == id(function)
-    decorated_function = flog()(function)
+    decorated_function = log()(function)
     assert id(register.get_original(decorated_function)) == id(function)
     register.remove(function)
 
@@ -65,11 +65,11 @@ def test_remove():
     def function():
         pass
     register = RegisteringFunctions()
-    decorated = flog()(function)
+    decorated = log()(function)
     assert register.is_decorator(decorated) == True
     register.remove(decorated)
     assert register.is_decorator(decorated) == False
-    decorated = flog()(function)
+    decorated = log()(function)
     assert register.is_decorator(decorated) == True
     register.remove(decorated)
 
@@ -135,7 +135,7 @@ def test_finalize():
     def abcde():
         pass
     register = RegisteringFunctions()
-    function = flog()(abcde)
+    function = log()(abcde)
     assert register.is_decorator(function) == True
     function_id = id(function)
     del function

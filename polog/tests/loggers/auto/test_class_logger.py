@@ -2,11 +2,11 @@ import time
 
 import pytest
 
-from polog import clog, flog, config
+from polog import log, clog, flog, config
 from polog.errors import IncorrectUseOfTheDecoratorError
 
 
-@clog(methods=('important_method',), message='base_message')
+@log(methods=('important_method',), message='base_message')
 class ExampleOne:
     field = 'test'
 
@@ -16,12 +16,12 @@ class ExampleOne:
     def not_important_method(self):
         pass
 
-@clog(message='base_message_2', level=1)
+@log(message='base_message_2', level=1)
 class ExampleTwo:
     def one_method(self):
         pass
 
-    @flog(level=100)
+    @log(level=100)
     def two_method(self):
         pass
 
@@ -71,13 +71,13 @@ def test_flog(handler):
 
 def test_inherit_affect(handler):
     """
-    Проверяем, что последний класс в иерархии наследования не аффектит работу своих предков при навешивании на него @clog.
+    Проверяем, что последний класс в иерархии наследования не аффектит работу своих предков при навешивании на него @log.
     """
     config.set(level=1)
     class A:
         def a(self):
             pass
-    @clog
+    @log
     class B(A):
         def b(self):
             pass
@@ -90,11 +90,11 @@ def test_inherit_affect_2(handler):
     Еще одна проверка, что декорирование класса не аффектит предков.
     """
     config.set(level=1)
-    @clog(message='message a')
+    @log(message='message a')
     class A:
         def a(self):
             pass
-    @clog(message='message b')
+    @log(message='message b')
     class B(A):
         def b(self):
             pass
@@ -118,11 +118,11 @@ def test_inherit_affect_3(handler):
     Проверяем, что когда мы указываем в некоем классе список методов для логирования, унаследованные от залогированного класса методы, не перечисленные в данном списке, логироваться не будут.
     """
     config.set(level=1)
-    @clog(message='message a')
+    @log(message='message a')
     class A:
         def a(self):
             pass
-    @clog(methods=('b',), message='message b')
+    @log(methods=('b',), message='message b')
     class B(A):
         def b(self):
             pass
@@ -161,18 +161,11 @@ def test_get_logging_methods_not_danders():
     methods = clog.get_logging_methods(TestClass)
     assert len(methods) == 0
 
-def test_wrong_using():
-    """
-    Проверяем, что если передать в декоратор не класс, поднимется исключение.
-    """
-    with pytest.raises(IncorrectUseOfTheDecoratorError):
-        clog('kek')
-
 def test_auto_flag_with_class(handler):
     """
     Проверяем, что флаг "auto" для логов, записанных через декоратор, проставляется в True.
     """
-    @clog(message='kek')
+    @log(message='kek')
     class A:
         def a(self):
             pass
