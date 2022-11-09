@@ -1,4 +1,5 @@
 [![PyPI downloads](https://img.shields.io/pypi/dm/polog.svg)](https://pypistats.org/packages/polog)
+[![codecov](https://codecov.io/gh/pomponchik/polog/branch/master/graph/badge.svg)](https://codecov.io/gh/pomponchik/polog)
 
 # Polog: логгер нового поколения
 
