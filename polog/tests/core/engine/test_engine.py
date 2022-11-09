@@ -47,7 +47,7 @@ def test_reload_massive_attack(handler):
     engine = Engine()
     store = SettingsStore()
     engine.write(log)
-    time.sleep(0.0001)
+    time.sleep(0.001)
     handler.clean()
 
     number_of_items = 3000
@@ -59,7 +59,7 @@ def test_reload_massive_attack(handler):
     thread.start()
 
     engine.reload()
-    time.sleep(0.1)
+    time.sleep(0.2)
 
     assert len(handler.all) == number_of_items
 
