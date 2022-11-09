@@ -28,6 +28,10 @@ jobs:
       shell: bash
       run: pip install pytest-cov==4.0.0
 
+    - name: Install dependencies 2
+      shell: bash
+      run: pip install termcolor==2.1.0
+
     - name: Install package
       run: python3 setup.py install
 
