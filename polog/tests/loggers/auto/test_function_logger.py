@@ -473,7 +473,7 @@ def test_compare_engine_thread_native_id_and_local(handler):
         pass
 
     function()
-    time.sleep(0.0001)
+    time.sleep(0.001)
 
     assert handler.last['lol'] is not None
     assert handler.last['lol'] != handler.last['kek']
