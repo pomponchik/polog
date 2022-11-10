@@ -1,3 +1,4 @@
+import time
 from threading import Thread
 
 import pytest
@@ -59,7 +60,7 @@ def test_threads_race_condition_without_locks():
     """
     Проверяем, что состояние гонки возникает без использования локов.
     """
-    iterations = 5000000
+    iterations = 5000
     number_of_threads = 4
 
     index = 2 ** 70
@@ -67,6 +68,7 @@ def test_threads_race_condition_without_locks():
         nonlocal index
         for _ in range(iterations):
             value = index + 1
+            time.sleep(0.001)
             index = value
 
     threads = [Thread(target=incrementer, args=(iterations, )) for thread_index in range(number_of_threads)]
