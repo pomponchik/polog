@@ -146,7 +146,7 @@ def for_process(path_to_logs_file, path_to_numbers_file, number_of_iterations):
     К моменту завершения процесса все логи еще не должны успеть обработаться. Для проверки этого факта в конце работы процеса записывается длина очереди (она не должна быть нулевой, это потом булет проверено в тесте; если она нулевая, это значило бы, что все логи таки успели обработаться в штатном порядке).
     """
     config.add_handlers(file_writer(path_to_logs_file))
-    config.set(pool_size=2)
+    config.set(pool_size=2, max_delay_before_exit=2)
 
     for index in range(number_of_iterations):
         log('kek')
