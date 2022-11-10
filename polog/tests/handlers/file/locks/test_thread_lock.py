@@ -66,7 +66,8 @@ def test_threads_race_condition_without_locks():
     def incrementer(iterations):
         nonlocal index
         for _ in range(iterations):
-            index = index + 1
+            value = index + 1
+            index = value
 
     threads = [Thread(target=incrementer, args=(iterations, )) for thread_index in range(number_of_threads)]
     for thread in threads:
