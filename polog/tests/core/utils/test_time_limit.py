@@ -31,11 +31,11 @@ def test_function_as_parameter():
     wrapper = time_limit(lambda: quant)
     wrapped_function = wrapper(function)
     with pytest.raises(TimeoutError):
-        wrapped_function(5)
+        wrapped_function(2)
 
     wrapper = time_limit(lambda: quant * 10)
     wrapped_function = wrapper(function)
-    wrapped_function(5)
+    wrapped_function(2)
 
 def test_error_signature_function():
     """
