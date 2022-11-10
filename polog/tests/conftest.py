@@ -1,6 +1,7 @@
 import os
 import shutil
 import uuid
+from multiprocessing import set_start_method
 
 import pytest
 from termcolor import colored
@@ -8,6 +9,9 @@ from termcolor import colored
 from polog import config
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.handlers.memory.saver import memory_saver
+
+
+set_start_method('spawn')
 
 
 @pytest.fixture
