@@ -1,3 +1,4 @@
+import os
 import time
 from threading import active_count, Thread
 from multiprocessing import Process
@@ -160,8 +161,8 @@ def test_finalize(number_of_strings_in_the_files, delete_files):
     Проверяем, что при остановке интерпретатора записываются не успевшие записаться логи в многопоточном движке.
     Для этого запускаем polog в другом процессе.
     """
-    path_to_logs_file = 'polog/tests/data/other_process.log'
-    path_to_numbers_file = 'polog/tests/data/queue_size.log'
+    path_to_logs_file = os.path.join('polog', 'tests', 'data', 'other_process.log')
+    path_to_numbers_file = os.path.join('polog', 'tests', 'data', 'queue_size.log')
     number_of_iterations = 10000
 
     delete_files(path_to_logs_file, path_to_numbers_file)

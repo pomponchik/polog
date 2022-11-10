@@ -39,12 +39,13 @@ def test_file_lock_race_condition_in_processes(filename_for_test, number_of_stri
 
     expected_number_of_logs = number_of_processes * number_of_iterations
 
-    for filename in os.listdir('polog/tests/data/'):
+
+    for filename in os.listdir(os.path.join('polog', 'tests', 'data')):
         if not filename.startswith('.') and not os.path.isdir(filename):
-            files.append(os.path.join('polog/tests/data/', filename))
+            files.append(os.path.join('polog', 'tests', 'data', filename))
 
     assert number_of_strings_in_the_files(*files) == expected_number_of_logs
-    delete_files(*[os.path.join('polog/tests/data/', filename) for filename in os.listdir('polog/tests/data/') if not os.path.isdir(filename) and not filename == '.gitkeep'])
+    delete_files(*[os.path.join('polog', 'tests', 'data', filename) for filename in os.listdir(os.path.join('polog', 'tests', 'data')) if not os.path.isdir(filename) and not filename == '.gitkeep'])
 
 def test_active_flag_is_working_for_file_lock(filename_for_test):
     """
