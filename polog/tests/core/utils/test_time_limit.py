@@ -15,11 +15,11 @@ def test_integer():
     wrapper = time_limit(quant)
     wrapped_function = wrapper(function)
     with pytest.raises(TimeoutError):
-        wrapped_function(5)
+        wrapped_function(2)
 
     wrapper = time_limit(quant * 10)
     wrapped_function = wrapper(function)
-    wrapped_function(5)
+    wrapped_function(2)
 
 def test_function_as_parameter():
     """
