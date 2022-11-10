@@ -36,9 +36,6 @@ jobs:
       shell: bash
       run: pip install ujson==5.5.0
 
-    - name: Install package
-      run: python3 setup.py install
-
     - name: Run tests and show coverage on the command line
       run: coverage run --source=locklib --omit="*tests*" -m pytest --cache-clear && coverage report -m
 
