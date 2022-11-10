@@ -37,7 +37,7 @@ jobs:
       run: pip install ujson==5.5.0
 
     - name: Run tests and show coverage on the command line
-      run: coverage run --source=locklib --omit="*tests*" -m pytest --cache-clear && coverage report -m
+      run: coverage run --source=polog --omit="*tests*" -m pytest --cache-clear && coverage report -m
 
     - name: Upload reports to codecov
       env:
