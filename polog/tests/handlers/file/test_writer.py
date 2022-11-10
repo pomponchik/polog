@@ -13,7 +13,7 @@ from polog.handlers.file.writer import file_writer
 from polog.core.utils.exception_escaping import exception_escaping
 
 
-TIMEOUT = 5
+TIMEOUT = 6
 
 
 def test_base_writer(number_of_strings_in_the_files, delete_files):
