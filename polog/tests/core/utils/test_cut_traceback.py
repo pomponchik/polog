@@ -5,6 +5,10 @@ import pytest
 from polog.core.utils.cut_traceback import cut_traceback
 
 
+def test_import_testcapi():
+    import _testcapi
+
+
 def test_compare_counters_traceback_cutting_on_and_off():
     """
     Проверяем, что обрезание трейсбека действительно работает, то есть трейсбек становится меньше, чем если обрезание не делать.
