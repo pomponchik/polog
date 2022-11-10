@@ -62,7 +62,7 @@ def test_threads_race_condition_without_locks():
     iterations = 5000000
     number_of_threads = 4
 
-    index = 0
+    index = 2 ** 70
     def incrementer(iterations):
         nonlocal index
         for _ in range(iterations):
@@ -74,4 +74,4 @@ def test_threads_race_condition_without_locks():
     for thread in threads:
         thread.join()
 
-    assert index < iterations * number_of_threads
+    assert index < iterations * number_of_threads + 2 ** 70
