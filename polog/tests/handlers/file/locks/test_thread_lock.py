@@ -57,26 +57,3 @@ def test_threads_race_condition_lock_off():
         thread.join()
 
     assert index < iterations * number_of_threads
-
-def test_threads_race_condition_without_locks():
-    """
-    Проверяем, что состояние гонки возникает без использования локов.
-    """
-    iterations = 5000
-    number_of_threads = 4
-
-    index = 0
-    def incrementer(iterations):
-        nonlocal index
-        for _ in range(iterations):
-            value = index + 1
-            time.sleep(0.001)
-            index = value
-
-    threads = [Thread(target=incrementer, args=(iterations, )) for thread_index in range(number_of_threads)]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-
-    assert index < iterations * number_of_threads + 2 ** 70
