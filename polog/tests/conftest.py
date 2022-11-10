@@ -101,7 +101,7 @@ def dirname_for_test(delete_files):
     """
     Получаем имя файла в тестовой директории и удаляем за собой файл.
     """
-    path = f'polog/tests/data/'
+    path = os.path.join('polog', 'tests', 'data')
     shutil.rmtree(path, ignore_errors=True)
     os.makedirs(path)
     yield path
