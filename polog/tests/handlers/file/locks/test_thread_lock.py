@@ -59,7 +59,7 @@ def test_threads_race_condition_without_locks():
     """
     Проверяем, что состояние гонки возникает без использования локов.
     """
-    iterations = 500000
+    iterations = 5000000
     number_of_threads = 4
 
     index = 0
