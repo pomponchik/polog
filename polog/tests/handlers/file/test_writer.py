@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import asyncio
+import platform
 from threading import Thread, get_ident
 from multiprocessing import Process
 
@@ -109,6 +110,7 @@ def test_base_concurrent_write(number_of_strings_in_the_files, filename_for_test
 
     config.delete_handlers(handler)
 
+@pytest.mark.skipif('windows' in platform.system().lower(), reason="file locks don't work on windows")
 def create_logs_for_process(process_index, number_of_logs, filename_for_test, dirname_for_test):
     """
     Функция предназначена для запуска в отдельном процессе.
