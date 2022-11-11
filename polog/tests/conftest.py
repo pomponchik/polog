@@ -100,7 +100,7 @@ def filename_for_test(dirname_for_test):
     yield os.path.join(dirname_for_test, f'data_{uuid.uuid1().hex}.log')
 
 @pytest.fixture
-def dirname_for_test(delete_files, delete_files):
+def dirname_for_test(delete_files):
     """
     Получаем имя файла в тестовой директории и удаляем за собой файл.
     """
