@@ -17,7 +17,7 @@ class BaseLogger(AbstractHandleLogger):
     # Каждая из этих функций должна принимать словарь с уже ранее извлеченными значениями полей и возвращать значение поля, название которого является ключом.
     _default_values = {
         'level': lambda fields: SettingsStore()['default_level'] if fields.get('success', True) else SettingsStore()['default_error_level'],
-        'time': lambda fields: datetime.datetime.fromtimestamp(time.perf_counter()),
+        'time': lambda fields: datetime.datetime.fromtimestamp(time.time()),
     }
 
     def _specific_processing(self, fields):
