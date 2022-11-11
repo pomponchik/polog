@@ -112,7 +112,10 @@ def dirname_for_test(delete_files):
         pass
     yield path
     shutil.rmtree(path, ignore_errors=True)
-    os.makedirs(path)
+    try:
+        os.makedirs(path)
+    except FileExistsError:
+        pass
     open(os.path.join(path, '.gitkeep'), 'w').close()
 
 @pytest.hookimpl
