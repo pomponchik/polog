@@ -422,9 +422,8 @@ def test_lenth_of_one_line_traceback_in_file_writer(filename_for_test):
 
     with open(filename_for_test, 'r') as file:
         string = [string for string in file.read().split('\n') if string][-1]
-        print(string)
 
     assert "traceback: raise ValueError('kek_message') (\"" in string
-    assert '", line 417, in function)' in string
+    assert '", line 419, in function)' in string
 
     config.delete_handlers('test_lenth_of_one_line_traceback_in_file_writer')

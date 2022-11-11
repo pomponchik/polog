@@ -11,9 +11,9 @@ def test_integration_with_logging_on_simple_error(handler):
     """
     config.set(pool_size=0, logging_off=False, integration_with_logging=True)
 
-    before = datetime.fromtimestamp(time.perf_counter())
+    before = datetime.fromtimestamp(time.time())
     logging.error('kek')
-    after = datetime.fromtimestamp(time.perf_counter())
+    after = datetime.fromtimestamp(time.time())
 
     assert handler.last is not None
     assert len(handler.all) == 1

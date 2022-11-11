@@ -67,18 +67,18 @@ class FunctionLogger:
                 _message._clean_context()
                 args_dict = self.get_base_args_dict(func, message)
                 try:
-                    start = time.perf_counter()
+                    start = time.time()
                     args_dict['time'] = datetime.datetime.fromtimestamp(start)
                     result = await func(*args, **kwargs)
                 except Exception as e:
-                    finish = time.perf_counter()
+                    finish = time.time()
                     self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, args, kwargs)
                     if not suppress_all:
                         if not exception_is_suppressed(e, suppressed_exceptions, self.settings):
                             cut_traceback(self.settings)
                             raise
                     return None
-                finish = time.perf_counter()
+                finish = time.time()
                 self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, args, kwargs)
                 return result
             @wraps(func)
@@ -89,18 +89,18 @@ class FunctionLogger:
                 _message._clean_context()
                 args_dict = self.get_base_args_dict(func, message)
                 try:
-                    start = time.perf_counter()
+                    start = time.time()
                     args_dict['time'] = datetime.datetime.fromtimestamp(start)
                     result = func(*args, **kwargs)
                 except Exception as e:
-                    finish = time.perf_counter()
+                    finish = time.time()
                     self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, args, kwargs)
                     if not suppress_all:
                         if not exception_is_suppressed(e, suppressed_exceptions, self.settings):
                             cut_traceback(self.settings)
                             raise
                     return None
-                finish = time.perf_counter()
+                finish = time.time()
                 self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, args, kwargs)
                 return result
             if inspect.iscoroutinefunction(func):
