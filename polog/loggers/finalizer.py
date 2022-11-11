@@ -77,7 +77,7 @@ class LoggerRouteFinalizer:
         self.finalizer.detach()
 
         self.start_time = perf_counter()
-        self.data['time'] = datetime.now()
+        self.data['time'] = datetime.fromtimestamp(self.start_time)
 
         return self
 

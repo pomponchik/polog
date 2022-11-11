@@ -68,7 +68,7 @@ class FunctionLogger:
                 args_dict = self.get_base_args_dict(func, message)
                 try:
                     start = time.perf_counter()
-                    args_dict['time'] = datetime.datetime.now()
+                    args_dict['time'] = datetime.datetime.fromtimestamp(start)
                     result = await func(*args, **kwargs)
                 except Exception as e:
                     finish = time.perf_counter()
@@ -90,7 +90,7 @@ class FunctionLogger:
                 args_dict = self.get_base_args_dict(func, message)
                 try:
                     start = time.perf_counter()
-                    args_dict['time'] = datetime.datetime.now()
+                    args_dict['time'] = datetime.datetime.fromtimestamp(start)
                     result = func(*args, **kwargs)
                 except Exception as e:
                     finish = time.perf_counter()
