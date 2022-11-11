@@ -1,5 +1,6 @@
 from multiprocessing import Process, current_process
 from threading import Thread
+import platform
 import shutil
 import os
 
@@ -21,6 +22,7 @@ def process_race_condition_generator(filename, number_of_iterations, number_of_p
             file = open(filename, 'a', encoding='utf-8')
         lock.release()
 
+@pytest.mark.skipif('windows' in platform.system().lower(), reason="file locks don't work on windows")
 def test_file_lock_race_condition_in_processes(filename_for_test, number_of_strings_in_the_files, delete_files, dirname_for_test):
     """
     Провоцируем состояние гонки между процессами.
@@ -54,6 +56,7 @@ def test_active_flag_is_working_for_file_lock(filename_for_test):
     assert FileLock(filename_for_test).active == True
     assert FileLock(None).active == False
 
+@pytest.mark.skipif('windows' in platform.system().lower(), reason="file locks don't work on windows")
 def test_file_lock_race_condition_in_threads(filename_for_test):
     """
     Проверяем, что файловый лок работает и на тредах.
