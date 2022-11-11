@@ -69,7 +69,7 @@ def delete_files():
                 try:
                     os.rmdir(file)
                 except NotADirectoryError:
-                    raise e
+                    pass
                 except PermissionError:
                     pass
     return result
