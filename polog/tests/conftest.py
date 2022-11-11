@@ -70,6 +70,8 @@ def delete_files():
                     os.rmdir(file)
                 except NotADirectoryError:
                     raise e
+                except PermissionError:
+                    pass
     return result
 
 @pytest.fixture
