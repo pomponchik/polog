@@ -1,6 +1,7 @@
 import time
 import datetime
 from multiprocessing import Process, Queue
+from random import shuffle
 
 import pytest
 
@@ -503,16 +504,16 @@ def test_sorting_log_items(handler):
     """
     config.set(pool_size=0)
 
-    random_range_collection = set()
+    collection = []
 
     log('first')
-    random_range_collection.add(handler.last)
+    collection.append(handler.last)
     log('second')
-    random_range_collection.add(handler.last)
+    collection.append(handler.last)
     log('third')
-    random_range_collection.add(handler.last)
+    collection.append(handler.last)
 
-    collection = list(random_range_collection)
+    shuffle(collection)
     collection.sort()
 
     assert collection[0]['message'] == 'first'
