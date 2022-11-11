@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+import time
 
 from polog import config
 
@@ -10,7 +11,7 @@ def test_integration_with_logging_on_simple_error(handler):
     """
     config.set(pool_size=0, logging_off=False, integration_with_logging=True)
 
-    before = datetime.now()
+    before = datetime.fromtimestamp(time.perf_counter())
     logging.error('kek')
     after = datetime.now()
 
