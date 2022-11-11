@@ -1,7 +1,7 @@
 import weakref
 import inspect
 import traceback
-from time import time
+from time import perf_counter
 import json
 from datetime import datetime
 
@@ -76,7 +76,7 @@ class LoggerRouteFinalizer:
 
         self.finalizer.detach()
 
-        self.start_time = time()
+        self.start_time = perf_counter()
         self.data['time'] = datetime.now()
 
         return self
@@ -95,7 +95,7 @@ class LoggerRouteFinalizer:
         else:
             self.data['success'] = True
 
-        self.data['time_of_work'] = time() - self.start_time
+        self.data['time_of_work'] = perf_counter() - self.start_time
 
         simple_handle_log(**(self.data))
 
