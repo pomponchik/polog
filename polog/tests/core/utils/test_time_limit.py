@@ -9,17 +9,17 @@ def test_integer():
     """
     Проверяем, что лимит устанавливается и срабатывает с числом в качестве аргумента.
     """
-    quant = 0.001
+    quant = 0.0001
     function = lambda number: [time.sleep(quant) for x in range(number)]
-
-    wrapper = time_limit(quant)
-    wrapped_function = wrapper(function)
-    with pytest.raises(TimeoutError):
-        wrapped_function(3)
 
     wrapper = time_limit(quant * 10)
     wrapped_function = wrapper(function)
-    wrapped_function(3)
+    with pytest.raises(TimeoutError):
+        wrapped_function(3 * 10)
+
+    wrapper = time_limit(quant * 100)
+    wrapped_function = wrapper(function)
+    wrapped_function(3 * 10)
 
 def test_function_as_parameter():
     """
