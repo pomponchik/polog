@@ -19,7 +19,7 @@ def test_integer():
 
     wrapper = time_limit(quant * 100)
     wrapped_function = wrapper(function)
-    wrapped_function(3 * 10)
+    wrapped_function(35 * 10)
 
 def test_function_as_parameter():
     """
