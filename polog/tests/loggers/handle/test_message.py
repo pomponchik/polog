@@ -3,7 +3,7 @@ import asyncio
 
 import pytest
 
-from polog import flog, message, field, config
+from polog import log, message, field, config
 
 
 def test_basic_message(handler):
@@ -12,7 +12,7 @@ def test_basic_message(handler):
     """
     config.set(level=1)
 
-    @flog(message='base text')
+    @log(message='base text')
     def normal_function():
         message('new text', level=5)
         return True
@@ -28,7 +28,7 @@ def test_basic_message_async(handler):
     """
     config.set(level=1)
 
-    @flog(message='base text')
+    @log(message='base text')
     async def normal_function():
         message('new text', level=5)
         return True
@@ -44,21 +44,21 @@ def test_basic_message_exception(handler):
     """
     config.set(level=1)
 
-    @flog(message='base text')
+    @log(message='base text')
     def error_function():
         try:
             raise ValueError('exception text')
         except ValueError as e:
             message(e=e)
 
-    @flog(message='base text')
+    @log(message='base text')
     def error_function_2():
         try:
             raise ValueError('exception text 2')
         except ValueError as e:
             message(exception=e)
 
-    @flog(message='base text')
+    @log(message='base text')
     def error_function_3():
         message(exception=ValueError('new message'))
 
@@ -88,7 +88,7 @@ def test_message_affects(handler):
     def function_without_flog():
         message('lol', local_variables='kek')
 
-    @flog
+    @log
     def function_with_flog():
         message('lolkek')
 
@@ -107,7 +107,7 @@ def test_message_with_another_field(handler):
         pass
     config.add_fields(lolkek=field(extractor))
 
-    @flog(message='lolkek')
+    @log(message='lolkek')
     def function():
         message('lolkek', lolkek='lolkek')
 
@@ -119,7 +119,7 @@ def test_message_unknown_argument(handler):
     """
     Проверяем, что в message можно передать неизвестный именной аргумент.
     """
-    @flog
+    @log
     def function():
         message('lolkek', unknown_argument='kek')
 
@@ -133,7 +133,7 @@ def test_wrong_type():
     """
     Проверяем, что если в одно из стандартных полей подать переменную неправильного типа, поднимется исключение.
     """
-    @flog
+    @log
     def function():
         message('lolkek', success='kek')
 
@@ -146,7 +146,7 @@ def test_message_unhandled_exception(handler):
     """
     Проверяем, что извлечение сообщений работает в том числе в случае необработанного внутри функции исключения.
     """
-    @flog
+    @log
     def function():
         message('kek')
         raise ValueError
@@ -161,7 +161,7 @@ def test_message_unhandled_exception_async(handler):
     """
     Тест аналогичен test_message_unhandled_exception, но message() используется внутри корутинной функции.
     """
-    @flog
+    @log
     async def function():
         message('kek')
         raise ValueError

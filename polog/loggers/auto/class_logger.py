@@ -10,7 +10,7 @@ class ClassLogger:
     Экземпляры данного класса - готовые декораторы для других классов.
     """
 
-    def __call__(self, *args, methods=(), message=None, level=None, errors_level=None):
+    def __call__(self, suppress_all, suppressed_exceptions, *args, methods=(), message=None, level=None, errors_level=None):
         """
         Фабрика декораторов классов. Можно вызывать как со скобками, так и без.
         В задекорированном классе @flog() применяется ко всем методам, кроме тех, чье название начинается с '__'.
@@ -22,7 +22,7 @@ class ClassLogger:
             for method_name in all_methods:
                 method = getattr(Class, method_name)
                 # Конфигурируем декоратор для метода.
-                wrapper = flog(message=message, level=level, errors_level=errors_level, is_method=True)
+                wrapper = flog(suppress_all, suppressed_exceptions, message=message, level=level, errors_level=errors_level, is_method=True)
                 # Применяем его.
                 new_method = wrapper(method)
                 setattr(Class, method_name, new_method)

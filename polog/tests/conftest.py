@@ -1,6 +1,7 @@
 import os
 import shutil
 import uuid
+from multiprocessing import set_start_method
 
 import pytest
 from termcolor import colored
@@ -8,6 +9,9 @@ from termcolor import colored
 from polog import config
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.handlers.memory.saver import memory_saver
+
+
+set_start_method('spawn')
 
 
 @pytest.fixture
@@ -61,8 +65,13 @@ def delete_files():
                 os.remove(file)
             except FileNotFoundError:
                 pass
-            except PermissionError:
-                os.rmdir(file)
+            except PermissionError as e:
+                try:
+                    os.rmdir(file)
+                except NotADirectoryError:
+                    pass
+                except PermissionError:
+                    pass
     return result
 
 @pytest.fixture
@@ -97,12 +106,18 @@ def dirname_for_test(delete_files):
     """
     Получаем имя файла в тестовой директории и удаляем за собой файл.
     """
-    path = f'polog/tests/data/'
+    path = os.path.join('polog', 'tests', 'data')
     shutil.rmtree(path, ignore_errors=True)
-    os.makedirs(path)
+    try:
+        os.makedirs(path)
+    except FileExistsError:
+        pass
     yield path
     shutil.rmtree(path, ignore_errors=True)
-    os.makedirs(path)
+    try:
+        os.makedirs(path)
+    except FileExistsError:
+        pass
     open(os.path.join(path, '.gitkeep'), 'w').close()
 
 @pytest.hookimpl

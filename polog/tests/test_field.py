@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from polog import config, flog, field, log
+from polog import config, log, field, log
 from polog.core.utils.exception_escaping import exception_escaping
 
 
@@ -22,7 +22,7 @@ def test_django_example(handler):
     """
     config.add_fields(ip=field(ip_extractor))
 
-    @flog
+    @log
     def django_handler_example(request):
         html = 'text'
         return html
@@ -40,15 +40,15 @@ def test_django_example_error(handler):
     """
     config.add_fields(ip=field(ip_extractor))
 
-    @flog
+    @exception_escaping
+    @log
     def django_handler_error(request):
         html = 1 / 0
         return html
+
     request = Request()
-    try:
-        django_handler_error(request)
-    except:
-        pass
+    django_handler_error(request)
+
     time.sleep(0.0001)
     assert handler.last['ip'] == '123.456.789.010'
 
@@ -70,7 +70,7 @@ def test_basic_converter(handler):
     """
     Указываем конвертер значений и проверяем, что он работает.
     """
-    @flog
+    @log
     def django_handler_example(request):
         html = 'text'
         return html

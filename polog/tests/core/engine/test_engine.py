@@ -1,3 +1,4 @@
+import os
 import time
 from threading import active_count, Thread
 from multiprocessing import Process
@@ -47,7 +48,7 @@ def test_reload_massive_attack(handler):
     engine = Engine()
     store = SettingsStore()
     engine.write(log)
-    time.sleep(0.0001)
+    time.sleep(0.001)
     handler.clean()
 
     number_of_items = 3000
@@ -59,7 +60,7 @@ def test_reload_massive_attack(handler):
     thread.start()
 
     engine.reload()
-    time.sleep(0.1)
+    time.sleep(0.2)
 
     assert len(handler.all) == number_of_items
 
@@ -146,7 +147,7 @@ def for_process(path_to_logs_file, path_to_numbers_file, number_of_iterations):
     К моменту завершения процесса все логи еще не должны успеть обработаться. Для проверки этого факта в конце работы процеса записывается длина очереди (она не должна быть нулевой, это потом булет проверено в тесте; если она нулевая, это значило бы, что все логи таки успели обработаться в штатном порядке).
     """
     config.add_handlers(file_writer(path_to_logs_file))
-    config.set(pool_size=2)
+    config.set(pool_size=2, max_delay_before_exit=2)
 
     for index in range(number_of_iterations):
         log('kek')
@@ -160,8 +161,8 @@ def test_finalize(number_of_strings_in_the_files, delete_files):
     Проверяем, что при остановке интерпретатора записываются не успевшие записаться логи в многопоточном движке.
     Для этого запускаем polog в другом процессе.
     """
-    path_to_logs_file = 'polog/tests/data/other_process.log'
-    path_to_numbers_file = 'polog/tests/data/queue_size.log'
+    path_to_logs_file = os.path.join('polog', 'tests', 'data', 'other_process.log')
+    path_to_numbers_file = os.path.join('polog', 'tests', 'data', 'queue_size.log')
     number_of_iterations = 10000
 
     delete_files(path_to_logs_file, path_to_numbers_file)

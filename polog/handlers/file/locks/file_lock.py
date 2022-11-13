@@ -1,5 +1,3 @@
-import fcntl
-
 from polog.handlers.file.locks.abstract_single_lock import AbstractSingleLock
 
 
@@ -16,7 +14,7 @@ class FileLock(AbstractSingleLock):
     def __init__(self, original_file_name, lock_file_extension='lock'):
         """
         Инициализация блокировки.
-        
+
         original_file_name - имя файла, куда идет запись логов, и который мы хотим защитить локом. Если передать вместо него None, блокировка включена не будет.
         lock_file_extension - расширение файла блокировки. Для реализации блокировки будет создан еще один файл, имя которого образовано из имени оригинального файла + нового расширения.
         """
@@ -30,10 +28,12 @@ class FileLock(AbstractSingleLock):
         """
         Взять лок.
         """
+        import fcntl
         fcntl.flock(self.file.fileno(), fcntl.LOCK_EX)
 
     def release(self):
         """
         Отпустить лок.
         """
+        import fcntl
         fcntl.flock(self.file.fileno(), fcntl.LOCK_UN)

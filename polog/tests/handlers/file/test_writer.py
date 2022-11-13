@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import asyncio
+import platform
 from threading import Thread, get_ident
 from multiprocessing import Process
 
@@ -13,7 +14,7 @@ from polog.handlers.file.writer import file_writer
 from polog.core.utils.exception_escaping import exception_escaping
 
 
-TIMEOUT = 3
+TIMEOUT = 15
 
 
 def test_base_writer(number_of_strings_in_the_files, delete_files):
@@ -23,7 +24,7 @@ def test_base_writer(number_of_strings_in_the_files, delete_files):
     Проверяем, что в файл вообще что-то записывается.
     """
     iterations = 5
-    path = 'polog/tests/data/data.log'
+    path = os.path.join('polog', 'tests', 'data', 'data.log')
     handler = file_writer(path)
     config.add_handlers(handler)
     config.set(pool_size=0, level=0)
@@ -67,7 +68,7 @@ def test_parameter_is_not_string_and_not_file_object(delete_files):
     Проверяем, что валидным неименованным параметром принимаются только файловые объекты и строки, при других вариантах - поднимаются исключения.
     """
     file_writer(io.StringIO())
-    path = 'polog/tests/data/data.log'
+    path = os.path.join('polog', 'tests', 'data', 'data.log')
     file_writer(path)
     with pytest.raises(ValueError):
         file_writer(777)
@@ -115,7 +116,7 @@ def create_logs_for_process(process_index, number_of_logs, filename_for_test, di
 
     Она записывает в файл filename_for_test number_of_logs строчек лога.
     """
-    config.set(pool_size=2, level=1)
+    config.set(pool_size=2, level=1, max_delay_before_exit=50)
     handler = file_writer(filename_for_test, rotation=f'3 kb >> {dirname_for_test}', lock_type='file+thread')
     config.add_handlers(handler)
 
@@ -125,6 +126,7 @@ def create_logs_for_process(process_index, number_of_logs, filename_for_test, di
 
     time.sleep(TIMEOUT)
 
+@pytest.mark.skipif('windows' in platform.system().lower(), reason="file locks don't work on windows")
 def test_multiprocessing_concurrent_write(number_of_strings_in_the_files, filename_for_test, dirname_for_test):
     """
     Запускаем много логов в нескольких процессах и проверяем, что они все успевают записаться в файл, и при этом в ничего не было потеряно при ротациях.
@@ -420,9 +422,8 @@ def test_lenth_of_one_line_traceback_in_file_writer(filename_for_test):
 
     with open(filename_for_test, 'r') as file:
         string = [string for string in file.read().split('\n') if string][-1]
-        print(string)
 
     assert "traceback: raise ValueError('kek_message') (\"" in string
-    assert '", line 417, in function)' in string
+    assert '", line 419, in function)' in string
 
     config.delete_handlers('test_lenth_of_one_line_traceback_in_file_writer')

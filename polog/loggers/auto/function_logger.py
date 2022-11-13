@@ -14,6 +14,7 @@ from polog.core.utils.get_errors_level import get_errors_level
 from polog.core.utils.exception_to_dict import exception_to_dict
 from polog.core.utils.cut_traceback import cut_traceback
 from polog.utils.json_vars import json_vars, json_one_variable
+from polog.core.utils.exception_is_suppressed import exception_is_suppressed
 from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.core.utils.get_traceback import get_traceback, get_locals_from_traceback
 from polog.errors import IncorrectUseOfTheDecoratorError, HandlerNotFoundError
@@ -39,7 +40,7 @@ class FunctionLogger:
         self.in_place_fields = in_place_fields
         self.engine_fields = engine_fields
 
-    def __call__(self, *args, message=None, level=None, errors_level=None, is_method=False, handlers=None, extra_fields=None, extra_engine_fields=None):
+    def __call__(self, suppress_all, suppressed_exceptions, *args, message=None, level=None, errors_level=None, is_method=False, handlers=None, extra_fields=None, extra_engine_fields=None):
         """
         Фабрика декораторов логирования для функций. Можно вызывать как со скобками, так и без.
         """
@@ -67,15 +68,18 @@ class FunctionLogger:
                 args_dict = self.get_base_args_dict(func, message)
                 try:
                     start = time.time()
-                    args_dict['time'] = datetime.datetime.now()
+                    args_dict['time'] = datetime.datetime.fromtimestamp(start)
                     result = await func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
-                    cut_traceback(self.settings)
-                    raise
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, args, kwargs)
+                    if not suppress_all:
+                        if not exception_is_suppressed(e, suppressed_exceptions, self.settings):
+                            cut_traceback(self.settings)
+                            raise
+                    return None
                 finish = time.time()
-                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
+                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, args, kwargs)
                 return result
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -86,15 +90,18 @@ class FunctionLogger:
                 args_dict = self.get_base_args_dict(func, message)
                 try:
                     start = time.time()
-                    args_dict['time'] = datetime.datetime.now()
+                    args_dict['time'] = datetime.datetime.fromtimestamp(start)
                     result = func(*args, **kwargs)
                 except Exception as e:
                     finish = time.time()
-                    self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
-                    cut_traceback(self.settings)
-                    raise
+                    self.log_exception_info(e, finish, start, args_dict, errors_level, level, local_handlers, in_place_fields, engine_fields, args, kwargs)
+                    if not suppress_all:
+                        if not exception_is_suppressed(e, suppressed_exceptions, self.settings):
+                            cut_traceback(self.settings)
+                            raise
+                    return None
                 finish = time.time()
-                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, *args, **kwargs)
+                self.log_normal_info(result, finish, start, args_dict, level, local_handlers, in_place_fields, engine_fields, args, kwargs)
                 return result
             if inspect.iscoroutinefunction(func):
                 result = async_wrapper
@@ -158,7 +165,7 @@ class FunctionLogger:
         arg = getattr(obj, arg_name, None)
         not_none_to_dict(args, key_name, arg)
 
-    def log_exception_info(self, exc, finish, start, args_dict, errors_level, simple_level, handlers, in_place_fields, engine_fields, *args, **kwargs):
+    def log_exception_info(self, exc, finish, start, args_dict, errors_level, simple_level, handlers, in_place_fields, engine_fields, args, kwargs):
         """
         Здесь происходит заполнение автоматически извлекаемых полей в случае исключения.
         В т. ч. извлекается вся информация об исключении - название, сообщение и т. д.
@@ -184,7 +191,7 @@ class FunctionLogger:
                     log = self.create_log_item(args, kwargs, args_dict, handlers, engine_fields, in_place_fields)
                     self.engine.write(log)
 
-    def log_normal_info(self, result, finish, start, args_dict, level, handlers, in_place_fields, engine_fields, *args, **kwargs):
+    def log_normal_info(self, result, finish, start, args_dict, level, handlers, in_place_fields, engine_fields, args, kwargs):
         """
         Заполнение автоматических полей в случае, когда исключения не было.
         """

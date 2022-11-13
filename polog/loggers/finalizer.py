@@ -10,6 +10,7 @@ from polog.loggers.auto.class_logger import clog
 from polog.loggers.auto.function_logger import flog
 from polog.errors import IncorrectUseLoggerError, IncorrectUseOfTheDecoratorError, IncorrectUseOfTheContextManagerError
 from polog.core.stores.settings.settings_store import SettingsStore
+from polog.core.utils.exception_is_suppressed import exception_is_suppressed
 
 
 class LoggerRouteFinalizer:
@@ -22,14 +23,15 @@ class LoggerRouteFinalizer:
     3. У объекта LoggerRouteFinalizer вызывается магический метод __enter__(). Это значит, что роутер используется как фабрика контекстного менеджера, необходиимо отработать соответствующим образом.
     """
     def __init__(self, *args, **kwargs):
-        self.settings = SettingsStore()
-        self.data = self.convert_arguments_to_dict(*args, **kwargs)
-        self.finalizer = weakref.finalize(self, self.create_finalizer(*args, **kwargs))
         self.used = False
         self.entered = False
         self.start_time = None
         self.suppressed_exceptions = []
         self.suppress_all = False
+
+        self.settings = SettingsStore()
+        self.data = self.convert_arguments_to_dict(*args, **kwargs)
+        self.finalizer = weakref.finalize(self, self.create_finalizer(*args, **kwargs))
 
     def __call__(self, *args, **kwargs):
         """
@@ -57,7 +59,7 @@ class LoggerRouteFinalizer:
         else:
             raise IncorrectUseOfTheDecoratorError()
 
-        decorator = decorator_factory(**(self.data))
+        decorator = decorator_factory(self.suppress_all, self.suppressed_exceptions, **(self.data))
         return decorator(wrappable)
 
     def __enter__(self):
@@ -75,7 +77,7 @@ class LoggerRouteFinalizer:
         self.finalizer.detach()
 
         self.start_time = time()
-        self.data['time'] = datetime.now()
+        self.data['time'] = datetime.fromtimestamp(self.start_time)
 
         return self
 
@@ -101,14 +103,7 @@ class LoggerRouteFinalizer:
             if self.suppress_all:
                 return True
             if self.suppressed_exceptions:
-                if self.settings['suppress_exception_subclasses']:
-                    if any(isinstance(exception_value, suppressed_exception) for suppressed_exception in self.suppressed_exceptions):
-                        return True
-                    return False
-                else:
-                    if any(exception_type is suppressed_exception for suppressed_exception in self.suppressed_exceptions):
-                        return True
-                    return False
+                return exception_is_suppressed(exception_value, self.suppressed_exceptions, self.settings)
             else:
                 return self.settings['suppress_by_default']
 

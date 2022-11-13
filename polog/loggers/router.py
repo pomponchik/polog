@@ -83,34 +83,17 @@ class Router:
             else:
                 raise IncorrectUseLoggerError(f'The first argument of class {type(item).__name__} is not recognized.')
         elif len(args) == 0:
-            return self._route_wrapper(*args, **kwargs)
+            return LoggerRouteFinalizer(**kwargs)
         else:
             raise IncorrectUseLoggerError('Passing more than one positional argument to the logger.')
-
-    def _route_wrapper(self, *args, **kwargs):
-        """
-        Декорируем декоратор.
-        Когда пользователь использует синтаксис декоратора (@) со скобками, возвращается функция, которая в свою очередь вернет уже обернутую оригинальную функцию или класс.
-        Так вот, в данном случае мы не просто возвращаем ее, мы возвращаем обертку, которая смотрит на то, передан в нее класс или функция, и в зависимости от этого возвращает разную обертку.
-        Если вы это прочитали, соболезную.
-        """
-        def wrapper(item):
-            if inspect.isclass(item):
-                wrapped_wrapper = clog(*args, **kwargs)
-            elif callable(item):
-                wrapped_wrapper = flog(*args, **kwargs)
-            return wrapped_wrapper(item)
-        return wrapper
 
     def _wrap(self, wrapper, item, *args, **kwargs):
         """
         Обычно данный метод будет срабатывать, когда объект используется в качестве декоратора без скобок.
         В этом случае мы просто передаем в обертку wrapper переданный нам объект item (класс или функция) и возвращаем результат.
-        Предварительно проверяем на наличие аргов и кваргов, т. к. возможна переадресация из self.__getattribute__() с обогащением доп. аргументами.
+        Также добавляем арги и кварги, т. к. возможна переадресация из self.__getattribute__() с обогащением доп. аргументами.
         """
-        if args or kwargs:
-            wrapper = wrapper(*args, **kwargs)
-        return wrapper(item)
+        return wrapper(False, [], *args, **kwargs)(item)
 
     def message(self, *args, **kwargs):
         """

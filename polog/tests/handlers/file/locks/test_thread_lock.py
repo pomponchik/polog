@@ -1,3 +1,4 @@
+import time
 from threading import Thread
 
 import pytest
@@ -35,7 +36,7 @@ def test_threads_race_condition_lock_off():
     Проверяем, что если лок выключен - он не работает.
     Из-за состояния гонки инкремент должен "пробуксовывать".
     """
-    iterations = 500000
+    iterations = 5000
     number_of_threads = 4
     lock = ThreadLock(on=False)
 
@@ -43,7 +44,11 @@ def test_threads_race_condition_lock_off():
     def incrementer(iterations):
         nonlocal index
         for _ in range(iterations):
-            index += 1
+            lock.acquire()
+            value = index + 1
+            time.sleep(0.001)
+            index = value
+            lock.release()
 
     threads = [Thread(target=incrementer, args=(iterations, )) for thread_index in range(number_of_threads)]
     for thread in threads:

@@ -1,4 +1,5 @@
 import os
+import platform
 
 import pytest
 
@@ -8,6 +9,7 @@ from polog.handlers.file.writer import file_writer
 from polog.handlers.file.file_dependency_wrapper import FileDependencyWrapper
 
 
+@pytest.mark.skipif('windows' in platform.system().lower(), reason="file locks don't work on windows")
 def test_base_behavior_rotation_file_size(number_of_strings_in_the_files, delete_files, dirname_for_test, filename_for_test):
     """
     Проверяем, что ротация работает с набором валидных правил.

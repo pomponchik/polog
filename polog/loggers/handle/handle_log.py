@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.handlers import global_handlers
@@ -16,7 +17,7 @@ class BaseLogger(AbstractHandleLogger):
     # Каждая из этих функций должна принимать словарь с уже ранее извлеченными значениями полей и возвращать значение поля, название которого является ключом.
     _default_values = {
         'level': lambda fields: SettingsStore()['default_level'] if fields.get('success', True) else SettingsStore()['default_error_level'],
-        'time': lambda fields: datetime.datetime.now(),
+        'time': lambda fields: datetime.datetime.fromtimestamp(time.time()),
     }
 
     def _specific_processing(self, fields):
