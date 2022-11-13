@@ -116,7 +116,7 @@ def create_logs_for_process(process_index, number_of_logs, filename_for_test, di
 
     Она записывает в файл filename_for_test number_of_logs строчек лога.
     """
-    config.set(pool_size=2, level=1, max_delay_before_exit=5)
+    config.set(pool_size=2, level=1, max_delay_before_exit=50)
     handler = file_writer(filename_for_test, rotation=f'3 kb >> {dirname_for_test}', lock_type='file+thread')
     config.add_handlers(handler)
 
