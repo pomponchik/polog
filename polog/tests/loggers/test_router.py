@@ -1572,6 +1572,71 @@ def test_suppress_function_without_erguments_with_empty_breackets(handler):
     assert isinstance(handler.last['time_of_work'], float)
     assert handler.last['time_of_work'] > 0
 
+def test_suppress_function_without_erguments_without_breackets_and_dotlevel(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с пустыми скобками) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10)
+    config.levels(test_suppress_function_without_erguments_without_breackets_and_dotlevel=567)
+
+    @log.test_suppress_function_without_erguments_without_breackets_and_dotlevel.suppress()
+    def function():
+        raise ValueError('kek')
+
+    function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 567
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_function_without_erguments_without_breackets(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (без скобок) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10)
+
+    @log.suppress()
+    def function():
+        raise ValueError('kek')
+
+    function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 10
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
 def test_suppress_function_without_erguments_with_empty_breackets_async(handler):
     """
     Провереяем, что метод .suppress() работает с log в роли декоратора (с пустыми скобками) для корутинной функции.
@@ -1579,6 +1644,71 @@ def test_suppress_function_without_erguments_with_empty_breackets_async(handler)
     config.set(pool_size=0, default_level=5, default_error_level=10)
 
     @log().suppress()
+    async def function():
+        raise ValueError('kek')
+
+    asyncio.run(function())
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 10
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_function_without_erguments_without_breackets_and_dotlevel_async(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с пустыми скобками) для корутинной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10)
+    config.levels(test_suppress_function_without_erguments_without_breackets_and_dotlevel_async=777)
+
+    @log.test_suppress_function_without_erguments_without_breackets_and_dotlevel_async.suppress()
+    async def function():
+        raise ValueError('kek')
+
+    asyncio.run(function())
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 777
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_function_without_erguments_without_breackets_async(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (без скобок) для корутинной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10)
+
+    @log.suppress()
     async def function():
         raise ValueError('kek')
 
@@ -1638,6 +1768,75 @@ def test_suppress_class_without_erguments_with_empty_breackets(handler):
     assert isinstance(handler.last['time_of_work'], float)
     assert handler.last['time_of_work'] > 0
 
+def test_suppress_class_without_erguments_without_breackets_and_dotlevel(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с пустыми скобками) для класса.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10)
+    config.levels(test_suppress_class_without_erguments_without_breackets_and_dotlevel=777)
+
+    @log.test_suppress_class_without_erguments_without_breackets_and_dotlevel.suppress()
+    class SomeClass:
+        def method(self):
+            raise ValueError('kek')
+
+    SomeClass().method()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 777
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'method'
+    assert handler.last['class'] == 'SomeClass'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_class_without_erguments_without_breackets(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (без скобок) для класса.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10)
+
+    @log.suppress()
+    class SomeClass:
+        def method(self):
+            raise ValueError('kek')
+
+    SomeClass().method()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 10
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'method'
+    assert handler.last['class'] == 'SomeClass'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
 def test_suppress_exception_function_without_erguments_with_empty_breackets_suppress_exception_subclasses_on(handler):
     """
     Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
@@ -1645,6 +1844,71 @@ def test_suppress_exception_function_without_erguments_with_empty_breackets_supp
     config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=True)
 
     @log().suppress(Exception)
+    def function():
+        raise ValueError('kek')
+
+    function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 10
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on_and_dotlevel(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=True)
+    config.levels(test_suppress_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on_and_dotlevel=777)
+
+    @log.test_suppress_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on_and_dotlevel.suppress(Exception)
+    def function():
+        raise ValueError('kek')
+
+    function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 777
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=True)
+
+    @log.suppress(Exception)
     def function():
         raise ValueError('kek')
 
@@ -1703,6 +1967,73 @@ def test_suppress_exception_function_without_erguments_with_empty_breackets_supp
     assert isinstance(handler.last['time_of_work'], float)
     assert handler.last['time_of_work'] > 0
 
+def test_suppress_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off_and_dotlevel(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=False)
+    config.levels(test_suppress_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off_and_dotlevel=777)
+
+    @log.test_suppress_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off_and_dotlevel.suppress(Exception)
+    def function():
+        raise ValueError('kek')
+
+    with pytest.raises(ValueError):
+        function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 777
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=False)
+
+    @log.suppress(Exception)
+    def function():
+        raise ValueError('kek')
+
+    with pytest.raises(ValueError):
+        function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 10
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
 def test_suppress_other_exception_function_without_erguments_with_empty_breackets_suppress_exception_subclasses_off(handler):
     """
     Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
@@ -1714,7 +2045,74 @@ def test_suppress_other_exception_function_without_erguments_with_empty_breacket
         raise ValueError('kek')
 
     with pytest.raises(ValueError):
-            function()
+        function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 10
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off_and_dotlevel(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=False)
+    config.levels(test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off_and_dotlevel=777)
+
+    @log.test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off_and_dotlevel.suppress(TypeError)
+    def function():
+        raise ValueError('kek')
+
+    with pytest.raises(ValueError):
+        function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 777
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=False)
+
+    @log.suppress(TypeError)
+    def function():
+        raise ValueError('kek')
+
+    with pytest.raises(ValueError):
+        function()
 
     assert handler.last is not None
     assert len(handler.all) == 1
@@ -1747,7 +2145,107 @@ def test_suppress_other_exception_function_without_erguments_with_empty_breacket
         raise ValueError('kek')
 
     with pytest.raises(ValueError):
-            function()
+        function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 10
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on_and_dotlevel(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=True)
+    config.levels(test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on_and_dotlevel=777)
+
+    @log.test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on_and_dotlevel.suppress(TypeError)
+    def function():
+        raise ValueError('kek')
+
+    with pytest.raises(ValueError):
+        function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 777
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=True)
+
+    @log.suppress(TypeError)
+    def function():
+        raise ValueError('kek')
+
+    with pytest.raises(ValueError):
+        function()
+
+    assert handler.last is not None
+    assert len(handler.all) == 1
+
+    assert 'message' not in handler.last
+    assert 'result' not in handler.last
+
+    assert handler.last['level'] == 10
+    assert handler.last['success'] == False
+    assert handler.last['auto'] == True
+    assert handler.last['exception_type'] == 'ValueError'
+    assert handler.last['exception_message'] == 'kek'
+    assert is_json(handler.last['traceback'])
+    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['function'] == 'function'
+
+    assert isinstance(handler.last['time'], datetime)
+    assert 'time_of_work' in handler.last
+    assert isinstance(handler.last['time_of_work'], float)
+    assert handler.last['time_of_work'] > 0
+
+def test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on(handler):
+    """
+    Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
+    """
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=True)
+
+    @log.suppress(TypeError)
+    def function():
+        raise ValueError('kek')
+
+    with pytest.raises(ValueError):
+        function()
 
     assert handler.last is not None
     assert len(handler.all) == 1

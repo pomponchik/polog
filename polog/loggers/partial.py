@@ -39,8 +39,16 @@ class RouterPartial:
         """
         Отложенный вызов функции, аналог functools.partial.
         """
-        kwargs.update(self.kwargs)
-        return self.item(*args, **kwargs)
+        if self.to_calling_before_enter is None:
+            kwargs.update(self.kwargs)
+            result = self.item(*args, **kwargs)
+        else:
+            method_name, cached_args, cached_kwargs = self.to_calling_before_enter
+            result = LoggerRouteFinalizer()
+            attribute = getattr(result, method_name)
+            result.suppress(*cached_args, **cached_kwargs)
+            result = result(*args, **kwargs)
+        return result
 
     def __enter__(self):
         """
