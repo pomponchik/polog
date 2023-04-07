@@ -11,6 +11,8 @@ from polog.loggers.auto.function_logger import flog
 from polog.errors import IncorrectUseLoggerError, IncorrectUseOfTheDecoratorError, IncorrectUseOfTheContextManagerError
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.exception_is_suppressed import exception_is_suppressed
+from polog.core.utils.signature_matcher import SignatureMatcher
+from polog.data_structures.trees.named_tree.projector import TreeProjector
 
 
 class LoggerRouteFinalizer:
@@ -175,6 +177,17 @@ class LoggerRouteFinalizer:
 
         self.suppressed_exceptions.extend(exceptions_to_use)
 
+        return self
+
+    def handlers(self, *exceptions):
+        is_ellipsis = False
+        for handler in handlers:
+            if isinstance(handler, Ellipsis):
+                is_ellipsis = True
+            elif isinstance(handler, str):
+                pass
+            elif SignatureMatcher.is_handler(handler, raise_exception=False):
+                pass
         return self
 
     @staticmethod
