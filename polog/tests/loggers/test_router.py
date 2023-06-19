@@ -2234,11 +2234,11 @@ def test_suppress_other_exception_function_without_erguments_without_breackets_s
     assert isinstance(handler.last['time_of_work'], float)
     assert handler.last['time_of_work'] > 0
 
-def test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_on(handler):
+def test_suppress_other_exception_function_without_erguments_without_breackets_suppress_exception_subclasses_off(handler):
     """
     Провереяем, что метод .suppress() работает с log в роли декоратора (с Exception в скобках) для обычной функции.
     """
-    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=True)
+    config.set(pool_size=0, default_level=5, default_error_level=10, suppress_exception_subclasses=False)
 
     @log.suppress(TypeError)
     def function():

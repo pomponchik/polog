@@ -84,3 +84,11 @@ class RouterPartial:
         result = LoggerRouteFinalizer(**self.kwargs)
         result.suppress(*exceptions)
         return result
+
+    def handlers(self, *exceptions):
+        """
+        Подавление исключений для контекстных менеджеров.
+        """
+        result = LoggerRouteFinalizer(**self.kwargs)
+        result.handlers(*exceptions)
+        return result

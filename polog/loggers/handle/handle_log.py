@@ -56,7 +56,7 @@ class BaseLogger(AbstractHandleLogger):
             except AttributeError:
                 pass
 
-    def _push(self, fields):
+    def _push(self, fields, handlers):
         """
         Создаем объект лога и передаем его в движок.
         Предварительно проверяем, достаточен ли уровень лога для того, чтобы это сделать, и нет ли запрета на логирование.
@@ -65,7 +65,12 @@ class BaseLogger(AbstractHandleLogger):
             if not unlog.get_unlog_status():
                 log_item = LogItem()
                 log_item.set_data(fields)
-                log_item.set_handlers(global_handlers)
+                if handlers is None:
+                    log_item.set_handlers(global_handlers)
+                else:
+                    handlers = (x() for x in handlers)
+                    handlers = (x for x in handlers if x is not None)
+                    log_item.set_handlers(handlers)
                 log_item.extract_extra_fields_from(in_place_fields)
                 self._engine.write(log_item)
 

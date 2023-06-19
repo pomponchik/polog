@@ -4,6 +4,10 @@ import traceback
 from time import time
 import json
 from datetime import datetime
+from dataclasses import dataclass
+from collections.abc import Iterable, Callable
+from typing import Optional, Any
+from functools import partial
 
 from polog.loggers.handle.handle_log import simple_handle_log
 from polog.loggers.auto.class_logger import clog
@@ -13,6 +17,14 @@ from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.utils.exception_is_suppressed import exception_is_suppressed
 from polog.core.utils.signature_matcher import SignatureMatcher
 from polog.data_structures.trees.named_tree.projector import TreeProjector
+from polog.core.stores.handlers import global_handlers
+from polog.core.log_item import LogItem
+from polog.data_structures.wrappers.reusable_chain.chain import ReusableChain
+from polog.data_structures.wrappers.reusable_map.map import ReusableMap
+
+@dataclass
+class RelatedData:
+    handlers: Optional[Iterable[Callable[[], Optional[Callable[[LogItem], Any]]]]] = None
 
 
 class LoggerRouteFinalizer:
@@ -29,11 +41,12 @@ class LoggerRouteFinalizer:
         self.entered = False
         self.start_time = None
         self.suppressed_exceptions = []
+        self.related_data = RelatedData()
         self.suppress_all = False
 
         self.settings = SettingsStore()
         self.data = self.convert_arguments_to_dict(*args, **kwargs)
-        self.finalizer = weakref.finalize(self, self.create_finalizer(*args, **kwargs))
+        self.finalizer = weakref.finalize(self, self.create_finalizer(self.related_data, *args, **kwargs))
 
     def __call__(self, *args, **kwargs):
         """
@@ -99,7 +112,7 @@ class LoggerRouteFinalizer:
 
         self.data['time_of_work'] = time() - self.start_time
 
-        simple_handle_log(**(self.data))
+        simple_handle_log(handlers=self.related_data.handlers, **(self.data))
 
         if exception_value is not None:
             if self.suppress_all:
@@ -179,22 +192,44 @@ class LoggerRouteFinalizer:
 
         return self
 
-    def handlers(self, *exceptions):
+    def handlers(self, *handlers):
         is_ellipsis = False
+        only_handlers = []
+
         for handler in handlers:
-            if isinstance(handler, Ellipsis):
+            if handler is Ellipsis:
                 is_ellipsis = True
             elif isinstance(handler, str):
-                pass
+                for handler_subname in handler.split('.'):
+                    if not handler_subname.isidentifier():
+                        explaining_postfix = f' (a part of "{handler}")' if handler_subname != handler else ''
+                        raise NameError(f'The name "{handler_subname}"{explaining_postfix} cannot be used for the handler.')
+                only_handlers.append(partial(lambda x, y: x[y], global_handlers, handler))
             elif SignatureMatcher.is_handler(handler, raise_exception=False):
-                pass
+                only_handlers.append(partial(lambda x: x, handler))
+            else:
+                raise ValueError('Handler objects, their names (taken from the global scope) or an ellipsis can be passed to the "handlers" method.')
+
+        if is_ellipsis:
+            # map, который из каждого элемента последовательности делает функцию без аргументов, которая возвращает этот элемент.
+            map_of_globals = ReusableMap(lambda x: partial(lambda y: y, x), global_handlers)
+            if only_handlers:
+                only_handlers = ReusableChain(only_handlers, map_of_globals)
+            else:
+                only_handlers = map_of_globals
+
+        if self.related_data.handlers is None:
+            self.related_data.handlers = only_handlers
+        else:
+            self.related_data.handlers = ReusableChain(only_handlers, self.related_data.handlers)
+
         return self
 
     @staticmethod
-    def create_finalizer(*args, **kwargs):
+    def create_finalizer(related_data, *args, **kwargs):
         """
         Здесь происходит создание объекта функции, который будет вызван в случае, если по контексту будет ясно, что функция log() вызвана для обычного ручного логирования.
         """
         def finalizer():
-            simple_handle_log(*args, **kwargs)
+            simple_handle_log(*args, handlers=related_data.handlers, **kwargs)
         return finalizer

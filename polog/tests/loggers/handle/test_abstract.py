@@ -11,7 +11,7 @@ class HandleLogger(AbstractHandleLogger):
         super().__init__(*args, **kwargs)
         self.logs_store = []
 
-    def _push(self, fields):
+    def _push(self, fields, handlers):
         self.logs_store.append({**fields})
 
     def _specific_processing(self, fields):

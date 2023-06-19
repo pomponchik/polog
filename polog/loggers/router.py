@@ -106,6 +106,11 @@ class Router:
         context.aware_calling_method('suppress', *exceptions)
         return context
 
+    def handlers(self, *handlers):
+        context = RouterPartial(self)
+        context.aware_calling_method('handlers', *handlers)
+        return context
+
     def __getattribute__(self, name):
         """
         Объект данного класса можно вызывать как непосредственно, так и через "виртуальные" методы, имена которых соответствуют именам зарегистрированных пользователем уровней логирования.

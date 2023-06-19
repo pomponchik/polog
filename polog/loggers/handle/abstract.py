@@ -71,7 +71,7 @@ class AbstractHandleLogger:
             return functools.partial(self, level=name)
         return object.__getattribute__(self, name)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, handlers=None, **kwargs):
         """
         Каждый вызов объекта отнаследованного класса как функции подразумевает выполнение трех действий:
 
@@ -81,14 +81,15 @@ class AbstractHandleLogger:
         """
         fields = self._prepare_data(args, kwargs)
         self._specific_processing(fields)
-        return self._push(fields)
+        return self._push(fields, handlers)
 
-    def _push(self, fields):
+    def _push(self, fields, handlers):
         """
         Единственный метод, который обязательно переопределять в отнаследованных классах.
         Здесь словарь с данными, собранный из переданных пользователем аргументов, куда-то передается.
 
         fields - словарь с извлеченными полями лога.
+        handlers - итерабельный объект, содержащий обработчики для логов.
         """
         raise NotImplementedError # pragma: no cover
 
