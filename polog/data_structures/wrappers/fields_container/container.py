@@ -20,8 +20,7 @@ class FieldsContainer:
 
         При пересечении множеств ключей двух словарей, они не дублируются.
         """
-        for key in self.fields:
-            yield key
+        yield from self.fields
 
         for key in self.defaults:
             if key not in self.fields:
@@ -33,8 +32,7 @@ class FieldsContainer:
 
         При пересечении множеств ключей двух словарей, предпочтение отдается значению из первого словаря.
         """
-        for key, value in self.fields.items():
-            yield key, value
+        yield from self.fields.items()
 
         for key, value in self.defaults.items():
             if key not in self.fields:
