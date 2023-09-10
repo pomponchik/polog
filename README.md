@@ -1,9 +1,10 @@
 # Polog: логгер нового поколения
 
-[![Downloads](https://pepy.tech/badge/polog/month)](https://pepy.tech/project/polog)
-[![Downloads](https://pepy.tech/badge/polog)](https://pepy.tech/project/polog)
-[![codecov](https://codecov.io/gh/pomponchik/polog/branch/master/graph/badge.svg)](https://codecov.io/gh/pomponchik/polog)
+[![Downloads](https://static.pepy.tech/badge/polog/month)](https://pepy.tech/project/polog)
+[![Downloads](https://static.pepy.tech/badge/polog)](https://pepy.tech/project/polog)
+[![codecov](https://codecov.io/gh/pomponchik/polog/graph/badge.svg?token=N604O4X3FU)](https://codecov.io/gh/pomponchik/polog)
 [![Test-Package](https://github.com/pomponchik/polog/actions/workflows/coverage.yml/badge.svg)](https://github.com/pomponchik/polog/actions/workflows/coverage.yml)
+[![Python versions](https://img.shields.io/pypi/pyversions/polog.svg)](https://pypi.python.org/pypi/polog)
 [![PyPI version](https://badge.fury.io/py/polog.svg)](https://badge.fury.io/py/polog)
 
 Логируйте красиво, удобно и без бойлерплейта. Избавьтесь от "мусора" в коде. Зацените фичи:
