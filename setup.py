@@ -7,7 +7,7 @@ requirements = []
 
 setup(
     name='polog',
-    version='0.0.17',
+    version='0.0.18',
     author='Evgeniy Blinov',
     author_email='zheni-b@yandex.ru',
     description='The new generation logger',
