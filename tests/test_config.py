@@ -9,7 +9,7 @@ from polog import config, handle_log, field, log
 from polog.core.stores.settings.settings_store import SettingsStore
 from polog.core.stores.levels import Levels
 from polog.data_structures.trees.named_tree.tree import NamedTree
-from polog.tests.test_config_without_log import do_log
+from tests.test_config_without_log import do_log
 
 
 def test_set_valid_key_delay_before_exit():

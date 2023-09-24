@@ -273,7 +273,7 @@ def test_converting_function_object_to_name(handler):
     log('kek', function=function_kek)
 
     assert handler.last['function'] == 'function_kek'
-    assert handler.last['module'] == 'polog.tests.loggers.handle.test_handle_log'
+    assert handler.last['module'] == 'tests.loggers.handle.test_handle_log'
 
 def test_converting_exception_object_to_name(handler):
     """

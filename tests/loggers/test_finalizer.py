@@ -81,7 +81,7 @@ def test_finalizer_one_argument_is_allowed_function(handler):
     assert handler.last['level'] == 500
     assert handler.last['auto'] == True
     assert handler.last['function'] == 'function'
-    assert handler.last['module'] == 'polog.tests.loggers.test_finalizer'
+    assert handler.last['module'] == 'tests.loggers.test_finalizer'
     assert handler.last['success'] == True
 
     assert 'time_of_work' in handler.last
@@ -118,7 +118,7 @@ def test_finalizer_one_argument_is_allowed_class(handler):
     assert handler.last['auto'] == True
     assert handler.last['function'] == 'method'
     assert handler.last['class'] == 'LocalClass'
-    assert handler.last['module'] == 'polog.tests.loggers.test_finalizer'
+    assert handler.last['module'] == 'tests.loggers.test_finalizer'
     assert handler.last['success'] == True
 
     assert 'time_of_work' in handler.last

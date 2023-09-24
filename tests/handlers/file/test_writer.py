@@ -24,7 +24,7 @@ def test_base_writer(number_of_strings_in_the_files, delete_files):
     Проверяем, что в файл вообще что-то записывается.
     """
     iterations = 5
-    path = os.path.join('polog', 'tests', 'data', 'data.log')
+    path = os.path.join('tests', 'data', 'data.log')
     handler = file_writer(path)
     config.add_handlers(handler)
     config.set(pool_size=0, level=0)
@@ -68,7 +68,7 @@ def test_parameter_is_not_string_and_not_file_object(delete_files):
     Проверяем, что валидным неименованным параметром принимаются только файловые объекты и строки, при других вариантах - поднимаются исключения.
     """
     file_writer(io.StringIO())
-    path = os.path.join('polog', 'tests', 'data', 'data.log')
+    path = os.path.join('tests', 'data', 'data.log')
     file_writer(path)
     with pytest.raises(ValueError):
         file_writer(777)

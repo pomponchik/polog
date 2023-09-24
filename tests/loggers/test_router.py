@@ -836,7 +836,7 @@ def test_router_method_decorator_without_brackets(handler):
 
     assert handler.last['class'] == 'SomeClass'
     assert handler.last['function'] == 'method'
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['success'] == True
     assert handler.last['auto'] == True
     assert handler.last['level'] == default_level
@@ -893,7 +893,7 @@ def test_router_method_decorator_with_empty_brackets(handler):
 
     assert handler.last['class'] == 'SomeClass'
     assert handler.last['function'] == 'method'
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['success'] == True
     assert handler.last['auto'] == True
     assert handler.last['level'] == default_level
@@ -942,7 +942,7 @@ def test_router_class_decorator_with_list_of_methods(handler):
 
     assert handler.last['class'] == 'SomeClass'
     assert handler.last['function'] == 'important_method'
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['success'] == True
     assert handler.last['auto'] == True
     assert handler.last['level'] == default_level
@@ -972,7 +972,7 @@ def test_router_class_decorator_with_level(handler):
 
     assert handler.last['class'] == 'SomeClass'
     assert handler.last['function'] == 'method'
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['success'] == True
     assert handler.last['auto'] == True
     assert handler.last['level'] == real_level
@@ -1003,7 +1003,7 @@ def test_router_class_decorator_with_positional_message(handler):
 
     assert handler.last['class'] == 'SomeClass'
     assert handler.last['function'] == 'method'
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['success'] == True
     assert handler.last['auto'] == True
     assert handler.last['level'] == default_level
@@ -1033,7 +1033,7 @@ def test_router_method_decorator_with_empty_brackets_when_exception(handler):
 
     assert handler.last['class'] == 'SomeClass'
     assert handler.last['function'] == 'method'
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['success'] == False
     assert handler.last['auto'] == True
     assert handler.last['level'] == default_error_level
@@ -1065,7 +1065,7 @@ def test_router_method_decorator_with_positional_message_when_exception(handler)
     assert handler.last['message'] == 'kek'
     assert handler.last['class'] == 'SomeClass'
     assert handler.last['function'] == 'method'
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['success'] == False
     assert handler.last['auto'] == True
     assert handler.last['level'] == default_error_level
@@ -1564,7 +1564,7 @@ def test_suppress_function_without_erguments_with_empty_breackets(handler):
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1597,7 +1597,7 @@ def test_suppress_function_without_erguments_without_breackets_and_dotlevel(hand
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1629,7 +1629,7 @@ def test_suppress_function_without_erguments_without_breackets(handler):
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1661,7 +1661,7 @@ def test_suppress_function_without_erguments_with_empty_breackets_async(handler)
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1694,7 +1694,7 @@ def test_suppress_function_without_erguments_without_breackets_and_dotlevel_asyn
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1726,7 +1726,7 @@ def test_suppress_function_without_erguments_without_breackets_async(handler):
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1759,7 +1759,7 @@ def test_suppress_class_without_erguments_with_empty_breackets(handler):
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'method'
     assert handler.last['class'] == 'SomeClass'
 
@@ -1794,7 +1794,7 @@ def test_suppress_class_without_erguments_without_breackets_and_dotlevel(handler
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'method'
     assert handler.last['class'] == 'SomeClass'
 
@@ -1828,7 +1828,7 @@ def test_suppress_class_without_erguments_without_breackets(handler):
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'method'
     assert handler.last['class'] == 'SomeClass'
 
@@ -1861,7 +1861,7 @@ def test_suppress_exception_function_without_erguments_with_empty_breackets_supp
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1894,7 +1894,7 @@ def test_suppress_exception_function_without_erguments_without_breackets_suppres
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1926,7 +1926,7 @@ def test_suppress_exception_function_without_erguments_without_breackets_suppres
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1959,7 +1959,7 @@ def test_suppress_exception_function_without_erguments_with_empty_breackets_supp
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -1993,7 +1993,7 @@ def test_suppress_exception_function_without_erguments_without_breackets_suppres
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -2026,7 +2026,7 @@ def test_suppress_exception_function_without_erguments_without_breackets_suppres
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -2059,7 +2059,7 @@ def test_suppress_other_exception_function_without_erguments_with_empty_breacket
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -2093,7 +2093,7 @@ def test_suppress_other_exception_function_without_erguments_without_breackets_s
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -2126,7 +2126,7 @@ def test_suppress_other_exception_function_without_erguments_without_breackets_s
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -2159,7 +2159,7 @@ def test_suppress_other_exception_function_without_erguments_with_empty_breacket
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -2193,7 +2193,7 @@ def test_suppress_other_exception_function_without_erguments_without_breackets_s
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -2226,7 +2226,7 @@ def test_suppress_other_exception_function_without_erguments_without_breackets_s
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)
@@ -2259,7 +2259,7 @@ def test_suppress_other_exception_function_without_erguments_without_breackets_s
     assert handler.last['exception_type'] == 'ValueError'
     assert handler.last['exception_message'] == 'kek'
     assert is_json(handler.last['traceback'])
-    assert handler.last['module'] == 'polog.tests.loggers.test_router'
+    assert handler.last['module'] == 'tests.loggers.test_router'
     assert handler.last['function'] == 'function'
 
     assert isinstance(handler.last['time'], datetime)

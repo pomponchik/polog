@@ -50,12 +50,12 @@ def test_double_lock_race_condition(filename_for_test, number_of_strings_in_the_
 
     expected_number_of_logs = number_of_processes * number_of_iterations * number_of_threads
 
-    for filename in os.listdir(os.path.join('polog', 'tests', 'data')):
+    for filename in os.listdir(os.path.join('tests', 'data')):
         if not filename.startswith('.') and not os.path.isdir(filename):
-            files.append(os.path.join('polog', 'tests', 'data', filename))
+            files.append(os.path.join('tests', 'data', filename))
 
     assert number_of_strings_in_the_files(*files) == expected_number_of_logs
-    #delete_files(*[os.path.join('polog', 'tests', 'data', filename) for filename in os.listdir(os.path.join('polog', 'tests', 'data')) if not os.path.isdir(filename) and not filename == '.gitkeep'])
+    #delete_files(*[os.path.join('tests', 'data', filename) for filename in os.listdir(os.path.join('tests', 'data')) if not os.path.isdir(filename) and not filename == '.gitkeep'])
 
 def test_get_lock_types():
     """
